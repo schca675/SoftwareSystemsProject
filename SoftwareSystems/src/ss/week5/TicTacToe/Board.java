@@ -188,7 +188,7 @@ public class Board {
     	for (int i = 0; i < DIM; i++) {
     		boolean win = true;
     		for (int j = 0; j < DIM; j++) {
-    			if (!fields[j].equals(m)) {
+    			if (!fields[DIM * i + j].equals(m)) {
     				win = false;
     			}
     		}
@@ -212,7 +212,7 @@ public class Board {
     	for (int i = 0; i < DIM; i++) {
     		boolean win = true;
     		for (int j = 0; j < DIM; j++) {
-    			if (!fields[j * DIM].equals(m)) {
+    			if (!fields[i + j * DIM].equals(m)) {
     				win = false;
     			}
     		}
@@ -237,15 +237,15 @@ public class Board {
         boolean d2 = true;
         int i = 0;
         int j = 2;
-        for (int k = 1; k <= 3; k++) {
+        for (int k = 1; k <= DIM; k++) {
         	if (!fields[i].equals(m)) {
         		d1 = false;
         	}
         	if (!fields[j].equals(m)) {
         		d2 = false;
         	}
-        	i = i + 4;
-        	j = j + 2;
+        	i = i + DIM + 1;
+        	j = j + DIM - 1;
         }
         return d1 || d2;
     }

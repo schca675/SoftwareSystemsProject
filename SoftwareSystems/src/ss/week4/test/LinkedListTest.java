@@ -11,7 +11,7 @@ public class LinkedListTest {
     private LinkedList<Object> list;
     private Object object1;
     private Object object2;
-    private Object object3;
+    private Object object3; 
 
     @Before
     public void setUp() {
