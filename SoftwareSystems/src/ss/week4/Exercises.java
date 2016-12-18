@@ -2,15 +2,28 @@ package ss.week4;
 
 public class Exercises {
     public static int countNegativeNumbers(int[] arr) {
-        // TODO: implement, see exercise P-4.1
+    	int numNeg = 0;
+    	for (int i = 0; i < arr.length; i++) {
+    		if (arr[i] < 0) { 
+    			numNeg = numNeg + 1;
+    		}
+    	}
+    	return numNeg;
     }
 
     public static void reverseArray(int[] ints) {
-        // TODO: implement, see exercise P-4.2
+    	int numSwaps = ints.length / 2;
+    	for (int i = 0; i < numSwaps; i++) {
+    		// Storage for one of the entries to swap now, the other can 
+    		// still be accessed after the first assignment
+    		int lower = ints[i];
+    		ints[i] = ints[ints.length - i - 1];
+    		ints[ints.length - i - 1] = lower;
+    	}
     }
 
     class SimpleList {
-        public class Element {}
+        public class Element { }
 
         public class Node {
             public Node next;

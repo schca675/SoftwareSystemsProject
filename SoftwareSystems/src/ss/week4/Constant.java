@@ -1,16 +1,15 @@
 package ss.week4;
 
-public class Constant implements Function {
-	
-	private double constant;
-	
-	public Constant(double value) {
-		constant = value;
-	}
+public class Constant implements Function, Integrandable {
+	private double value;
 
+	public Constant(double constant) {
+		value = constant;
+	}
+	
 	@Override
 	public double apply(double argument) {
-		return constant;
+		return value;
 	}
 
 	@Override
@@ -18,8 +17,13 @@ public class Constant implements Function {
 		return new Constant(0);
 	}
 	
-	public String toString() {
-		return "f(x) = " + constant;
+	@Override
+	public Function integrand() {
+		return new LinearProduct(new Exponent(1), this);
 	}
-
+	
+	@Override
+	public String toString() {
+		return "" + value;
+	}
 }
