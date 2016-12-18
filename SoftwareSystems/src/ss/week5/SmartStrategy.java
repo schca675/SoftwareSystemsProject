@@ -52,7 +52,7 @@ public class SmartStrategy implements Strategy {
 					j++;
 				}
 				// if yes, this field is taken
-				if (otherWinner >= 0) {
+				if (otherWin && otherWinner >= 0) {
 					return otherWinner;				
 				}
 			}

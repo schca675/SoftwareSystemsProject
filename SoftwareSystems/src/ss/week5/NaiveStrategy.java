@@ -8,12 +8,13 @@ import ss.week5.TicTacToe.Board;
 import ss.week5.TicTacToe.Mark;
 
 public class NaiveStrategy implements Strategy {
+	
 	public String getName() {
 		return "Naive";
 	}
 	
 	public int determineMove(Board b, Mark m) {
-		List<Integer> emptyList = new ArrayList<>();
+		List<Integer> emptyList = new ArrayList<Integer>();
 		int dim = Board.DIM * Board.DIM;
 		for (int i = 0; i < dim; i++) {
 			if (b.isEmptyField(i)) {
