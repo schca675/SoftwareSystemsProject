@@ -2,7 +2,7 @@ package ss.week4.test;
 
 import org.junit.Before;
 import org.junit.Test;
-import ss.week4.math.Constant;
+import ss.week4.Constant;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +16,7 @@ public class ConstantTest {
     @Before
     public void setUp() {
         constant = new Constant(CONSTANT_VALUE);
-    }
+    } 
 
     @Test
     public void testApply() {

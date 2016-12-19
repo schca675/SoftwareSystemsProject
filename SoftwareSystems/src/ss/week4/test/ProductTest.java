@@ -2,9 +2,9 @@ package ss.week4.test;
 
 import org.junit.Before;
 import org.junit.Test;
-import ss.week4.math.Constant;
-import ss.week4.math.Product;
-import ss.week4.math.Sum;
+import ss.week4.Constant;
+import ss.week4.Product;
+import ss.week4.Sum;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

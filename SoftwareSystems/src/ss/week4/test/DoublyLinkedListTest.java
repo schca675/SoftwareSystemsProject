@@ -14,7 +14,7 @@ public class DoublyLinkedListTest {
 
     @Before
     public void setUp() { 
-        list = new DoublyLinkedList< >();
+        list = new DoublyLinkedList<Object>();
         object1 = new Object();
         object2 = new Object();
         object3 = new Object();
