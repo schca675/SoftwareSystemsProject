@@ -11,7 +11,7 @@ public class MapUtil {
 	// * Checks whether a map is 1-1
 	
 	 /*@ ensures (\forall K x1,x2; map.keySet().contains(x1) && map.keySet().contains(x2)
-	 @ && !map.get(x1).equals(map.get(x2)) && x1.equals(x2)) == \result;
+	 @ && !map.get(x1).equals(map.get(x2)) && !x1.equals(x2)) == \result;
 	 */
 	public static <K, V> boolean isOneOnOne(Map<K, V> map) {
 		Set<K> setkeys = map.keySet();
@@ -35,7 +35,8 @@ public class MapUtil {
 	}
 
 	
-	 /*@ ensures (\forall V v1; range.contains(v1) && map.values().contains(v1)) == \result;
+	 /*@ ensures (\forall V v1; range.contains(v1); 
+	   @ (\exists K k; map.values().contains(v1); map.get(k) == v1)) == \result;
 	 */
 	public static <K, V> boolean isSurjectiveOnRange(Map<K, V> map, Set<V> range) {
 		Set<K> setkeys = map.keySet();
@@ -103,7 +104,7 @@ public class MapUtil {
 		finalmap.put(map.get(key), key);
 	} */
 
-	//@ ensures (\forall V v; f.values().contains(v); g.keySet().contains(v)); 
+	//@ ensures (\forall V v; f.values().contains(v); g.keySet().contains(v)) == \result; 
 	public static <K, V, W> boolean compatible(Map<K, V> f, Map<V, W> g) {
 		Set<V> keysg = g.keySet();
 		boolean compatible = true;
@@ -115,6 +116,7 @@ public class MapUtil {
 		return compatible;
 	}
 
+	//@ requires compatible(f,g);
 	//@ ensures (\forall K k; \result.keySet().contains(k); \result.get(k) == g.get(f.get(k)));
 	public static <K, V, W> Map<K, W> compose(Map<K, V> f, Map<V, W> g) {
 		if (compatible(f, g)) {
