@@ -1,12 +1,13 @@
 package ss.week6.test;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import ss.week6.ArgumentLengthsDifferException;
 import ss.week6.TooFewArgumentsException;
 import ss.week6.Zipper;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Testprogram for Zipper.
@@ -22,7 +23,7 @@ public class ZipperTest {
     @Before
     public void setUp() {
         zipper = new Zipper();
-    }
+    } 
 
     /**
      * Test for zipping with too few arguments
@@ -31,7 +32,7 @@ public class ZipperTest {
     public void testFirstArgumentNull() throws TooFewArgumentsException, ArgumentLengthsDifferException {
         zipper.zip2(null, "Hello World!");
     }
-
+ 
     /**
      * Test for zipping with too few arguments
      */
