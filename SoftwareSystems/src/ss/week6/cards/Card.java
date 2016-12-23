@@ -1,5 +1,14 @@
 package ss.week6.cards;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
 public class Card
 {
 
@@ -159,6 +168,84 @@ public class Card
 			result = r2 == r1 + 1;
 		}
 		return result;
+	}
+	
+	public void write(java.io.PrintWriter writer) {
+		writer.println(this.toString());
+	}
+	
+	public static void writeCards(PrintWriter writer) {
+		Card card0 = new Card(Card.DIAMONDS, '8');
+		Card card1 = new Card(Card.CLUBS, Card.ACE);
+		Card card2 = new Card(Card.HEARTS, Card.QUEEN);
+		Card card3 = new Card(Card.SPADES, '3');
+		card0.write(writer);
+		card1.write(writer);
+		card2.write(writer);
+		card3.write(writer);
+		writer.flush();
+		writer.close();
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException {
+		PrintWriter writer;
+		
+		//Question: how to do it to not repeat code?
+		try {
+			FileOutputStream fileWriter = new FileOutputStream(args[0]);
+			writer = new PrintWriter(fileWriter);
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		} catch (ArrayIndexOutOfBoundsException e) {
+			writer = new PrintWriter(System.out);
+			writeCards(writer);
+		}
+		
+		/*try (PrintWriter writer = new PrintWriter(new FileOutputStream(args[0]))) {
+			card0.write(writer);
+			card1.write(writer);
+			card2.write(writer);
+			card3.write(writer);
+			writer.flush();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		} catch (ArrayIndexOutOfBoundsException e) {
+			PrintWriter writer = new PrintWriter(System.out);
+		}
+		*/
+	}
+	
+	public static Card read(BufferedReader in) throws EOFException, IOException {
+		String lineOfText = in.readLine();
+		if (lineOfText == null) {
+			throw new EOFException();
+		}
+		Scanner scanny = new Scanner(lineOfText);
+		try {
+			String suit = scanny.next();
+			String rank = scanny.next();
+			scanny.close();
+			boolean validSuit = false;
+			boolean validRank = false;
+			for (String suits : SUIT_STRINGS) {
+				if (suit.equals(suits)) {
+					validSuit = true;
+				}
+			}
+			for (String ranks : RANK_STRINGS) {
+				if (rank.equals(ranks)) {
+					validRank = true;
+				}
+			}
+			if (validSuit && validRank) {
+				return new Card(Card.suitString2Char(suit), Card.rankString2Char(rank));
+			} else {
+				return null;
+			}
+		} catch (NoSuchElementException e) {
+			return null;
+		}
 	}
 	
 	// ---- instance variabeles -----------------------------------
