@@ -189,14 +189,16 @@ public class Card
 	
 	public static void main(String[] args) throws FileNotFoundException {
 		PrintWriter writer;
-		
-		//Question: how to do it to not repeat code?
 		try {
+			// If a valid file path is given, write to this file
 			FileOutputStream fileWriter = new FileOutputStream(args[0]);
 			writer = new PrintWriter(fileWriter);
-		} catch (FileNotFoundException e) {
+			writeCards(writer);
+		} catch (FileNotFoundException e) { 
+			// If the path is not valid, say this
 			System.out.println(e.getMessage());
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} catch (ArrayIndexOutOfBoundsException e) { 
+			// If no path is given, print to stdout
 			writer = new PrintWriter(System.out);
 			writeCards(writer);
 		}
@@ -228,11 +230,13 @@ public class Card
 			scanny.close();
 			boolean validSuit = false;
 			boolean validRank = false;
+			// like validSuit = SUIT_STRINGS.contains(suit)
 			for (String suits : SUIT_STRINGS) {
 				if (suit.equals(suits)) {
 					validSuit = true;
 				}
 			}
+			// like validRank = RANK_STRINGS.contains(rank)
 			for (String ranks : RANK_STRINGS) {
 				if (rank.equals(ranks)) {
 					validRank = true;
