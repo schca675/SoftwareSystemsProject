@@ -21,7 +21,7 @@ public class CardTest {
     private Card card;
 
     /** Path to where you will save the card files */
-    private static final String PATH = ""; //Your path to the test folder
+    private static final String PATH = "C:/"; //Your path to the test folder
 
     @Before
     public void setUp() {

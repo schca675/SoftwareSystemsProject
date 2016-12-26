@@ -1,15 +1,21 @@
 package ss.week6.cards;
 
 import java.io.BufferedReader;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-public class Card
+public class Card implements Serializable //Is Serializable necessary for ObjectOutput?
 {
 
 	// ---- constants -----------------------------------
@@ -170,84 +176,114 @@ public class Card
 		return result;
 	}
 	
-	public void write(java.io.PrintWriter writer) {
+	// <------- EXERCISES ------->
+	
+	public void write(ObjectOutput out) throws IOException {
+		out.writeObject(this);
+		out.flush();
+		out.close();
+	}
+	
+	public void write(DataOutput out) throws IOException {
+		out.writeChar(this.suit);
+		out.writeChar(this.rank);
+	}
+	
+	public void write(PrintWriter writer) {
 		writer.println(this.toString());
 	}
 	
-	public static void writeCards(PrintWriter writer) {
-		Card card0 = new Card(Card.DIAMONDS, '8');
-		Card card1 = new Card(Card.CLUBS, Card.ACE);
-		Card card2 = new Card(Card.HEARTS, Card.QUEEN);
-		Card card3 = new Card(Card.SPADES, '3');
-		card0.write(writer);
-		card1.write(writer);
-		card2.write(writer);
-		card3.write(writer);
+	private static void writeCards(PrintWriter writer, Card[] cards) {
+		for (Card toWrite : cards) {
+			toWrite.write(writer);
+		}
 		writer.flush();
 		writer.close();
 	}
 	
-	public static void main(String[] args) throws FileNotFoundException {
-		PrintWriter writer;
+	public static void main(String[] args) throws IOException, EOFException {
+		Card[] cards = new Card[4];
+		cards[0] = new Card(Card.DIAMONDS, '8');
+		cards[1] = new Card(Card.CLUBS, Card.ACE);
+		cards[2] = new Card(Card.HEARTS, Card.QUEEN);
+		cards[3] = new Card(Card.SPADES, '3');
+		
 		try {
 			// If a valid file path is given, write to this file
-			FileOutputStream fileWriter = new FileOutputStream(args[0]);
-			writer = new PrintWriter(fileWriter);
-			writeCards(writer);
+			writeCards(new PrintWriter(new FileOutputStream(args[0])), cards);
+			// Try to read back the card, compare
+			Card readCard = read(new BufferedReader(new FileReader(args[0])));
+			if (readCard.equals(cards[0])) {
+				System.out.println("readCard matches written cards[0] :)");
+			} else {
+				System.out.println("readCard does not match written cards[0] :(");
+			}
 		} catch (FileNotFoundException e) { 
 			// If the path is not valid, say this
 			System.out.println(e.getMessage());
 		} catch (ArrayIndexOutOfBoundsException e) { 
 			// If no path is given, print to stdout
-			writer = new PrintWriter(System.out);
-			writeCards(writer);
+			writeCards(new PrintWriter(System.out), cards);
 		}
-		
-		/*try (PrintWriter writer = new PrintWriter(new FileOutputStream(args[0]))) {
-			card0.write(writer);
-			card1.write(writer);
-			card2.write(writer);
-			card3.write(writer);
-			writer.flush();
-			writer.close();
-		} catch (FileNotFoundException e) {
-			System.out.println(e.getMessage());
-		} catch (ArrayIndexOutOfBoundsException e) {
-			PrintWriter writer = new PrintWriter(System.out);
-		}
-		*/
 	}
 	
-	public static Card read(BufferedReader in) throws EOFException, IOException {
-		String lineOfText = in.readLine();
-		if (lineOfText == null) {
+	public static Card read(ObjectInput in) throws EOFException {
+		Card readCard;
+		try {
+			readCard = (Card) in.readObject();
+		} catch (ClassNotFoundException e) {
+			return null;
+		} catch (IOException e) {
+			return null;
+		} catch (NullPointerException e) {
 			throw new EOFException();
 		}
-		Scanner scanny = new Scanner(lineOfText);
+		if (Card.isValidSuit(readCard.suit) && Card.isValidRank(readCard.rank)) {
+			return readCard;
+		} else {
+			return null;
+		}
+	}
+	
+	public static Card read(DataInput data) throws EOFException {
+		char suit;
+		char rank;
+		
 		try {
-			String suit = scanny.next();
-			String rank = scanny.next();
+			suit = data.readChar();
+			rank = data.readChar();
+			if (Card.isValidSuit(suit) && Card.isValidRank(rank)) {
+				return new Card(suit, rank);
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			return null;
+		}
+	}
+	
+	public static Card read(BufferedReader in) throws EOFException {
+		String suit;
+		String rank;
+		try {
+			String lineOfText = in.readLine();
+			if (lineOfText == null) {
+				throw new EOFException();
+			}
+			Scanner scanny = new Scanner(lineOfText);
+			suit = scanny.next();
+			rank = scanny.next();
 			scanny.close();
-			boolean validSuit = false;
-			boolean validRank = false;
-			// like validSuit = SUIT_STRINGS.contains(suit)
-			for (String suits : SUIT_STRINGS) {
-				if (suit.equals(suits)) {
-					validSuit = true;
-				}
-			}
-			// like validRank = RANK_STRINGS.contains(rank)
-			for (String ranks : RANK_STRINGS) {
-				if (rank.equals(ranks)) {
-					validRank = true;
-				}
-			}
-			if (validSuit && validRank) {
+			if (Card.suitString2Char(suit) != '?' && Card.rankString2Char(rank) != '?') {
 				return new Card(Card.suitString2Char(suit), Card.rankString2Char(rank));
 			} else {
 				return null;
 			}
 		} catch (NoSuchElementException e) {
+			//Scanner exception
+			return null;
+		} catch (IOException e) {
+			//Reader exception
 			return null;
 		}
 	}
