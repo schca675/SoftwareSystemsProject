@@ -75,7 +75,7 @@ public class Board<PLAYERIDTYPE> {
 	 */
 	//@ requires isValidTower(x,y);
 	/*@ pure */ public List<PLAYERIDTYPE> getTower(int x, int y) {
-		return boardData.get((x - 1) * xDim + (y - 1) * yDim);
+		return boardData.get((x - 1) + (y - 1) * yDim);
 	}
 	
 	/** Checks whether a piece can be added at (x,y)
@@ -88,9 +88,9 @@ public class Board<PLAYERIDTYPE> {
 	//@ ensures getZDim() > 0 ==> \result == (isValidTower(x,y) && getTowerHeight(x,y) < getZDim());
 	/*@ pure */ public boolean checkMove(int x, int y) {
 		if (zDim == UNLIMITED_Z) {
-			return isValidTower(x,y);
+			return isValidTower(x, y);
 		} else {
-			return isValidTower(x,y) && getTowerHeight(x,y) < getZDim();
+			return isValidTower(x, y) && getTowerHeight(x, y) < getZDim();
 		}
 	}
 	
@@ -105,7 +105,7 @@ public class Board<PLAYERIDTYPE> {
 	//TODO: Determine PLAYERIDTYPE
 	// ensures \result == null || \result instanceof PLAYERIDTYPE;
 	/*@ pure nullable */ public PLAYERIDTYPE getCellOwner(int x, int y, int z) {
-		if (z <= getTowerHeight(x,y)) {
+		if (z <= getTowerHeight(x, y)) {
 			return getTower(x, y).get(z - 1);
 		} else {
 			return null;
@@ -121,7 +121,7 @@ public class Board<PLAYERIDTYPE> {
 	//@ requires isValidCell(x,y,z);
 	//@ ensures \result == (getCellOwner(x,y,z) == null);
 	/*@ pure */ public boolean isEmptyCell(int x, int y, int z) {
-		return (getCellOwner(x,y,z) == null);
+		return (getCellOwner(x, y, z) == null);
 	}
 	
 	/** Checks whether the board is full
