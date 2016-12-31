@@ -4,11 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Board<PLAYERIDTYPE> {
+	
+	// <------ Constants ------>
+	
 	public static final int DEFAULT_XDIM = 4;
 	public static final int DEFAULT_YDIM = 4;
 	public static final int DEFAULT_ZDIM = 4;
 	public static final int DEFAULT_WIN = 4;
 	public static final int UNLIMITED_Z = -1;
+	
+	// <------ Instance variables ------>
+	
 	private int xDim;
 	private int yDim;
 	private int zDim;
@@ -102,7 +108,7 @@ public class Board<PLAYERIDTYPE> {
 	 * @return Owner, null if no owner
 	 */
 	//@ requires isValidCell(x,y,z);
-	//TODO: Determine PLAYERIDTYPE
+	//TODO: Determine PLAYERIDTYPE --> PlayerID
 	// ensures \result == null || \result instanceof PLAYERIDTYPE;
 	/*@ pure nullable */ public PLAYERIDTYPE getCellOwner(int x, int y, int z) {
 		if (z <= getTowerHeight(x, y)) {
@@ -192,6 +198,19 @@ public class Board<PLAYERIDTYPE> {
 				directionHasWon(x, y, z, 1, -1, -1);
 	}
 	
+	//Check JML & Javadoc.
+	
+	/** Checks whether the direction (deltax,deltay,deltaz) belonging to the cell (x,y,z) is winning. 
+	 * 
+	 * @param x X position to check
+	 * @param y Y position to check
+	 * @param z Z position to check
+	 * @param deltax
+	 * @param deltay
+	 * @param deltaz
+	 * @return if the direction is winning.
+	 */
+	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
 	/*@ pure */ private boolean directionHasWon(int x, int y, int z, int deltax, int deltay, int deltaz) {
 		int connectedPieces = 1;
 		PLAYERIDTYPE owner = getCellOwner(x,y,z);
