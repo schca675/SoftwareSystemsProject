@@ -30,22 +30,48 @@ public class HumanPlayer extends Player {
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
-	public Coordinates determineMove(Board<PlayerID> board) {
-		// TODO Auto-generated method stub
+    public Coordinates determineMove(Board<PlayerID> board) {
 		String message = "It is your turn, " + this.getName() + " (" 
 				+ this.getPlayerID().toString() + "), what is your choice?";
 		Coordinates coord = readCoord(message); 
-		return null;
-	}
-	
-	public Coordinates readCoord(String message) {
-		boolean successfullReading = false;	
-		Scanner scanny = new Scanner(System.in);
-		while (!successfullReading) {
-			
-			
+		while (!board.checkMove(coord.getX(), coord.getY())) {
+			coord = readCoord("Invalid choice: " + message);
 		}
-		return null;
+		return coord;
+	}
+	/**
+	 * Reads the coordinates from System.in.
+	 * 
+	 * @param message Message that should be printed.
+	 * @return Coordinates that the player entered.
+	 */
+	public Coordinates readCoord(String message) {
+		int x = -1;
+		int y = -1;
+		int countInt = 0;
+		Scanner line = new Scanner(System.in);
+		// read until getting two integers.
+		while (countInt < 2) {
+			System.out.println(message);
+			System.out.println("Write the coordinates in this form: x y");
+			if (line.hasNextLine()) {
+				Scanner scanny = new Scanner(line.nextLine());
+				while (countInt < 2 && scanny.hasNextInt()) {
+					if (countInt == 0) {
+						x = scanny.nextInt();
+					} else if (countInt == 1) {
+						y = scanny.nextInt();
+					}
+					countInt = countInt + 1;
+				}
+				scanny.close();
+				if (countInt != 2) {
+					countInt = 0;
+				}
+			}		
+		}
+		return new Coordinates(x, y);
+
 	}
 
 }
