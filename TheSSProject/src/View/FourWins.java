@@ -15,6 +15,7 @@ public class FourWins {
 			Player a = new HumanPlayer(args[0], playerID);
 			Player b = new HumanPlayer(args[1], playerID.other());
 			
+			// code needed to enlarge the dimensions)
 			/*if (!readBoolean("Do you want to play with default board?", "y", "n")) {
 			System.out.println("Please enter your dimensions.");
 			// code to follow
