@@ -57,12 +57,13 @@ public abstract class Player {
 
 	/**
 	 * Makes a move on the given board.
+	 * 
 	 * @param board current board, the game is played on.
+	 * @param coord Coordinates of the tower to play
 	 */
     //@ requires board != null & !board.isFull();
-    public void makeMove(Board<PlayerID> board) {
-    	// Get the coordinates which are ensured to be valid by the determineMove method.
-        Coordinates coord = determineMove(board);
+	//@ requires board.checkMove(coord.getX(),coord.getY());
+    public void makeMove(Board<PlayerID> board, Coordinates coord) {
         int x = coord.getX();
         int y = coord.getY();
         board.makeMove(x, y, playerID);
