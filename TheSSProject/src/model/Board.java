@@ -23,13 +23,15 @@ public class Board<PLAYERIDTYPE> {
 	
 	// <------ Constructors ------>
 	
-	/** Create a new board with specified dimensions and winning length
+	/** Create a new board with specified dimensions and winning length.
 	 * @param xDim X dimension of the board
 	 * @param yDim Y dimension of the board
 	 * @param zDim Z dimension of the board, -1 specifies unlimited
 	 * @param winningLength Connected pieces required to win the game
 	 */
-	//@ requires winningLength <= xDim || winningLength <= yDim || (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
+	/*@ requires winningLength <= xDim || winningLength <= yDim 
+	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
+	*/
 	//@ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	public Board(int xDim, int yDim, int zDim, int winningLength) {
 		this.xDim = xDim;
@@ -39,7 +41,7 @@ public class Board<PLAYERIDTYPE> {
 		reset();
 	}
 	
-	/** Create a board with default settings and rules
+	/** Create a board with default settings and rules.
 	 * 
 	 */
 	public Board() {
@@ -49,7 +51,7 @@ public class Board<PLAYERIDTYPE> {
 	
 	// <------ Queries ------>
 	
-	/** Getter for X dimension
+	/** Getter for X dimension.
 	 * 
 	 * @return X dimension
 	 */
@@ -57,7 +59,7 @@ public class Board<PLAYERIDTYPE> {
 		return xDim;
 	}
 
-	/** Getter for Y dimension
+	/** Getter for Y dimension.
 	 * 
 	 * @return Y dimension
 	 */
@@ -65,7 +67,7 @@ public class Board<PLAYERIDTYPE> {
 		return yDim;
 	}
 
-	/** Getter for Z dimension
+	/** Getter for Z dimension.
 	 * 
 	 * @return Z dimension
 	 */
@@ -73,7 +75,7 @@ public class Board<PLAYERIDTYPE> {
 		return zDim;
 	}
 	
-	/** Gets the tower at (x,y), assuming there is one
+	/** Gets the tower at (x,y), assuming there is one.
 	 * 
 	 * @param x X position
 	 * @param y Y position
@@ -84,7 +86,7 @@ public class Board<PLAYERIDTYPE> {
 		return boardData.get((x - 1) + (y - 1) * yDim);
 	}
 	
-	/** Checks whether a piece can be added at (x,y)
+	/** Checks whether a piece can be added at (x,y).
 	 * 
 	 * @param x X position to check
 	 * @param y Y position to check
@@ -100,7 +102,7 @@ public class Board<PLAYERIDTYPE> {
 		}
 	}
 	
-	/** Returns the owner of the (assumed valid) cell (x,y,z), null if no owner
+	/** Returns the owner of the (assumed valid) cell (x,y,z), null if no owner.
 	 * 
 	 * @param x X position
 	 * @param y Y position
@@ -117,7 +119,7 @@ public class Board<PLAYERIDTYPE> {
 			return null;
 		}
 	}
-	/** Checks whether the given cell is empty
+	/** Checks whether the given cell is empty.
 	 * 
 	 * @param x X position to check
 	 * @param y Y position to check
@@ -127,10 +129,10 @@ public class Board<PLAYERIDTYPE> {
 	//@ requires isValidCell(x,y,z);
 	//@ ensures \result == (getCellOwner(x,y,z) == null);
 	/*@ pure */ public boolean isEmptyCell(int x, int y, int z) {
-		return (getCellOwner(x, y, z) == null);
+		return getCellOwner(x, y, z) == null;
 	}
 	
-	/** Checks whether the board is full
+	/** Checks whether the board is full.
 	 * 
 	 * @return Board is full
 	 */
@@ -148,7 +150,7 @@ public class Board<PLAYERIDTYPE> {
 		}
 	}
 	
-	/** Returns the height of the tower at (x,y)
+	/** Returns the height of the tower at (x,y).
 	 * 
 	 * @param x X position to check
 	 * @param y Y position to check
@@ -160,7 +162,7 @@ public class Board<PLAYERIDTYPE> {
 		return getTower(x, y).size();
 	}
 	
-	/** Checks whether the piece at (x,y,z) belongs to a winning set
+	/** Checks whether the piece at (x,y,z) belongs to a winning set.
 	 * 
 	 * @param x X position to check
 	 * @param y Y position to check
@@ -200,7 +202,8 @@ public class Board<PLAYERIDTYPE> {
 	
 	//Check JML & Javadoc.
 	
-	/** Checks whether the direction (deltax,deltay,deltaz) belonging to the cell (x,y,z) is winning. 
+	/** Checks whether the direction (deltax,deltay,deltaz) 
+	 * belonging to the cell (x,y,z) is winning. 
 	 * 
 	 * @param x X position to check
 	 * @param y Y position to check
@@ -211,9 +214,10 @@ public class Board<PLAYERIDTYPE> {
 	 * @return if the direction is winning.
 	 */
 	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
-	/*@ pure */ private boolean directionHasWon(int x, int y, int z, int deltax, int deltay, int deltaz) {
+	/*@ pure */ private boolean directionHasWon(int x, int y, int z, 
+													int deltax, int deltay, int deltaz) {
 		int connectedPieces = 1;
-		PLAYERIDTYPE owner = getCellOwner(x,y,z);
+		PLAYERIDTYPE owner = getCellOwner(x, y, z);
 		int distance = 1;
 		int sign = 1;
 		while (connectedPieces < winningLength) {
@@ -238,7 +242,7 @@ public class Board<PLAYERIDTYPE> {
 		return true;
 	}
 	
-	/** Checks whether (x,y) is a valid tower on the board
+	/** Checks whether (x,y) is a valid tower on the board.
 	 * 
 	 * @param x X position
 	 * @param y Y position
@@ -249,7 +253,7 @@ public class Board<PLAYERIDTYPE> {
 		return x > 0 && x <= xDim && y > 0 && y <= yDim;
 	}
 	
-	/** Checks whether (x,y,z) is a valid cell on the board
+	/** Checks whether (x,y,z) is a valid cell on the board.
 	 * 
 	 * @param x X position
 	 * @param y Y position
@@ -268,7 +272,7 @@ public class Board<PLAYERIDTYPE> {
 	
 	// <------ Commands ------>
 	
-	/** Make a move, assumes checkMove(x,y) has been called
+	/** Make a move, assumes checkMove(x,y) has been called.
 	 * 
 	 * @param x X position to place piece at
 	 * @param y Y position to place piece at
@@ -277,10 +281,10 @@ public class Board<PLAYERIDTYPE> {
 	//@ requires checkMove(x,y);
 	//@ ensures getCellOwner(x,y,getTowerHeight(x,y)) == playerID;
 	public void makeMove(int x, int y, PLAYERIDTYPE playerID) {
-		getTower(x,y).add(playerID);
+		getTower(x, y).add(playerID);
 	}
 	
-	/** Resets the board to an empty board
+	/** Resets the board to an empty board.
 	 * 
 	 */
 	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
