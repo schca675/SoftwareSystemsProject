@@ -75,6 +75,15 @@ public class Board<PLAYERIDTYPE> {
 		return zDim;
 	}
 	
+	/** Getter for winning length.
+	 * 
+	 * @return winning length
+	 */
+	/*@ pure */ public int getWinningLength() {
+		return winningLength;
+	}
+	
+	
 	/** Gets the tower at (x,y), assuming there is one.
 	 * 
 	 * @param x X position
