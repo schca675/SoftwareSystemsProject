@@ -44,10 +44,10 @@ public abstract class Player {
 	}
 	
 	/**
-	 * Determines the coordinates of the field for the next move.
+	 * Determines the coordinates of the tower for the next move.
 	 * 
-	 * @param board current board, the game is played on.
-	 * @return index of the field for the next move.
+	 * @param board current board the game is played on.
+	 * @return Coordinates of the tower for the next move.
 	 */
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
