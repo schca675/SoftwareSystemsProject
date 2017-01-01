@@ -35,6 +35,7 @@ public class Game {
 	//@ requires player1 != null && player2 != null;
 	public Game(Player player1, Player player2) {
 		board = new Board<PlayerID>();
+		players = new Player[NUMBER_PLAYERS]; 
 		players[0] = player1;
 		players[1] = player2;
 		currentPlayerIndex = randomStarter();	
@@ -56,6 +57,7 @@ public class Game {
 	//@ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	public Game(Player player1, Player player2, int xDim, int yDim, int zDim, int winningLength) {
 		board = new Board<PlayerID>(xDim, yDim, zDim, winningLength);
+		players = new Player[NUMBER_PLAYERS]; 
 		players[0] = player1;
 		players[1] = player2;
 		currentPlayerIndex = randomStarter();
@@ -113,14 +115,15 @@ public class Game {
 			winning = board.hasWon(coord.getX(), coord.getY(), 
 					board.getTowerHeight(coord.getX(), coord.getY()));
 			if (!winning) {
-				currentPlayerIndex = currentPlayerIndex + 1 % NUMBER_PLAYERS;
+				// following code only works because we have 2 players
+				currentPlayerIndex = 1 - currentPlayerIndex;
 				currentplayer = players[currentPlayerIndex];
 			}
 			currentSituation();
 		}
 		if (winning) {
 			//  The currentplayer is the winner.
-			System.out.println("Player " + currentplayer.getName() + " with ID " 
+			System.out.println("Player " + currentplayer.getName() + " with Player ID " 
 					+ currentplayer.getPlayerID() + " is the winner!");
 		} else {
 			// The board is full, so there is a draw.
