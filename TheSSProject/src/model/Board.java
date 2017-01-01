@@ -288,7 +288,7 @@ public class Board<PLAYERIDTYPE> {
 	 * 
 	 */
 	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
-	private void reset() {
+	public void reset() {
 		boardData = new ArrayList<List<PLAYERIDTYPE>>();
 		// More efficient way to do this?
 		for (int i = 0; i < xDim * yDim; i++) {
