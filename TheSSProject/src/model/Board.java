@@ -1,7 +1,9 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class Board<PLAYERIDTYPE> {
 	
@@ -209,8 +211,7 @@ public class Board<PLAYERIDTYPE> {
 				directionHasWon(x, y, z, 1, -1, -1);
 	}
 	
-	//Check JML & Javadoc.
-	
+	//TODO: Check JML & Javadoc.
 	/** Checks whether the direction (deltax,deltay,deltaz) 
 	 * belonging to the cell (x,y,z) is winning. 
 	 * 
@@ -278,6 +279,44 @@ public class Board<PLAYERIDTYPE> {
 		}
 	}
 	
+	/** Returns the coordinates belonging to a tower index
+	 * 
+	 * @param i index
+	 * @return coordinates
+	 */
+	//TODO: JML
+	/*@ pure */ private Coordinates getTowerCoordinates(int i) {
+		int x = i % yDim + 1;
+		int y = i / yDim + 1;
+		return new Coordinates(x, y);
+	}
+	
+	/** Returns the coordinates of each tower where a piece can be added
+	 * 
+	 * @return Available towers
+	 */
+	//TODO: JML
+	/*@ pure */ public List<Coordinates> getAvailableTowers() {
+		ListIterator<List<PLAYERIDTYPE>> iterator = boardData.listIterator();
+		List<Coordinates> availableTowers = new ArrayList<Coordinates>();
+		if (zDim == UNLIMITED_Z) {
+			while (iterator.hasNext()) {
+				availableTowers.add(getTowerCoordinates(iterator.nextIndex()));
+				iterator.next();
+			}
+		} else {
+			while (iterator.hasNext()) {
+				int x = getTowerCoordinates(iterator.nextIndex()).getX();
+				int y = getTowerCoordinates(iterator.nextIndex()).getY();
+				if (getTowerHeight(x, y) < zDim) {
+					availableTowers.add(new Coordinates(x, y));
+				}
+				iterator.next();
+			}
+		}
+		return availableTowers;
+	}
+	
 	
 	// <------ Commands ------>
 	
@@ -303,5 +342,20 @@ public class Board<PLAYERIDTYPE> {
 		for (int i = 0; i < xDim * yDim; i++) {
 			boardData.add(new ArrayList<PLAYERIDTYPE>());
 		}
+	}
+	
+	/** Creates and returns a deep copy of the board.
+	 * 
+	 * @return deep copy of board
+	 */
+	//@ ensures \result.equals(this);
+	/*@ pure */ public Board<PLAYERIDTYPE> deepCopy() {
+		Board<PLAYERIDTYPE> boardCopy = new Board<PLAYERIDTYPE>(xDim, yDim, zDim, winningLength);
+		Iterator<List<PLAYERIDTYPE>> oldBoardIterator = boardData.iterator(); 
+		Iterator<List<PLAYERIDTYPE>> newBoardIterator = boardCopy.boardData.iterator(); 
+		while (oldBoardIterator.hasNext()) {
+			newBoardIterator.next().addAll(oldBoardIterator.next());
+		}
+		return boardCopy;
 	}
 }
