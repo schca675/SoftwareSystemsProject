@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class Board<PLAYERIDTYPE> {
+public class Board<P> {
 	
 	// <------ Constants ------>
 	
@@ -17,11 +17,13 @@ public class Board<PLAYERIDTYPE> {
 	
 	// <------ Instance variables ------>
 	
-	private int xDim;
-	private int yDim;
-	private int zDim;
-	private int winningLength;
-	private List<List<PLAYERIDTYPE>> boardData;
+	// With public final, they are visible but can't be changed after being set.
+	// Saves the redundant getters.
+	public final int xDim;
+	public final int yDim;
+	public final int zDim;
+	public final int winningLength;
+	private List<List<P>> boardData;
 	
 	// <------ Constructors ------>
 	
@@ -32,8 +34,8 @@ public class Board<PLAYERIDTYPE> {
 	 * @param winningLength Connected pieces required to win the game
 	 */
 	/*@ requires winningLength <= xDim || winningLength <= yDim 
-	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
-	*/
+	  @ 			|| (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
+	 */
 	//@ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	public Board(int xDim, int yDim, int zDim, int winningLength) {
 		this.xDim = xDim;
@@ -51,40 +53,7 @@ public class Board<PLAYERIDTYPE> {
 	}
 	
 	
-	// <------ Queries ------>
-	
-	/** Getter for X dimension.
-	 * 
-	 * @return X dimension
-	 */
-	/*@ pure */ public int getXDim() {
-		return xDim;
-	}
-
-	/** Getter for Y dimension.
-	 * 
-	 * @return Y dimension
-	 */
-	/*@ pure */ public int getYDim() {
-		return yDim;
-	}
-
-	/** Getter for Z dimension.
-	 * 
-	 * @return Z dimension
-	 */
-	/*@ pure */ public int getZDim() {
-		return zDim;
-	}
-	
-	/** Getter for winning length.
-	 * 
-	 * @return winning length
-	 */
-	/*@ pure */ public int getWinningLength() {
-		return winningLength;
-	}
-	
+	// <------ Queries ------>	
 	
 	/** Gets the tower at (x,y), assuming there is one.
 	 * 
@@ -93,7 +62,7 @@ public class Board<PLAYERIDTYPE> {
 	 * @return Tower at (x,y)
 	 */
 	//@ requires isValidTower(x,y);
-	/*@ pure */ public List<PLAYERIDTYPE> getTower(int x, int y) {
+	/*@ pure */ private List<P> getTower(int x, int y) {
 		return boardData.get((x - 1) + (y - 1) * yDim);
 	}
 	
@@ -103,13 +72,13 @@ public class Board<PLAYERIDTYPE> {
 	 * @param y Y position to check
 	 * @return Tower at (x,y) exists and isn't full
 	 */
-	//@ ensures getZDim() == -1 ==> \result == (isValidTower(x,y));
-	//@ ensures getZDim() > 0 ==> \result == (isValidTower(x,y) && getTowerHeight(x,y) < getZDim());
+	//@ ensures zDim == UNLIMITED_Z ==> \result == (isValidTower(x,y));
+	//@ ensures zDim > 0 ==> \result == (isValidTower(x,y) && getTowerHeight(x,y) < zDim);
 	/*@ pure */ public boolean checkMove(int x, int y) {
 		if (zDim == UNLIMITED_Z) {
 			return isValidTower(x, y);
 		} else {
-			return isValidTower(x, y) && getTowerHeight(x, y) < getZDim();
+			return isValidTower(x, y) && getTowerHeight(x, y) < zDim;
 		}
 	}
 	
@@ -121,9 +90,9 @@ public class Board<PLAYERIDTYPE> {
 	 * @return Owner, null if no owner
 	 */
 	//@ requires isValidCell(x,y,z);
-	//TODO: Determine PLAYERIDTYPE --> PlayerID
-	// ensures \result == null || \result instanceof PLAYERIDTYPE;
-	/*@ pure nullable */ public PLAYERIDTYPE getCellOwner(int x, int y, int z) {
+	//TODO: JML refuses generic type P
+	// ensures \result == null || \result instanceof P;
+	/*@ pure nullable */ public P getCellOwner(int x, int y, int z) {
 		if (z <= getTowerHeight(x, y)) {
 			return getTower(x, y).get(z - 1);
 		} else {
@@ -152,7 +121,7 @@ public class Board<PLAYERIDTYPE> {
 		if (zDim == UNLIMITED_Z) {
 			return false;
 		} else {
-			for (List<PLAYERIDTYPE> tower : boardData) {
+			for (List<P> tower : boardData) {
 				if (tower.size() < zDim) {
 					return false;
 				}
@@ -168,7 +137,8 @@ public class Board<PLAYERIDTYPE> {
 	 * @return The height of the tower at (x,y)
 	 */
 	//@ requires isValidTower(x,y);
-	// ensures \result == ?;
+	//@ ensures \result >= 0 && (\result <= zDim || zDim == UNLIMITED_Z);
+	//@ ensures \forall int z; isValidCell(x,y,z); isEmptyCell(x,y,z) == (z > \result);
 	/*@ pure */ public int getTowerHeight(int x, int y) {
 		return getTower(x, y).size();
 	}
@@ -181,6 +151,7 @@ public class Board<PLAYERIDTYPE> {
 	 * @return Piece at (x,y,z) belongs to winning set
 	 */
 	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
+	//TODO: ensures part?
 	/*@ pure */ public boolean hasWon(int x, int y, int z) {
 		// Linearly independent direction vectors:
 		// (1,0,0) X-direction
@@ -211,23 +182,23 @@ public class Board<PLAYERIDTYPE> {
 				directionHasWon(x, y, z, 1, -1, -1);
 	}
 	
-	//TODO: Check JML & Javadoc.
 	/** Checks whether the direction (deltax,deltay,deltaz) 
 	 * belonging to the cell (x,y,z) is winning. 
 	 * 
-	 * @param x X position to check
-	 * @param y Y position to check
-	 * @param z Z position to check
-	 * @param deltax
-	 * @param deltay
-	 * @param deltaz
-	 * @return if the direction is winning.
+	 * @param x X position of cell
+	 * @param y Y position of cell
+	 * @param z Z position of cell
+	 * @param deltax X direction
+	 * @param deltay Y direction
+	 * @param deltaz Z direction
+	 * @return Direction has won
 	 */
 	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
+	//TODO: ensures part?
 	/*@ pure */ private boolean directionHasWon(int x, int y, int z, 
 													int deltax, int deltay, int deltaz) {
 		int connectedPieces = 1;
-		PLAYERIDTYPE owner = getCellOwner(x, y, z);
+		P owner = getCellOwner(x, y, z);
 		int distance = 1;
 		int sign = 1;
 		while (connectedPieces < winningLength) {
@@ -258,7 +229,7 @@ public class Board<PLAYERIDTYPE> {
 	 * @param y Y position
 	 * @return (x,y) are valid coordinates on the board
 	 */
-	//@ ensures \result == (x > 0 && x <= getXDim() && y > 0 && y <= getYDim());
+	//@ ensures \result == (x > 0 && x <= xDim && y > 0 && y <= yDim);
 	/*@ pure */ public boolean isValidTower(int x, int y) {
 		return x > 0 && x <= xDim && y > 0 && y <= yDim;
 	}
@@ -270,7 +241,7 @@ public class Board<PLAYERIDTYPE> {
 	 * @param z Z position
 	 * @return (x,y,z) are valid coordinates on the board
 	 */
-	//@ ensures \result == (isValidTower(x,y) && z > 0 && z <= getZDim());
+	//@ ensures \result == (isValidTower(x,y) && ((z > 0 && z <= zDim) || zDim == UNLIMITED_Z));
 	/*@ pure */ public boolean isValidCell(int x, int y, int z) {
 		if (zDim == UNLIMITED_Z) {
 			return isValidTower(x, y);
@@ -279,25 +250,27 @@ public class Board<PLAYERIDTYPE> {
 		}
 	}
 	
-	/** Returns the coordinates belonging to a tower index
+	/** Returns the coordinates belonging to a tower index.
 	 * 
 	 * @param i index
-	 * @return coordinates
+	 * @return Coordinates of tower
 	 */
-	//TODO: JML
+	//@ requires i >= 0 && i < xDim * yDim - 1;
+	//@ ensures isValidTower(\result.getX(),\result.getY());
 	/*@ pure */ private Coordinates getTowerCoordinates(int i) {
 		int x = i % yDim + 1;
 		int y = i / yDim + 1;
 		return new Coordinates(x, y);
 	}
 	
-	/** Returns the coordinates of each tower where a piece can be added
+	/** Returns the coordinates of each tower where a piece can be added.
 	 * 
 	 * @return Available towers
 	 */
-	//TODO: JML
+	/*@ ensures \forall Coordinates coord; \result.contains(coord); 
+	  @										checkMove(coord.getX(),coord.getY()); 
 	/*@ pure */ public List<Coordinates> getAvailableTowers() {
-		ListIterator<List<PLAYERIDTYPE>> iterator = boardData.listIterator();
+		ListIterator<List<P>> iterator = boardData.listIterator();
 		List<Coordinates> availableTowers = new ArrayList<Coordinates>();
 		if (zDim == UNLIMITED_Z) {
 			while (iterator.hasNext()) {
@@ -317,19 +290,42 @@ public class Board<PLAYERIDTYPE> {
 		return availableTowers;
 	}
 	
+	/** Creates and returns a deep copy of the board.
+	 * 
+	 * @return Deep copy of this board
+	 */
+	//@ ensures \result.equals(this);
+	/*@ pure */ public Board<P> deepCopy() {
+		Board<P> boardCopy = new Board<P>(xDim, yDim, zDim, winningLength);
+		Iterator<List<P>> oldBoardIterator = boardData.iterator(); 
+		Iterator<List<P>> newBoardIterator = boardCopy.boardData.iterator(); 
+		while (oldBoardIterator.hasNext()) {
+			newBoardIterator.next().addAll(oldBoardIterator.next());
+		}
+		return boardCopy;
+	}
+	
 	
 	// <------ Commands ------>
 	
-	/** Make a move, assumes checkMove(x,y) has been called.
+	/** Make a move if it is valid.
 	 * 
 	 * @param x X position to place piece at
 	 * @param y Y position to place piece at
 	 * @param playerID ID of player that makes a move
+	 * @return Move successful
 	 */
-	//@ requires checkMove(x,y);
-	//@ ensures getCellOwner(x,y,getTowerHeight(x,y)) == playerID;
-	public void makeMove(int x, int y, PLAYERIDTYPE playerID) {
-		getTower(x, y).add(playerID);
+	/*@ ensures \old(checkMove(x,y)) ==> \result == true;
+	  @ ensures \result == true ==> getCellOwner(x,y,getTowerHeight(x,y)) == playerID && 
+	  @ 								getTowerHeight(x,y) == \old(getTowerHeight(x,y)) + 1;
+	 */
+	public boolean makeMove(int x, int y, P playerID) {
+		if (checkMove(x, y)) {
+			getTower(x, y).add(playerID);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/** Resets the board to an empty board.
@@ -337,25 +333,10 @@ public class Board<PLAYERIDTYPE> {
 	 */
 	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
 	public void reset() {
-		boardData = new ArrayList<List<PLAYERIDTYPE>>();
+		boardData = new ArrayList<List<P>>(xDim * yDim);
 		// More efficient way to do this?
 		for (int i = 0; i < xDim * yDim; i++) {
-			boardData.add(new ArrayList<PLAYERIDTYPE>());
+			boardData.add(new ArrayList<P>());
 		}
-	}
-	
-	/** Creates and returns a deep copy of the board.
-	 * 
-	 * @return deep copy of board
-	 */
-	//@ ensures \result.equals(this);
-	/*@ pure */ public Board<PLAYERIDTYPE> deepCopy() {
-		Board<PLAYERIDTYPE> boardCopy = new Board<PLAYERIDTYPE>(xDim, yDim, zDim, winningLength);
-		Iterator<List<PLAYERIDTYPE>> oldBoardIterator = boardData.iterator(); 
-		Iterator<List<PLAYERIDTYPE>> newBoardIterator = boardCopy.boardData.iterator(); 
-		while (oldBoardIterator.hasNext()) {
-			newBoardIterator.next().addAll(oldBoardIterator.next());
-		}
-		return boardCopy;
 	}
 }
