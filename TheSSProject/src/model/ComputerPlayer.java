@@ -44,7 +44,7 @@ public class ComputerPlayer extends Player {
 	
 	@Override
 	public Coordinates determineMove(Board<PlayerID> board) {
-		return strategy.determineMove(board, this.getPlayerID());
+		return strategy.determineMove(board, this.playerID);
 	}
 
 }

@@ -123,8 +123,8 @@ public class Game {
 		}
 		if (winning) {
 			//  The currentplayer is the winner.
-			System.out.println("Player " + currentplayer.getName() + " with Player ID " 
-					+ currentplayer.getPlayerID() + " is the winner!");
+			System.out.println("Player " + currentplayer.name + " with Player ID " 
+					+ currentplayer.playerID + " is the winner!");
 		} else {
 			// The board is full, so there is a draw.
 			System.out.println("Draw. There is no winner");

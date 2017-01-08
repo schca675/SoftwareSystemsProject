@@ -14,7 +14,7 @@ public class HumanPlayer extends Player {
 	 */
 	//@ requires name != null;
 	//@ requires id == PlayerID.X || id == PlayerID.O;
-	//@ ensures this.getName() == name && this.getPlayerID() == id;
+	//@ ensures this.name == name && this.playerID == id;
 	public HumanPlayer(String name, PlayerID id) {
 		super(name, id);
 	}
@@ -31,8 +31,8 @@ public class HumanPlayer extends Player {
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
     public Coordinates determineMove(Board<PlayerID> board) {
-		String message = "It is your turn, " + this.getName() + " (" 
-				+ this.getPlayerID().toString() + "), what is your choice?";
+		String message = "It is your turn, " + this.name + " ("  
+				+ this.playerID.toString() + "), what is your choice?";
 		Coordinates coord = readCoord(message); 
 		while (!board.checkMove(coord.getX(), coord.getY())) {
 			coord = readCoord("Invalid choice: " + message);
@@ -71,7 +71,6 @@ public class HumanPlayer extends Player {
 			}		
 		}
 		return new Coordinates(x, y);
-
 	}
 
 }

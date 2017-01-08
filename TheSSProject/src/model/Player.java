@@ -4,8 +4,8 @@ public abstract class Player {
 	
 	// <------ Instance variables ------>	
 	
-	private String name;
-	private PlayerID playerID;
+	public final String name;
+	public final PlayerID playerID;
 	
 	// <------ Constructor ------>
 	
@@ -17,7 +17,7 @@ public abstract class Player {
 	 */
 	//@ requires name != null;
 	//@ requires id == PlayerID.X || id == PlayerID.O;
-	//@ ensures this.getName() == name && this.getPlayerID() == id;
+	//@ ensures this.name == name && this.playerID == id;
 	public Player(String name, PlayerID id) {
 		this.name = name;
 		this.playerID = id;
@@ -25,23 +25,23 @@ public abstract class Player {
 
 	// <------ Queries ------>
 	
-	/**
-	 * Returns the name of the player.
-	 * 
-	 * @return name of the player
-	 */
-	/*@ pure */ public String getName() {
-		return this.name;
-	}
-	
-	/**
-	 * Returns the ID of the player.
-	 * 
-	 * @return ID of the player.
-	 */
-	/*@ pure */ public PlayerID getPlayerID() {
-		return this.playerID;
-	}
+//	/**
+//	 * Returns the name of the player.
+//	 * 
+//	 * @return name of the player
+//	 */
+//	/*@ pure */ public String getName() {
+//		return this.name;
+//	}
+//	
+//	/**
+//	 * Returns the ID of the player.
+//	 * 
+//	 * @return ID of the player.
+//	 */
+//	/*@ pure */ public PlayerID getPlayerID() {
+//		return this.playerID;
+//	}
 	
 	/**
 	 * Determines the coordinates of the tower for the next move.
