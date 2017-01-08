@@ -178,21 +178,25 @@ public class Card implements Serializable //Is Serializable necessary for Object
 	
 	// <------- EXERCISES ------->
 	
+	//Exercise 6.8
 	public void write(ObjectOutput out) throws IOException {
 		out.writeObject(this);
 		out.flush();
 		out.close();
 	}
 	
+	//Exercise 6.7
 	public void write(DataOutput out) throws IOException {
 		out.writeChar(this.suit);
 		out.writeChar(this.rank);
 	}
 	
+	//Exercise 6.4, gets called from below
 	public void write(PrintWriter writer) {
 		writer.println(this.toString());
 	}
 	
+	// Exercise 6.4
 	private static void writeCards(PrintWriter writer, Card[] cards) {
 		for (Card toWrite : cards) {
 			toWrite.write(writer);
@@ -209,6 +213,7 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		cards[3] = new Card(Card.SPADES, '3');
 		
 		try {
+			// Exercise 6.4 + 6.5, testing
 			// If a valid file path is given, write to this file
 			writeCards(new PrintWriter(new FileOutputStream(args[0])), cards);
 			// Try to read back the card, compare
@@ -227,10 +232,21 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		}
 	}
 	
+	//Exercise 6.8
 	public static Card read(ObjectInput in) throws EOFException {
 		Card readCard;
 		try {
-			readCard = (Card) in.readObject();
+			Object readObject = in.readObject();
+			if (readObject instanceof Card) {
+				readCard = (Card) readObject;
+				if (Card.isValidSuit(readCard.suit) && Card.isValidRank(readCard.rank)) {
+					return readCard;
+				} else {
+					return null;
+				}
+			} else {
+				return null;
+			}
 		} catch (ClassNotFoundException e) {
 			return null;
 		} catch (IOException e) {
@@ -238,13 +254,9 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		} catch (NullPointerException e) {
 			throw new EOFException();
 		}
-		if (Card.isValidSuit(readCard.suit) && Card.isValidRank(readCard.rank)) {
-			return readCard;
-		} else {
-			return null;
-		}
 	}
 	
+	//Exercise 6.7
 	public static Card read(DataInput data) throws EOFException {
 		char suit;
 		char rank;
@@ -262,6 +274,7 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		}
 	}
 	
+	//Exercise 6.5
 	public static Card read(BufferedReader in) throws EOFException {
 		String suit;
 		String rank;
@@ -272,7 +285,7 @@ public class Card implements Serializable //Is Serializable necessary for Object
 			}
 			Scanner scanny = new Scanner(lineOfText);
 			suit = scanny.next();
-			rank = scanny.next();
+			rank = scanny.next(); //Exception catched
 			scanny.close();
 			if (Card.suitString2Char(suit) != '?' && Card.rankString2Char(rank) != '?') {
 				return new Card(Card.suitString2Char(suit), Card.rankString2Char(rank));
@@ -284,7 +297,7 @@ public class Card implements Serializable //Is Serializable necessary for Object
 			return null;
 		} catch (IOException e) {
 			//Reader exception
-			return null;
+			throw new EOFException();
 		}
 	}
 	
