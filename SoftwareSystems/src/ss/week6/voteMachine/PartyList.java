@@ -15,7 +15,7 @@ public class PartyList extends Observable {
 		if (partyName != null && partyName.length() > 0 && !parties.contains(partyName))  {
 			parties.add(partyName);
 			setChanged();
-			notifyObservers(partyName);
+			notifyObservers("party");
 		}
 	}
 	
