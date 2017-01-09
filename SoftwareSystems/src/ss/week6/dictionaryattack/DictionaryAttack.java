@@ -1,12 +1,11 @@
 package ss.week6.dictionaryattack;
 
 import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Hex;
@@ -16,6 +15,10 @@ public class DictionaryAttack {
 	private Map<String, String> passwordMap;
 	private Map<String, String> hashDictionary;
 
+	public DictionaryAttack() {
+		passwordMap = new HashMap<String, String>();
+		hashDictionary = new HashMap<String, String>();
+	}
 	/**
 	 * Reads a password file. Each line of the password file has the form:
 	 * username: encodedpassword
@@ -29,14 +32,12 @@ public class DictionaryAttack {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(filename));
-			String line = reader.readLine();
-			while (line != null && !line.isEmpty()) {
-				System.out.println("Line" + line);
+			String line;// = reader.readLine();
+			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(": ");
-				System.out.println(parts[0]);
-				System.out.println(parts[1]);
-				passwordMap.put(parts[0], parts[1]);	
-				line = reader.readLine();
+				if (parts.length == 2) {
+					passwordMap.put(parts[0], parts[1]);
+				}
 			}
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException(e);
@@ -67,9 +68,13 @@ public class DictionaryAttack {
 	 * @return whether the password for that user was correct.
 	 */
 	public boolean checkPassword(String user, String password) {
-		String hashedUserPassword = passwordMap.get(user);
-		if (hashedUserPassword != null) {
-			return getPasswordHash(password).equals(hashedUserPassword);
+		if (passwordMap != null) {
+			String hashedUserPassword = passwordMap.get(user);
+			if (hashedUserPassword != null) {
+				return getPasswordHash(password).equals(hashedUserPassword);
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
@@ -89,12 +94,6 @@ public class DictionaryAttack {
 	 */
 	public void doDictionaryAttack() {
 		// To implement
-	}
-	public static void main(String[] args) throws IOException {
-		DictionaryAttack da = new DictionaryAttack();
-		da.readPasswords("LeakedPasswords.txt");
-		// To implement
-		da.doDictionaryAttack();
 	}
 
 }
