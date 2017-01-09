@@ -274,7 +274,7 @@ public class Board {
     //@ ensures \result == isWinner(Mark.XX) | \result == isWinner(Mark.OO);
     /*@pure*/
     public boolean hasWinner() {
-        return isWinner(Mark.OO)|| isWinner(Mark.XX);
+        return isWinner(Mark.OO) || isWinner(Mark.XX);
     }
 
     /**

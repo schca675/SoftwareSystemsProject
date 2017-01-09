@@ -15,5 +15,6 @@ public class Hello {
 				stop = true;
 			}
 		}
+		scanny.close();
 	}
 }

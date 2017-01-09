@@ -87,8 +87,11 @@ public class Hotel {
 	
 	// Returns the room where the guest with the entered name is checked in.
 	// Null if the guest does not have a room.
-	/*@ ensures \result !=null <==> ((getRoom1().getGuest() != null) ==> (getRoom1().getGuest().getName().equals(guestName))) 
-	 @ || ((getRoom2().getGuest() != null) ==> (getRoom2().getGuest().getName().equals(guestName))); */
+	/*@ ensures \result !=null <==> ((getRoom1().getGuest() != null) ==> 
+	  @ 				(getRoom1().getGuest().getName().equals(guestName))) 
+	  @ 				|| ((getRoom2().getGuest() != null) ==> 
+	  @					(getRoom2().getGuest().getName().equals(guestName))); 
+	 */
 	//@ ensures \result == null || \result.getGuest().getName().equals(guestName);
 	/*@ nullable*/ /*@ pure */ public Room getRoom(String guestName) {
 		Room toReturn;
@@ -114,7 +117,8 @@ public class Hotel {
 	// Returns a textual description of all rooms in the Hotel, 
 	// including the name of the guest and the status of the safe in that room.
 	/*@ pure */ public String toString() {
-		String sentence = "The hotel " + getHotelName()+" has 2 rooms namely rooms : room " + getRoom1().getNumber() + "whith guest: ";
+		String sentence = "The hotel " + getHotelName() + " has 2 rooms namely rooms : room " + 
+							getRoom1().getNumber() + "whith guest: ";
 		if (room1.getGuest() == null) {
 			sentence = sentence + "none";
 		} else {

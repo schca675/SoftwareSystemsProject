@@ -9,20 +9,20 @@ public class ThreeWayLamp7 {
 	private Setting currentSetting;
 
 	/*@ private invariant currentSetting==Setting.OFF  || currentSetting==Setting.LOW 
-	 @ || currentSetting==Setting.HIGH || currentSetting==Setting.MEDIUM; */
+	  @ || currentSetting==Setting.HIGH || currentSetting==Setting.MEDIUM; */
 
-	// @ ensures getSetting() == Setting.OFF;
+	//@ ensures getSetting() == Setting.OFF;
 	public ThreeWayLamp7() {
 		currentSetting = Setting.OFF;
 		assert currentSetting == Setting.OFF;
 	}
 
-	// @ ensures \result >=Setting.OFF && \result <=Setting.HIGH;
-	/* @ pure */ public Setting getSetting() {
+	// ensures \result >= Setting.OFF && \result <=Setting.HIGH;
+	/*@ pure */ public Setting getSetting() {
 		return currentSetting;
 	}
 
-	// @ ensures getSetting()==(\old(getSetting()) + 1) % 4;
+	// ensures getSetting()==(\old(getSetting()) + 1) % 4;
 	//@ ensures \old(getSetting()) == Setting.OFF ==> getSetting() == Setting.LOW;
 	public void switchSetting() {
 		assert currentSetting == Setting.OFF  || currentSetting == Setting.LOW 

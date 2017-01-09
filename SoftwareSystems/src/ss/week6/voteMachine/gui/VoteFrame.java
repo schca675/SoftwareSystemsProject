@@ -12,10 +12,11 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+@SuppressWarnings("serial")
 public class VoteFrame extends JFrame {
 	private static final String INIT_MESSAGE = "(Choose a party)";
 	// Graphical components components
-	private JComboBox partyChoice;
+	private JComboBox<String> partyChoice;
 	private JButton okButton;
 	private JLabel messageLabel;
 
@@ -36,7 +37,7 @@ public class VoteFrame extends JFrame {
 		messageLabel = new JLabel("Make your choice");
 		add(messageLabel, BorderLayout.NORTH);
 
-		partyChoice = new JComboBox();
+		partyChoice = new JComboBox<String>();
 		partyChoice.addItem(INIT_MESSAGE);
 		add(partyChoice, BorderLayout.CENTER);
 
@@ -74,7 +75,7 @@ public class VoteFrame extends JFrame {
 
 	/**
 	 * Ververst de lijst partijen in de <code>Choice</code> op basis van de
-	 * waargenomen verandering in de <code>Uitslag</code>
+	 * waargenomen verandering in de <code>Uitslag</code>.
 	 */
 	public void update(List<String> parties) {
 		partyChoice.setEnabled(false);

@@ -17,13 +17,13 @@ public class DollarsAndCentsCounter {
 		return cents;
 	}
 	
-	public void add (int addDollars, int addCents) {
-		if ((addDollars >= 0) && (addCents >= 0) && (addCents <=100)) {
-		   dollars = dollars + addDollars;
-		   cents = cents + addCents;
-		   if (cents >= 100) {
-		     	dollars = dollars +1;
-			    cents = cents -100;
+	public void add(int addDollars, int addCents) {
+		if ((addDollars >= 0) && (addCents >= 0) && (addCents <= 100)) {
+			dollars = dollars + addDollars;
+			cents = cents + addCents;
+			if (cents >= 100) {
+				dollars = dollars + 1;
+				cents = cents - 100;
 		    }
 		}
 	}

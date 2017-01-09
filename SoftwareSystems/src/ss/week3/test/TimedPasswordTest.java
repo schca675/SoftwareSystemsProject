@@ -24,7 +24,8 @@ public class TimedPasswordTest {
         // Change the password
         tp.setWord(BasicChecker.INITIAL, "test123");
         // Assert that it is valid.
-        assertFalse("The password should be valid after changing it and it should not yet have expired.",
+        assertFalse("The password should be valid after changing it and it should not yet have "
+        		+ "expired.",
                 tp.isExpired());
     }
 }

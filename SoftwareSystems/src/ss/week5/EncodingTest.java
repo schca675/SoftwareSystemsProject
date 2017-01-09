@@ -26,7 +26,7 @@ public class EncodingTest {
         
         System.out.println(Base64.encodeBase64String(input.getBytes()));
         
-        String hexString2 = "010203040506";
+        //String hexString2 = "010203040506";
         char[] hexChars2 = hexString.toCharArray();
         byte[] hexDecode2 = Hex.decodeHex(hexChars2);
         System.out.println(Base64.encodeBase64String(hexDecode2));

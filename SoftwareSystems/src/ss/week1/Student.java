@@ -1,6 +1,6 @@
 package ss.week1;
 
-public class student{
+public class Student {
 	public static final int REQSCORE = 70;
 
 	public boolean passed(int score) {

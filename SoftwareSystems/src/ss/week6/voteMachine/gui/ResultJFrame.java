@@ -3,15 +3,10 @@ package ss.week6.voteMachine.gui;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
-
-import ss.week6.voteMachine.VoteList;
 
 /**
  * P2 prac wk3.
@@ -19,6 +14,7 @@ import ss.week6.voteMachine.VoteList;
  * @author  Arend Rensink en Theo Ruys
  * @version 2005.02.15
  */
+@SuppressWarnings("serial")
 public class ResultJFrame extends JFrame {
 	// Grafische componenten
 	private JTextArea resultField;
@@ -45,10 +41,10 @@ public class ResultJFrame extends JFrame {
 	}
 
 	/** Zet de uitslag op het tekstveld, met 1 regel per partij. */
-	public void update(Map<String,Integer> votes) {
+	public void update(Map<String, Integer> votes) {
 		resultField.setText("");
 
-		for(Map.Entry<String,Integer> entry: votes.entrySet()){
+		for (Map.Entry<String, Integer> entry : votes.entrySet()) {
 			resultField.append(entry.getKey() + ": " + entry.getValue() + "\n");
 		}
 

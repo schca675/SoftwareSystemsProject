@@ -1,5 +1,6 @@
 package ss.week6;
 
+@SuppressWarnings("serial")
 public class TooFewArgumentsException extends WrongArgumentException {
 	public TooFewArgumentsException(String message, Throwable cause) {
 		super(message, cause);

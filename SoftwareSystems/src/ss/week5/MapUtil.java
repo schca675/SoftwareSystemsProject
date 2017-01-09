@@ -105,7 +105,7 @@ public class MapUtil {
 	} */
 
 	//@ ensures (\forall V v; f.values().contains(v); g.keySet().contains(v)) == \result; 
-	public static <K, V, W> boolean compatible(Map<K, V> f, Map<V, W> g) {
+	/*@ pure */ public static <K, V, W> boolean compatible(Map<K, V> f, Map<V, W> g) {
 		Set<V> keysg = g.keySet();
 		boolean compatible = true;
 		for (V valuesf: f.values()) {

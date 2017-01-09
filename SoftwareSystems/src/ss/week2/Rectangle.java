@@ -46,7 +46,7 @@ public class Rectangle {
 	//@ ensures \result >=0;
 	//@ ensures \result == length() * width();
 	//@pure;
-	    public int area() {
+	public int area() {
 		assert length >= 0 && width >= 0;
 		int calcArea = width * length;
 		assert calcArea >= 0;
@@ -63,7 +63,7 @@ public class Rectangle {
 		assert length >= 0 && width >= 0;
 		int calcPer = 2 * (length + width);
 		assert calcPer >= 0;
-		assert calcPer == 2*(this.length() + this.width());
+		assert calcPer == 2 * (this.length() + this.width());
 		return calcPer;
 	}
 }

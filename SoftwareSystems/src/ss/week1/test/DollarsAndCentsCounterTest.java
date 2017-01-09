@@ -25,8 +25,8 @@ public class DollarsAndCentsCounterTest {
         counter.reset();
     }
 
-    /**
-     * Test the method <tt>dollars()</tt>
+    /** Test the method <tt>dollars()</tt>.
+     * 
      */
     @Test
     public void testDollars() {
@@ -36,8 +36,8 @@ public class DollarsAndCentsCounterTest {
         assertEquals(6, counter.dollars());
     }
 
-    /**
-     * Test the method <tt>cents()</tt>
+    /** Test the method <tt>cents()</tt>.
+     * 
      */
     @Test
     public void testCents() {
@@ -47,8 +47,8 @@ public class DollarsAndCentsCounterTest {
         assertEquals(0, counter.cents());
     }
 
-    /**
-     * Test the method <tt>add(dollars, cents)</tt>
+    /** Test the method <tt>add(dollars, cents)</tt>.
+     * 
      */
     @Test
     public void testAdd() {
@@ -60,8 +60,8 @@ public class DollarsAndCentsCounterTest {
         assertEquals(5, counter.cents());
     }
 
-    /**
-     * Test the method <tt>reset()</tt>
+    /** Test the method <tt>reset()</tt>.
+     * 
      */
     @Test
     public void testReset() {

@@ -16,7 +16,8 @@ public class LinearProductTest {
 
     @Before
     public void setUp() {
-        linearProduct = new LinearProduct(new Constant(CONSTANT_VALUE), new Constant(CONSTANT_VALUE));
+        linearProduct = new LinearProduct(new Constant(CONSTANT_VALUE), 
+        		new Constant(CONSTANT_VALUE));
     }
 
     @Test

@@ -21,12 +21,12 @@ public class VoteGUIView implements VoteView {
 
 	public void start() {
 		VoteFrame stemFrame = new VoteFrame(this);
-		ResultJFrame uitslagJFrame = new ResultJFrame(this);
+		ResultJFrame uitslagJFrameLocal = new ResultJFrame(this);
 
-		uitslagJFrame.setVisible(true);
+		uitslagJFrameLocal.setVisible(true);
 		stemFrame.setVisible(true);
 
-		this.uitslagJFrame = uitslagJFrame;
+		this.uitslagJFrame = uitslagJFrameLocal;
 		this.voteFrame = stemFrame;
 
 		boolean running = true;
