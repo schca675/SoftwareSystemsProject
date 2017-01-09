@@ -1,5 +1,9 @@
 package testing;
 
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import model.Board;
 import model.PlayerID;
 
@@ -20,21 +24,21 @@ public class BoardTest {
 	}
 
 	// <------ Test the constructors ------>
-	
+	 
 	@Test
 	public void testDefaultDimension() {
-		assertEquals(Board.DEFAULT_XDIM, board.getXDim());
-		assertEquals(Board.DEFAULT_YDIM, board.getYDim());
-		assertEquals(Board.DEFAULT_ZDIM, board.getZDim());
-		assertEquals(Board.DEFAULT_WIN, board.getWinningLength());
+		assertEquals(Board.DEFAULT_XDIM, board.xDim);
+		assertEquals(Board.DEFAULT_YDIM, board.yDim);
+		assertEquals(Board.DEFAULT_ZDIM, board.zDim);
+		assertEquals(Board.DEFAULT_WIN, board.winningLength);
 	}
 
 	@Test
 	public void testSpecialDimension() {
-		assertEquals(LENGTH, specialBoard.getXDim());
-		assertEquals(WIDTH, specialBoard.getYDim());
-		assertEquals(HEIGHT, specialBoard.getZDim());
-		assertEquals(WIN, specialBoard.getWinningLength());
+		assertEquals(LENGTH, specialBoard.xDim);
+		assertEquals(WIDTH, specialBoard.yDim);
+		assertEquals(HEIGHT, specialBoard.zDim);
+		assertEquals(WIN, specialBoard.winningLength);
 	}
 	
 	// <------ Test the queries ------>
@@ -69,7 +73,15 @@ public class BoardTest {
 	
 	@Test
 	public void testisFull() {
-		
+		assertFalse(board.isFull());
+		for (int i = 1; i <= 4; i++) {
+			for (int j = 1; j <= 4; j++) {
+				for (int k = 1; k <= 4; k++) {
+					board.makeMove(i, j, PlayerID.O);
+				}
+			}
+		}
+		assertTrue(board.isFull());		
 	}
 	
 	@Test
@@ -169,7 +181,7 @@ public class BoardTest {
 		assertTrue(board.isValidTower(2, 4));
 		assertFalse(board.isValidTower(0, 0));
 		assertFalse(board.isValidTower(0, 1));
-		assertFalse(board.isValidTower(3, 1));
+		assertFalse(board.isValidTower(3, 0));
 		assertFalse(board.isValidTower(5, 2));
 		assertFalse(board.isValidTower(4, 5));
 		assertFalse(board.isValidTower(5, 5));		
