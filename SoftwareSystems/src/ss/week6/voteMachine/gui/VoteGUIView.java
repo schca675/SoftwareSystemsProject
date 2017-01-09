@@ -36,8 +36,11 @@ public class VoteGUIView implements VoteView {
 			if (words.length == 3 && words[0].equals("ADD")
 					&& words[1].equals("PARTY")) {
 				this.voteMachine.addParty(words[2]);
+				System.out.println("party added");
 			} else if (words.length == 1 && words[0].equals("PARTIES")) {
-				this.voteMachine.getParties();
+				for (String p : this.voteMachine.getParties()) {
+					System.out.println(p);
+				}
 			} else if (words.length == 1 && words[0].equals("EXIT")) {
 				running = false;
 			} else {

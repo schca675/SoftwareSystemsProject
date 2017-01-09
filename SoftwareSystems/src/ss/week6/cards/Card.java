@@ -262,14 +262,20 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		char rank;
 		
 		try {
+			System.out.println("1");
 			suit = data.readChar();
+			System.out.println("2" + suit);
 			rank = data.readChar();
+			System.out.println("3" + rank);
 			if (Card.isValidSuit(suit) && Card.isValidRank(rank)) {
 				return new Card(suit, rank);
 			} else {
 				return null;
 			}
+		} catch (EOFException e) {
+			throw e;
 		} catch (IOException e) {
+			System.out.println("IOException");
 			return null;
 		}
 	}
@@ -295,9 +301,12 @@ public class Card implements Serializable //Is Serializable necessary for Object
 		} catch (NoSuchElementException e) {
 			//Scanner exception
 			return null;
+		} catch (EOFException e) {
+			//EOF catched
+			throw e;
 		} catch (IOException e) {
 			//Reader exception
-			throw new EOFException();
+			return null;
 		}
 	}
 	

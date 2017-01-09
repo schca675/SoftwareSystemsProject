@@ -116,6 +116,7 @@ public class CardReader {
 				Card k = read();
 				if (k == null) {
 					System.err.println("Exception in input");
+					System.exit(0);
 				} else {
 					write(k);
 				}

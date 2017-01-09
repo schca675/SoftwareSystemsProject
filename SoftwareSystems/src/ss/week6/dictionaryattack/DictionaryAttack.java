@@ -1,6 +1,15 @@
 package ss.week6.dictionaryattack;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+
+import org.apache.commons.codec.binary.Hex;
 
 
 public class DictionaryAttack {
@@ -16,8 +25,23 @@ public class DictionaryAttack {
 	 * the username, and the password hash should be the content.
 	 * @param filename
 	 */
-	public void readPasswords(String filename) {
-		// To implement        
+	public void readPasswords(String filename) throws IOException {
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(filename));
+			String line = reader.readLine();
+			while (line != null && !line.isEmpty()) {
+				System.out.println("Line" + line);
+				String[] parts = line.split(": ");
+				System.out.println(parts[0]);
+				System.out.println(parts[1]);
+				passwordMap.put(parts[0], parts[1]);	
+				line = reader.readLine();
+			}
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException(e);
+		}
+		
 	}
 
 	/**
@@ -25,10 +49,15 @@ public class DictionaryAttack {
 	 * hash (or sometimes called digest) should be hex-encoded in a String.
 	 * @param password
 	 * @return
+	 * @throws NoSuchAlgorithmException 
 	 */
 	public String getPasswordHash(String password) {
-    		// To implement
+    	try {
+    		MessageDigest digester = MessageDigest.getInstance("MD5");
+    		return Hex.encodeHexString(digester.digest(password.getBytes()));
+    	} catch (NoSuchAlgorithmException e) {
     		return null;
+    	}
 	}
 	/**
 	 * Checks the password for the user the password list. If the user
@@ -38,8 +67,12 @@ public class DictionaryAttack {
 	 * @return whether the password for that user was correct.
 	 */
 	public boolean checkPassword(String user, String password) {
-        // To implement
-		return false;
+		String hashedUserPassword = passwordMap.get(user);
+		if (hashedUserPassword != null) {
+			return getPasswordHash(password).equals(hashedUserPassword);
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -57,8 +90,9 @@ public class DictionaryAttack {
 	public void doDictionaryAttack() {
 		// To implement
 	}
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		DictionaryAttack da = new DictionaryAttack();
+		da.readPasswords("LeakedPasswords.txt");
 		// To implement
 		da.doDictionaryAttack();
 	}

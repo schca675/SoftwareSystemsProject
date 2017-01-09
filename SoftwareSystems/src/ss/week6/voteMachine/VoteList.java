@@ -18,7 +18,7 @@ public class VoteList extends Observable {
 		}
 		allVotes.put(party, value);
 		setChanged();
-		notifyObservers(party);
+		notifyObservers("vote");
 	}
 	
 	public Map<String, Integer> getVotes() {
