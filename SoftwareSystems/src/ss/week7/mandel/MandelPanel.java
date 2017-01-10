@@ -11,12 +11,19 @@ import javax.swing.JPanel;
  * @author Martin Kalin, aangepast door Arend Rensink
  * @version 15-01-2002
  */
-class MandelPanel extends JPanel
+class MandelPanel extends JPanel implements Runnable
 {
 	public void draw() {
-		(new MandelThread(this)).start();
+		//(new MandelThread(this)).start();
+		Thread mandel = new Thread(this);
+		mandel.start();
 	}
 
+	@Override
+	public void run() {
+		drawMandel();
+	}
+	
 
 	// draw the fractal 
 	void drawMandel() {

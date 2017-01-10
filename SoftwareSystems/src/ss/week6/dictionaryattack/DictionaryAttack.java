@@ -37,6 +37,8 @@ public class DictionaryAttack {
 				String[] parts = line.split(": ");
 				if (parts.length == 2) {
 					passwordMap.put(parts[0], parts[1]);
+				} else {
+					System.err.println("Line in imported file is wrong");
 				}
 			}
 			reader.close();
