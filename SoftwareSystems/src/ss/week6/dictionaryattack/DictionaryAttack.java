@@ -29,7 +29,6 @@ public class DictionaryAttack {
 	 * @param filename
 	 */
 	public void readPasswords(String filename) throws IOException {
-		System.out.println("Reader");
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(filename));
@@ -89,14 +88,12 @@ public class DictionaryAttack {
 	 * @param filename filename of the dictionary.
 	 */
     public void addToHashDictionary(String filename) throws IOException {
-    	System.out.println("1");
     	BufferedReader reader;
     	try {
     		reader = new BufferedReader(new FileReader(filename));
     		String line;
     		while ((line = reader.readLine()) != null) {
     			hashDictionary.put(getPasswordHash(line), line);
-    			System.out.println(getPasswordHash(line) + line);
     		}
     		reader.close();
     	} catch (IndexOutOfBoundsException e) {
@@ -110,8 +107,16 @@ public class DictionaryAttack {
 	public void doDictionaryAttack() {
 		for (String username : passwordMap.keySet()) {
 			if (hashDictionary.keySet().contains(passwordMap.get(username))) {
-				System.out.println(username + hashDictionary.get(passwordMap.get(username)));
+				System.out.println(username + ": " + hashDictionary.get(passwordMap.get(username)));
 			}
 		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		DictionaryAttack da = new DictionaryAttack();
+		da.readPasswords("LeakedPasswords.txt");
+		da.addToHashDictionary("CommonPasswords.txt");
+		da.addToHashDictionary("linuxwords.txt");
+		da.doDictionaryAttack();
 	}
 }
