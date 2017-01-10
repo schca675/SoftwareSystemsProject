@@ -29,16 +29,18 @@ public class DictionaryAttack {
 	 * @param filename
 	 */
 	public void readPasswords(String filename) throws IOException {
+		System.out.println("Reader");
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(filename));
-			String line;// = reader.readLine();
+			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(": ");
 				if (parts.length == 2) {
 					passwordMap.put(parts[0], parts[1]);
 				}
 			}
+			reader.close();
 		} catch (IndexOutOfBoundsException e) {
 			throw new IOException(e);
 		}
@@ -86,14 +88,30 @@ public class DictionaryAttack {
      * the original password.
 	 * @param filename filename of the dictionary.
 	 */
-    	public void addToHashDictionary(String filename) {
-        // To implement        
+    public void addToHashDictionary(String filename) throws IOException {
+    	System.out.println("1");
+    	BufferedReader reader;
+    	try {
+    		reader = new BufferedReader(new FileReader(filename));
+    		String line;
+    		while ((line = reader.readLine()) != null) {
+    			hashDictionary.put(getPasswordHash(line), line);
+    			System.out.println(getPasswordHash(line) + line);
+    		}
+    		reader.close();
+    	} catch (IndexOutOfBoundsException e) {
+    		throw new IOException(e);
+    	}      
     }
+    
 	/**
 	 * Do the dictionary attack.
 	 */
 	public void doDictionaryAttack() {
-		// To implement
+		for (String username : passwordMap.keySet()) {
+			if (hashDictionary.keySet().contains(passwordMap.get(username))) {
+				System.out.println(username + hashDictionary.get(passwordMap.get(username)));
+			}
+		}
 	}
-
 }
