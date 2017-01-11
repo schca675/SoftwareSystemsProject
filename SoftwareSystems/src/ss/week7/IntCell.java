@@ -3,10 +3,10 @@ package ss.week7;
 public class IntCell {
     private int contents = 0;
 
-    public void add(int amount) {
+    public synchronized void add(int amount) {
         contents = contents + amount;
     }
-    public int get() {
+    public synchronized int get() {
         return contents;
     }
 
