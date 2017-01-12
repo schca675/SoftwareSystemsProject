@@ -20,7 +20,7 @@ public class RandomStrategy implements Strategy {
 	//@ requires id == PlayerID.X || id == PlayerID.O;
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
-	public Coordinates determineMove(Board<PlayerID> board, PlayerID id) {
+	public Coordinates determineMove(Board board, PlayerID id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

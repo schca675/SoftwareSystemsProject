@@ -20,7 +20,7 @@ public class Game {
 	//@ private invariant players !=null && players.length == NUMBER_PLAYERS;
 	//@ private invariant (\forall int i; i >= 0 && i < NUMBER_PLAYERS; players[i] != null);
 	//@ private invariant currentPlayerIndex >= 0 && currentPlayerIndex < NUMBER_PLAYERS;
-	private Board<PlayerID> board;
+	private Board board;
 	private Player[] players;
 	private int currentPlayerIndex;
 	
@@ -34,7 +34,7 @@ public class Game {
 	 */
 	//@ requires player1 != null && player2 != null;
 	public Game(Player player1, Player player2) {
-		board = new Board<PlayerID>();
+		board = new Board();
 		players = new Player[NUMBER_PLAYERS]; 
 		players[0] = player1;
 		players[1] = player2;
@@ -56,7 +56,7 @@ public class Game {
 	*/
 	//@ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	public Game(Player player1, Player player2, int xDim, int yDim, int zDim, int winningLength) {
-		board = new Board<PlayerID>(xDim, yDim, zDim, winningLength);
+		board = new Board(xDim, yDim, zDim, winningLength);
 		players = new Player[NUMBER_PLAYERS]; 
 		players[0] = player1;
 		players[1] = player2;
@@ -112,8 +112,7 @@ public class Game {
 		while (!winning && !board.isFull()) {
 			Coordinates coord = currentplayer.determineMove(board);
 			currentplayer.makeMove(board, coord);
-			winning = board.hasWon(coord.getX(), coord.getY(), 
-					board.getTowerHeight(coord.getX(), coord.getY()));
+			winning = board.hasWon(coord.getX(), coord.getY());
 			if (!winning) {
 				// following code only works because we have 2 players
 				currentPlayerIndex = 1 - currentPlayerIndex;

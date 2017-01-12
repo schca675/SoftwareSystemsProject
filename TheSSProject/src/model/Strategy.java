@@ -16,6 +16,6 @@ public interface Strategy {
 	//@ requires board != null && id !=null;
 	//@ requires id == PlayerID.X || id == PlayerID.O;
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
-	public Coordinates determineMove(Board<PlayerID> board, PlayerID id);
+	public Coordinates determineMove(Board board, PlayerID id);
 
 }

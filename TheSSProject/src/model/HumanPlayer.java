@@ -30,7 +30,7 @@ public class HumanPlayer extends Player {
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
-    public Coordinates determineMove(Board<PlayerID> board) {
+    public Coordinates determineMove(Board board) {
 		String message = "It is your turn, " + this.name + " ("  
 				+ this.playerID.toString() + "), what is your choice?";
 		Coordinates coord = readCoord(message); 

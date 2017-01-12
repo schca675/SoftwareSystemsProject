@@ -51,7 +51,7 @@ public abstract class Player {
 	 */
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
-	public abstract Coordinates determineMove(Board<PlayerID> board);
+	public abstract Coordinates determineMove(Board board);
 	
 	// <------ Commands ------>
 
@@ -63,7 +63,7 @@ public abstract class Player {
 	 */
     //@ requires board != null & !board.isFull();
 	//@ requires board.checkMove(coord.getX(),coord.getY());
-    public void makeMove(Board<PlayerID> board, Coordinates coord) {
+    public void makeMove(Board board, Coordinates coord) {
         int x = coord.getX();
         int y = coord.getY();
         board.makeMove(x, y, playerID);

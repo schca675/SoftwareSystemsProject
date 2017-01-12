@@ -26,13 +26,13 @@ public class BoardTest {
 	public static final int TOLOW = 0;
 	public static final int TOHIGH = Board.DEFAULT_XDIM + 1;
 	
-	private Board<PlayerID> board;
-	private Board<PlayerID> specialBoard;
+	private Board board;
+	private Board specialBoard;
 	
 	@Before
 	public void setUp() {
-		board = new Board<PlayerID>();
-		specialBoard = new Board<PlayerID>(LENGTH, WIDTH, HEIGHT, WIN);
+		board = new Board();
+		specialBoard = new Board(LENGTH, WIDTH, HEIGHT, WIN);
 	}
 
 	// <------ Test the constructors ------>
