@@ -68,9 +68,12 @@ public class Board {
 	 */
 	//@ ensures zDim == UNLIMITED_Z ==> \result == (isValidTower(x,y));
 	//@ ensures zDim > 0 ==> \result == (isValidTower(x,y) && getTowerHeight(x,y) < zDim);
-	/*@ pure */ public boolean checkMove(int x, int y) {
+	/*@ pure */ public boolean checkMove(int x, int y) throws CoordinatesOutOfBoundsException, 
+																TowerIsAlreadyFullException {
 		if (zDim == UNLIMITED_Z) {
-			return isValidTower(x, y);
+			if (!isValidTower(x, y)) {
+				throw new CoordinatesOutOfBoundsException(x, y, this);
+			}
 		} else {
 			return isValidTower(x, y) && getTowerHeight(x, y) < zDim;
 		}
@@ -145,7 +148,7 @@ public class Board {
 	 * 
 	 * @return <code>List</code> of <code>Coordinates</code> of available towers
 	 */
-	/*@ ensures \forall Coordinates coord; \result.contains(coord); 
+	/*@ ensures \forall TowerCoordinates coord; \result.contains(coord); 
 	  @										checkMove(coord.getX(),coord.getY()); 
 	/*@ pure */ public List<TowerCoordinates> getAvailableTowers() {
 		ListIterator<List<Integer>> iterator = boardData.listIterator();
@@ -188,7 +191,7 @@ public class Board {
 	 * @return Copy of the board data.
 	 */
 	/*@ pure */ public List<List<Integer>> deepDataCopy() {
-		return deepCopy().boardData;		
+		return deepCopy().boardData;
 	}
 	
 	// Still needed for current implementation of the controller.

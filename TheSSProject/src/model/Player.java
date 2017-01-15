@@ -1,5 +1,7 @@
 package model;
 
+import java.net.Socket;
+
 public abstract class Player {
 	
 	// <------ Instance variables ------>	

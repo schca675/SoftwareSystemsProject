@@ -1,12 +1,13 @@
 package controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
 import model.Board;
-import model.TowerCoordinates;
 import model.Player;
-import model.PlayerID;
+import model.TowerCoordinates;
 
 public class Game {
 	
@@ -21,7 +22,7 @@ public class Game {
 	//@ private invariant (\forall int i; i >= 0 && i < NUMBER_PLAYERS; players[i] != null);
 	//@ private invariant currentPlayerIndex >= 0 && currentPlayerIndex < NUMBER_PLAYERS;
 	private Board board;
-	private Player[] players;
+	private List<Player> players;
 	private int currentPlayerIndex;
 	
 	// <------ Constructors ------>
@@ -32,12 +33,12 @@ public class Game {
 	 * @param player1 Player 1
 	 * @param player2 Player 2
 	 */
-	//@ requires player1 != null && player2 != null;
-	public Game(Player player1, Player player2) {
+	//TODO: Fix JML
+	// requires player1 != null && player2 != null;
+	public Game(List<Player> players) {
 		board = new Board();
-		players = new Player[NUMBER_PLAYERS]; 
-		players[0] = player1;
-		players[1] = player2;
+		this.players = new ArrayList<Player>(players.size()); 
+		this.players.addAll(players);
 		currentPlayerIndex = randomStarter();	
 	}
 	
@@ -77,28 +78,13 @@ public class Game {
 	
 	// <------ Commands ------>
 	
-	/** 
-	 * Resets the game.
-	 * Same players get an empty board with a random starter.
-	 */
-	private void reset() {
-		currentPlayerIndex = randomStarter();
-		board.reset();
-	}
-	
 	/**
-	 * Starts the 4 wins game.
-	 * After each ended game, the player(s) can decide whether to continue or not.
-	 * The method runs until a negative response is given.
+	 * Starts the game.
 	 */
 	public void start() {
-		boolean playing = true;
-		while (playing) {
-			reset();
-			play();
-		    playing = readBoolean("Do you want to play another time?", "y", "n");	
-		}
+		play();
 	}
+	
 	/**
 	 * Runs the game.
 	 * Game starts with an empty board and 
@@ -108,7 +94,7 @@ public class Game {
 	public void play() {
 		currentSituation();
 		boolean winning = false;
-		Player currentplayer = players[currentPlayerIndex];
+		Player currentplayer = players.get(currentPlayerIndex);
 		while (!winning && !board.isFull()) {
 			TowerCoordinates coord = currentplayer.determineMove(board);
 			currentplayer.makeMove(board, coord);
@@ -116,7 +102,7 @@ public class Game {
 			if (!winning) {
 				// following code only works because we have 2 players
 				currentPlayerIndex = 1 - currentPlayerIndex;
-				currentplayer = players[currentPlayerIndex];
+				currentplayer = players.get(currentPlayerIndex);
 			}
 			currentSituation();
 		}
