@@ -89,9 +89,10 @@ public class Board {
 	//TODO: ensures part?
 	/*@ pure */ public boolean hasWon(int x, int y) throws CoordinatesOutOfBoundsException {
 		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException();
+			throw new CoordinatesOutOfBoundsException(x, y, this);
 		}
 		int z = getTowerHeight(x, y);
+		Integer owner = getCellOwner(x, y, z);
 		// Linearly independent direction vectors:
 		// (1,0,0) X-direction
 		// (0,1,0) Y-direction
@@ -106,19 +107,19 @@ public class Board {
 		// (1,1,-1) X+Y-Z-direction
 		// (1,-1,1) X-Y+Z-direction
 		// (1,-1,-1) X-Y-Z-direction
-		return directionHasWon(x, y, z, 1, 0, 0) || 
-				directionHasWon(x, y, z, 0, 1, 0) || 
-				directionHasWon(x, y, z, 0, 0, 1) || 
-				directionHasWon(x, y, z, 1, 1, 0) ||
-				directionHasWon(x, y, z, 1, -1, 0) || 
-				directionHasWon(x, y, z, 1, 0, 1) ||
-				directionHasWon(x, y, z, 1, 0, -1) || 
-				directionHasWon(x, y, z, 0, 1, 1) ||
-				directionHasWon(x, y, z, 0, 1, -1) || 
-				directionHasWon(x, y, z, 1, 1, 1) ||
-				directionHasWon(x, y, z, 1, 1, -1) || 
-				directionHasWon(x, y, z, 1, -1, 1) ||
-				directionHasWon(x, y, z, 1, -1, -1);
+		return directionHasWon(x, y, z, 1, 0, 0, owner) || 
+				directionHasWon(x, y, z, 0, 1, 0, owner) || 
+				directionHasWon(x, y, z, 0, 0, 1, owner) || 
+				directionHasWon(x, y, z, 1, 1, 0, owner) ||
+				directionHasWon(x, y, z, 1, -1, 0, owner) || 
+				directionHasWon(x, y, z, 1, 0, 1, owner) ||
+				directionHasWon(x, y, z, 1, 0, -1, owner) || 
+				directionHasWon(x, y, z, 0, 1, 1, owner) ||
+				directionHasWon(x, y, z, 0, 1, -1, owner) || 
+				directionHasWon(x, y, z, 1, 1, 1, owner) ||
+				directionHasWon(x, y, z, 1, 1, -1, owner) || 
+				directionHasWon(x, y, z, 1, -1, 1, owner) ||
+				directionHasWon(x, y, z, 1, -1, -1, owner);
 	}
 	
 	/** Checks whether the board is full.
@@ -202,7 +203,7 @@ public class Board {
 	//@ ensures \forall int z; isValidCell(x,y,z); isEmptyCell(x,y,z) == (z > \result);
 	/*@ pure */ public int getTowerHeight(int x, int y) throws CoordinatesOutOfBoundsException {
 		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException();
+			throw new CoordinatesOutOfBoundsException(x, y, this);
 		}
 		return getTower(x, y).size();
 	}
@@ -221,7 +222,7 @@ public class Board {
 	/*@ pure nullable */ public Integer getCellOwner(int x, int y, int z) throws 
 					CoordinatesOutOfBoundsException {
 		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException();
+			throw new CoordinatesOutOfBoundsException(x, y, z, this);
 		}
 		if (z <= getTowerHeight(x, y)) {
 			return getTower(x, y).get(z - 1);
@@ -243,7 +244,7 @@ public class Board {
 	/*@ pure */ public boolean isEmptyCell(int x, int y, int z) throws 
 					CoordinatesOutOfBoundsException {
 		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException();
+			throw new CoordinatesOutOfBoundsException(x, y, z, this);
 		}
 		return getCellOwner(x, y, z) == null;
 	}
@@ -276,9 +277,8 @@ public class Board {
 	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
 	//TODO: ensures part?
 	/*@ pure */ private boolean directionHasWon(int x, int y, int z, 
-													int xDir, int yDir, int zDir) {
+													int xDir, int yDir, int zDir, Integer owner) {
 		int connectedPieces = 1;
-		Integer owner = getCellOwner(x, y, z);
 		int distance = 1;
 		int sign = 1;
 		while (connectedPieces < winningLength) {
@@ -365,7 +365,7 @@ public class Board {
 		if (checkMove(x, y)) {
 			getTower(x, y).add(playerID);
 		} else if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException();
+			throw new CoordinatesOutOfBoundsException(x, y, this);
 		} else if (zDim != UNLIMITED_Z && !(getTowerHeight(x, y) < zDim)) {
 			throw new TowerIsAlreadyFullException();
 		}
@@ -379,9 +379,14 @@ public class Board {
 	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
 	public void reset() {
 		boardData = new ArrayList<List<Integer>>(xDim * yDim);
-		// More efficient way to do this?
-		for (int i = 0; i < xDim * yDim; i++) {
-			boardData.add(new ArrayList<Integer>());
+		if (zDim == UNLIMITED_Z) {
+			for (int i = 0; i < xDim * yDim; i++) {
+				boardData.add(new ArrayList<Integer>(50));
+			}
+		} else {
+			for (int i = 0; i < xDim * yDim; i++) {
+				boardData.add(new ArrayList<Integer>(zDim));
+			}
 		}
 	}
 }
