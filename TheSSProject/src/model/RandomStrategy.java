@@ -18,7 +18,7 @@ public class RandomStrategy implements Strategy {
 	 */
 	//@ requires board != null;
 	//@ requires id >= 0;
-	//@ ensures board.checkMove(\result.getX(),\result.getY());
+	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	@Override
 	public TowerCoordinates determineMove(Board board, int id) {
 		// TODO Auto-generated method stub

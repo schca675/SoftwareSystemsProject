@@ -7,7 +7,8 @@ import java.util.Scanner;
 
 import model.Board;
 import model.ComputerPlayer;
-import model.DummyException;
+import model.CoordinatesOutOfBoundsException;
+import model.IllegalCoordinatesException;
 import model.Player;
 import model.TowerCoordinates;
 
@@ -103,17 +104,21 @@ public class GameThread extends Thread {
 			TowerCoordinates coord = getMove(currentplayer);
 			try {
 				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-			} catch (DummyException e) {
+			} catch (IllegalCoordinatesException e) {
 				currentplayer = new ComputerPlayer(currentplayer.playerID);
 				coord = ((ComputerPlayer) currentplayer).determineMove(board);
 				try {
 					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-				} catch (DummyException ex) {
+				} catch (IllegalCoordinatesException ex) {
 					//TODO
 				}				
 			}
 			informClients(coord, currentplayer.playerID);
-			winning = board.hasWon(coord.getX(), coord.getY());
+			try {
+				winning = board.hasWon(coord.getX(), coord.getY());
+			} catch (CoordinatesOutOfBoundsException e) {
+				winning = false;
+			}
 			if (!winning) {
 				if (numberOfPlayers == 2) {
 					currentPlayerIndex = 1 - currentPlayerIndex;

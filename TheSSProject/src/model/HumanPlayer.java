@@ -28,13 +28,13 @@ public class HumanPlayer extends Player {
 	 * @return index of the field for the next move.
 	 */
 	//@ requires board != null && !board.isFull();
-	//@ ensures board.checkMove(\result.getX(),\result.getY());
+	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	@Override
     public TowerCoordinates determineMove(Board board) {
 		String message = "It is your turn, " + this.name + " ("  
 				+ this.playerID.toString() + "), what is your choice?";
 		TowerCoordinates coord = readCoord(message); 
-		while (!board.checkMove(coord.getX(), coord.getY())) {
+		while (!board.isValidMove(coord.getX(), coord.getY())) {
 			coord = readCoord("Invalid choice: " + message);
 		}
 		return coord;

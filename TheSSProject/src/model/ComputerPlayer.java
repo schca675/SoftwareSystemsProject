@@ -40,8 +40,7 @@ public class ComputerPlayer extends Player {
 	 * @return Coordinates of the tower for the next move.
 	 */
 	//@ requires board != null && !board.isFull();
-	//@ ensures board.checkMove(\result.getX(),\result.getY());
-	
+	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	public TowerCoordinates determineMove(Board board) {
 		return strategy.determineMove(board, this.playerID);
 	}

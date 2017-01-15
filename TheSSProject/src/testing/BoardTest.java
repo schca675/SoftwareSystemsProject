@@ -59,15 +59,15 @@ public class BoardTest {
 	
 	@Test 
 	public void testCheckMove() {
-		assertTrue(board.checkMove(MIN, MIN));
-		assertTrue(board.checkMove(MAX, MAX));
-		assertTrue(board.checkMove(BET, BET));
-		assertFalse(board.checkMove(TOLOW, TOLOW));
-		assertFalse(board.checkMove(TOLOW, BET));
-		assertFalse(board.checkMove(BET, TOLOW));
-		assertFalse(board.checkMove(TOHIGH, TOHIGH));
-		assertFalse(board.checkMove(TOHIGH, BET));
-		assertFalse(board.checkMove(BET, TOHIGH));		
+		assertTrue(board.isValidMove(MIN, MIN));
+		assertTrue(board.isValidMove(MAX, MAX));
+		assertTrue(board.isValidMove(BET, BET));
+		assertFalse(board.isValidMove(TOLOW, TOLOW));
+		assertFalse(board.isValidMove(TOLOW, BET));
+		assertFalse(board.isValidMove(BET, TOLOW));
+		assertFalse(board.isValidMove(TOHIGH, TOHIGH));
+		assertFalse(board.isValidMove(TOHIGH, BET));
+		assertFalse(board.isValidMove(BET, TOHIGH));		
 	}
 	
 	@Test

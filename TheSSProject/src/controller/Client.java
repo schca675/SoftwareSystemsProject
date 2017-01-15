@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Observable;
 
 import model.Board;
-import model.DummyException;
+import model.IllegalCoordinatesException;
 import model.Player;
 import model.TowerCoordinates;
 import view.ClientTUI;
@@ -92,7 +92,7 @@ public class Client extends Observable {
 	public void makeMove(int x, int y, int id) {
 		try {
 			board.makeMove(x, y, id);
-		} catch (DummyException e) {
+		} catch (IllegalCoordinatesException e) {
 			disconnect();
 		}
 	}

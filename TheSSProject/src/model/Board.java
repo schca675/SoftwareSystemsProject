@@ -9,9 +9,7 @@ public class Board {
 	
 	// <------ Constants ------>
 	
-	public static final int DEFAULT_XDIM = 4;
-	public static final int DEFAULT_YDIM = 4;
-	public static final int DEFAULT_ZDIM = 4;
+	public static final int DEFAULT_DIM = 4;
 	public static final int DEFAULT_WIN = 4;
 	public static final int UNLIMITED_Z = -1;
 	
@@ -28,7 +26,8 @@ public class Board {
 	
 	// <------ CONSTRUCTORS ------>
 	
-	/** Create a new board with specified dimensions and winning length.
+	/** 
+	 * Create a new board with specified dimensions and winning length.
 	 * @param xDim X dimension of the board
 	 * @param yDim Y dimension of the board
 	 * @param zDim Z dimension of the board, -1 specifies unlimited
@@ -38,7 +37,14 @@ public class Board {
 	  @ 			|| (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
 	 */
 	//@ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
-	public Board(int xDim, int yDim, int zDim, int winningLength) {
+	public Board(int xDim, int yDim, int zDim, int winningLength) 
+			throws IllegalBoardConstructorArgumentsException {
+		if (xDim <= 0 || yDim <= 0 || (zDim <= 0 && zDim != -1) || winningLength <= 0) {
+			throw new IllegalBoardDimensionsException(xDim, yDim, zDim);
+		} else if (winningLength > xDim && winningLength > yDim 
+	   			&& (zDim > 0 && winningLength <= zDim)) {
+			throw new IllegalWinningLengthException(xDim, yDim, zDim, winningLength);
+		}
 		this.xDim = xDim;
 		this.yDim = yDim;
 		this.zDim = zDim;
@@ -50,39 +56,75 @@ public class Board {
 	 * 
 	 */
 	public Board() {
-		this(DEFAULT_XDIM, DEFAULT_YDIM, DEFAULT_ZDIM, DEFAULT_WIN);
+		this.xDim = DEFAULT_DIM;
+		this.yDim = DEFAULT_DIM;
+		this.zDim = DEFAULT_DIM;
+		this.winningLength = DEFAULT_WIN;
+		reset();
 	}
 	
 	
 	// <------ QUERIES ------>	
 	
-	// <------ Used by external code ------>
+	// <------ Argument validity checks ------>
 	
-	/** Checks whether a piece can be added at (<code>x</code>, <code>y</code>), i.e. if 
+	/** 
+	 * Checks whether a piece can be added at (<code>x</code>, <code>y</code>), i.e. if 
 	 * (<code>x</code>, <code>y</code>) are	within the board dimensions (<code>xDim</code>, 
 	 * <code>yDim</code>) and if the tower height is less than <code>zDim</code>.
-	 * 
 	 * @param x X position
 	 * @param y Y position
 	 * @return Tower at (<code>x</code>, <code>y</code>) exists and isn't full
 	 */
 	//@ ensures zDim == UNLIMITED_Z ==> \result == (isValidTower(x,y));
 	//@ ensures zDim > 0 ==> \result == (isValidTower(x,y) && getTowerHeight(x,y) < zDim);
-	/*@ pure */ public boolean checkMove(int x, int y) throws CoordinatesOutOfBoundsException, 
-																TowerIsAlreadyFullException {
+	/*@ pure */ public boolean isValidMove(int x, int y) {
 		if (zDim == UNLIMITED_Z) {
-			if (!isValidTower(x, y)) {
-				throw new CoordinatesOutOfBoundsException(x, y, this);
-			}
+			return isValidTower(x, y);
 		} else {
-			return isValidTower(x, y) && getTowerHeight(x, y) < zDim;
+			try {
+				return isValidTower(x, y) && getTowerHeight(x, y) < zDim;
+			} catch (CoordinatesOutOfBoundsException e) {
+				return false;
+			}
 		}
 	}
 	
-	/** Checks whether the <i>last added</i> piece at (<code>x</code>, <code>y</code>) belongs to a
+	/** 
+	 * Checks whether (<code>x</code>, <code>y</code>) is a valid tower on the board, i.e. whether
+	 * the tower coordinates are within the board dimensions.
+	 * @param x X position
+	 * @param y Y position
+	 * @return (<code>x</code>, <code>y</code>) are valid tower coordinates
+	 */
+	//@ ensures \result == (x > 0 && x <= xDim && y > 0 && y <= yDim);
+	/*@ pure */ public boolean isValidTower(int x, int y) {
+		return x > 0 && x <= xDim && y > 0 && y <= yDim;
+	}
+	
+	/** 
+	 * Checks whether (<code>x</code>, <code>y</code>, <code>z</code>) is a valid cell on the 
+	 * board, i.e. whether the cell coordinates are within the board dimensions.
+	 * @param x X position
+	 * @param y Y position
+	 * @param z Z position
+	 * @return (<code>x</code>, <code>y</code>, <code>z</code>) are valid cell coordinates
+	 */
+	//@ ensures \result == (isValidTower(x,y) && ((z > 0 && z <= zDim) || zDim == UNLIMITED_Z));
+	/*@ pure */ public boolean isValidCell(int x, int y, int z) {
+		if (zDim == UNLIMITED_Z) {
+			return isValidTower(x, y);
+		} else {
+			return isValidTower(x, y) && z > 0 && z <= zDim;
+		}
+	}
+	
+	// <------ Checking for game ends------>
+	
+	/** 
+	 * Checks whether the <i>last added</i> piece at (<code>x</code>, <code>y</code>) belongs to a
 	 * winning set, i.e. it belongs to a connected set of <code>winningLength</code> pieces 
 	 * belonging to its owner.
-	 * 
 	 * @param x X position
 	 * @param y Y position
 	 * @return Piece at (<code>x</code>, <code>y</code>, <code>getTowerHeight(z)</code>) belongs to
@@ -125,8 +167,8 @@ public class Board {
 				directionHasWon(x, y, z, 1, -1, -1, owner);
 	}
 	
-	/** Checks whether the board is full.
-	 * 
+	/** 
+	 * Checks whether the board is full.
 	 * @return Board is full
 	 */
 	//@ ensures \result == (\forall int x,y,z; isValidCell(x,y,z); !isEmptyCell(x,y,z));
@@ -143,13 +185,15 @@ public class Board {
 		}
 	}
 	
-	/** Returns a <code>List</code> of <code>Coordinates</code> of each tower where a piece can be 
+	// <------ Required for AI ------>
+	
+	/** 
+	 * Returns a <code>List</code> of <code>Coordinates</code> of each tower where a piece can be 
 	 * added, i.e. towers with valid coordinates that are not full.
-	 * 
 	 * @return <code>List</code> of <code>Coordinates</code> of available towers
 	 */
 	/*@ ensures \forall TowerCoordinates coord; \result.contains(coord); 
-	  @										checkMove(coord.getX(),coord.getY()); 
+	  @										isValidMove(coord.getX(),coord.getY()); 
 	/*@ pure */ public List<TowerCoordinates> getAvailableTowers() {
 		ListIterator<List<Integer>> iterator = boardData.listIterator();
 		List<TowerCoordinates> availableTowers = new ArrayList<TowerCoordinates>();
@@ -162,8 +206,14 @@ public class Board {
 			while (iterator.hasNext()) {
 				int x = getTowerCoordinates(iterator.nextIndex()).getX();
 				int y = getTowerCoordinates(iterator.nextIndex()).getY();
-				if (getTowerHeight(x, y) < zDim) {
-					availableTowers.add(new TowerCoordinates(x, y));
+				try {
+					if (getTowerHeight(x, y) < zDim) {
+						availableTowers.add(new TowerCoordinates(x, y));
+					}
+				} catch (CoordinatesOutOfBoundsException e) { 
+					System.err.println("getAvailableTowers method  broken");
+					System.err.println(e.getMessage());
+					return null;
 				}
 				iterator.next();
 			}
@@ -171,50 +221,43 @@ public class Board {
 		return availableTowers;
 	}
 	
-	/** Creates and returns a deep copy of the board.
-	 * 
+	/** 
+	 * Creates and returns a deep copy of the board.
 	 * @return Deep copy of this board
 	 */
 	//@ ensures \result.equals(this);
 	/*@ pure */ public Board deepCopy() {
-		Board boardCopy = new Board(xDim, yDim, zDim, winningLength);
-		Iterator<List<Integer>> oldBoardIterator = boardData.iterator(); 
-		Iterator<List<Integer>> newBoardIterator = boardCopy.boardData.iterator(); 
-		while (oldBoardIterator.hasNext()) {
-			newBoardIterator.next().addAll(oldBoardIterator.next());
+		try {
+			Board boardCopy = new Board(xDim, yDim, zDim, winningLength);
+			Iterator<List<Integer>> oldBoardIterator = boardData.iterator(); 
+			Iterator<List<Integer>> newBoardIterator = boardCopy.boardData.iterator(); 
+			while (oldBoardIterator.hasNext()) {
+				newBoardIterator.next().addAll(oldBoardIterator.next());
+			}
+			return boardCopy;
+		} catch (IllegalBoardConstructorArgumentsException e) {
+			System.err.println("This can't ever happen :S");
+			System.err.println(e.getMessage());
+			return null;
 		}
-		return boardCopy;
 	}
 	
-	/** Creates and returns a deep copy of the <code>boardData</code>, to use for the view.
-	 * 
+	// <------ Required to present the data to the GUI without using another data format ------>
+	
+	/** 
+	 * Creates and returns a deep copy of the <code>boardData</code>, for use by the view.
 	 * @return Copy of the board data.
 	 */
 	/*@ pure */ public List<List<Integer>> deepDataCopy() {
 		return deepCopy().boardData;
 	}
 	
-	// Still needed for current implementation of the controller.
-	/** Returns the height of the tower at (<code>x</code>, <code>y</code>).
-	 * 
-	 * @param x X position
-	 * @param y Y position
-	 * @return The height of the tower at (<code>x</code>, <code>y</code>)
-	 */
-	//@ requires isValidTower(x,y);
-	//@ ensures \result >= 0 && (\result <= zDim || zDim == UNLIMITED_Z);
-	//@ ensures \forall int z; isValidCell(x,y,z); isEmptyCell(x,y,z) == (z > \result);
-	/*@ pure */ public int getTowerHeight(int x, int y) throws CoordinatesOutOfBoundsException {
-		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException(x, y, this);
-		}
-		return getTower(x, y).size();
-	}
+	// <------ Internal workings ------>
 	
-	// Used by test class only
-	/** Returns the owner of the cell (<code>x</code>, <code>y</code>, <code>z</code>), null if no
-	 *  owner.
-	 * 
+	// Used externally by test class
+	/** 
+	 * Returns the owner of the cell (<code>x</code>, <code>y</code>, <code>z</code>), null if no
+	 * owner.
 	 * @param x X position
 	 * @param y Y position
 	 * @param z Z position
@@ -234,9 +277,9 @@ public class Board {
 		}
 	}
 	
-	// Used by test class only
-	/** Checks whether the given cell is empty, i.e. <code>getCellOwner(x, y, z) == null</code>.
-	 * 
+	// Used externally by test class
+	/** 
+	 * Checks whether the given cell is empty, i.e. <code>getCellOwner(x, y, z) == null</code>.
 	 * @param x X position to check
 	 * @param y Y position to check
 	 * @param z Z position to check
@@ -246,16 +289,28 @@ public class Board {
 	//@ ensures \result == (getCellOwner(x,y,z) == null);
 	/*@ pure */ public boolean isEmptyCell(int x, int y, int z) throws 
 					CoordinatesOutOfBoundsException {
-		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException(x, y, z, this);
-		}
 		return getCellOwner(x, y, z) == null;
 	}
 	
-	// <------ Not used by external code ------>
+	// Still needed for current implementation of the controller.
+	/** 
+	 * Returns the height of the tower at (<code>x</code>, <code>y</code>).
+	 * @param x X position
+	 * @param y Y position
+	 * @return The height of the tower at (<code>x</code>, <code>y</code>)
+	 */
+	//@ requires isValidTower(x,y);
+	//@ ensures \result >= 0 && (\result <= zDim || zDim == UNLIMITED_Z);
+	//@ ensures \forall int z; isValidCell(x,y,z); isEmptyCell(x,y,z) == (z > \result);
+	/*@ pure */ public int getTowerHeight(int x, int y) throws CoordinatesOutOfBoundsException {
+		if (!isValidTower(x, y)) {
+			throw new CoordinatesOutOfBoundsException(x, y, this);
+		}
+		return getTower(x, y).size();
+	}
 	
-	/** Gets the tower at (<code>x</code>, <code>y</code>).
-	 * 
+	/** 
+	 * Gets the tower at (<code>x</code>, <code>y</code>).
 	 * @param x X position
 	 * @param y Y position
 	 * @return Tower at (<code>x</code>, <code>y</code>)
@@ -265,10 +320,10 @@ public class Board {
 		return boardData.get((x - 1) + (y - 1) * yDim);
 	}
 	
-	/** Checks whether the direction (<code>xDir</code>, <code>yDir</code>, 
+	/** 
+	 * Checks whether the direction (<code>xDir</code>, <code>yDir</code>, 
 	 * <code>zDir</code>), including its reverse, starting at the cell (<code>x</code>, 
 	 * <code>y</code>, <code>z</code>) is winning. 
-	 * 
 	 * @param x X position of cell
 	 * @param y Y position of cell
 	 * @param z Z position of cell
@@ -288,57 +343,34 @@ public class Board {
 			int checkX = x + sign * distance * xDir;
 			int checkY = y + sign * distance * yDir;
 			int checkZ = z + sign * distance * zDir;
-			if (isValidCell(checkX, checkY, checkZ) && getCellOwner(checkX, checkY, checkZ) != null
-					&& getCellOwner(checkX, checkY, checkZ).equals(owner)) {
-				connectedPieces = connectedPieces + 1;
-				distance = distance + 1;
-			} else {
-				if (sign == 1) {
-					//Reverse
-					sign = -1;
-					distance = 1;
+			try {
+				if (isValidCell(checkX, checkY, checkZ) && getCellOwner(checkX, checkY, checkZ) 
+						!= null	&& getCellOwner(checkX, checkY, checkZ).equals(owner)) {
+					connectedPieces = connectedPieces + 1;
+					distance = distance + 1;
 				} else {
-					//If reversed already, terminate
-					return false;
+					if (sign == 1) {
+						//Reverse
+						sign = -1;
+						distance = 1;
+					} else {
+						//If reversed already, terminate
+						return false;
+					}
 				}
+			} catch (CoordinatesOutOfBoundsException e) {
+				System.err.println("directionHasWon method is broken");
+				System.err.println(e.getMessage());
+				return false;
 			}
 		}
 		return true;
 	}
 	
-	/** Checks whether (<code>x</code>, <code>y</code>) is a valid tower on the board, i.e. whether
-	 * the tower coordinates are within the dimensions.
-	 * 
-	 * @param x X position
-	 * @param y Y position
-	 * @return (<code>x</code>, <code>y</code>) are valid tower coordinates
-	 */
-	//@ ensures \result == (x > 0 && x <= xDim && y > 0 && y <= yDim);
-	/*@ pure */ public boolean isValidTower(int x, int y) {
-		return x > 0 && x <= xDim && y > 0 && y <= yDim;
-	}
-	
-	/** Checks whether (<code>x</code>, <code>y</code>, <code>z</code>) is a valid cell on the 
-	 * board, i.e. whether the cell coordinates are within the dimensions.
-	 * 
-	 * @param x X position
-	 * @param y Y position
-	 * @param z Z position
-	 * @return (<code>x</code>, <code>y</code>, <code>z</code>) are valid cell coordinates
-	 */
-	//@ ensures \result == (isValidTower(x,y) && ((z > 0 && z <= zDim) || zDim == UNLIMITED_Z));
-	/*@ pure */ public boolean isValidCell(int x, int y, int z) {
-		if (zDim == UNLIMITED_Z) {
-			return isValidTower(x, y);
-		} else {
-			return isValidTower(x, y) && z > 0 && z <= zDim;
-		}
-	}
-	
-	/** Returns the <code>Coordinates</code> belonging to a tower index.
-	 * 
+	/** 
+	 * Returns the <code>TowerCoordinates</code> belonging to a tower index.
 	 * @param i index
-	 * @return <code>Coordinates</code> of tower
+	 * @return <code>TowerCoordinates</code> of tower
 	 */
 	//@ requires i >= 0 && i < xDim * yDim - 1;
 	//@ ensures isValidTower(\result.getX(),\result.getY());
@@ -351,33 +383,33 @@ public class Board {
 	
 	// <------ COMMANDS ------>
 	
-	// <------ Used by external code ------>
+	// <------ What it's all about ------>
 	
-	/** Add a piece to the tower at (<code>x</code>, <code>y</code>).
-	 * 
+	/** 
+	 * Add a piece to the tower at (<code>x</code>, <code>y</code>).
 	 * @param x X position to place piece at
 	 * @param y Y position to place piece at
 	 * @param playerID ID of player that makes a move
 	 */
-	//@ requires checkMove(x,y);
+	//@ requires isValidMove(x,y);
 	/*@ ensures getCellOwner(x,y,getTowerHeight(x,y)) == playerID && 
 	  @ 								getTowerHeight(x,y) == \old(getTowerHeight(x,y)) + 1;
 	 */
 	public void makeMove(int x, int y, Integer playerID) throws CoordinatesOutOfBoundsException, 
-																TowerIsAlreadyFullException {
-		if (checkMove(x, y)) {
+																TowerAlreadyFullException {
+		if (isValidMove(x, y)) {
 			getTower(x, y).add(playerID);
 		} else if (!isValidTower(x, y)) {
 			throw new CoordinatesOutOfBoundsException(x, y, this);
-		} else if (zDim != UNLIMITED_Z && !(getTowerHeight(x, y) < zDim)) {
-			throw new TowerIsAlreadyFullException();
+		} else if (zDim != UNLIMITED_Z && getTowerHeight(x, y) >= zDim) {
+			throw new TowerAlreadyFullException();
 		}
 	}
 	
-	// <------ Not used by external code ------>
+	// <------ Internal workings ------>
 	
-	/** Resets the board to an empty board.
-	 * 
+	/** 
+	 * Resets the board to an empty board.
 	 */
 	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
 	public void reset() {

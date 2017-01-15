@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import model.Board;
 import model.ComputerPlayer;
-import model.DummyException;
+import model.IllegalCoordinatesException;
 import model.Player;
 import model.TowerCoordinates;
 
@@ -104,12 +104,12 @@ public class Game {
 			TowerCoordinates coord = currentplayer.determineMove(board);
 			try {
 				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-			} catch (DummyException e) {
+			} catch (IllegalCoordinatesException e) {
 				currentplayer = new ComputerPlayer(currentplayer.playerID);
 				coord = ((ComputerPlayer) currentplayer).determineMove(board);
 				try {
 					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-				} catch (DummyException ex) {
+				} catch (IllegalCoordinatesException ex) {
 					//TODO
 				}
 				
