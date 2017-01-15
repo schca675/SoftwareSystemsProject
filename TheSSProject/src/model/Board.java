@@ -133,9 +133,6 @@ public class Board {
 	//@ requires isValidCell(x,y,getTowerHeight(x,y)) && !isEmptyCell(x,y,getTowerHeight(x,y));
 	//TODO: ensures part?
 	/*@ pure */ public boolean hasWon(int x, int y) throws CoordinatesOutOfBoundsException {
-		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException(x, y, this);
-		}
 		int z = getTowerHeight(x, y);
 		Integer owner = getCellOwner(x, y, z);
 		// Linearly independent direction vectors:
@@ -267,9 +264,6 @@ public class Board {
 	//@ ensures \result == null || \result instanceof Integer;
 	/*@ pure nullable */ public Integer getCellOwner(int x, int y, int z) throws 
 					CoordinatesOutOfBoundsException {
-		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException(x, y, z, this);
-		}
 		if (z <= getTowerHeight(x, y)) {
 			return getTower(x, y).get(z - 1);
 		} else {
@@ -303,9 +297,6 @@ public class Board {
 	//@ ensures \result >= 0 && (\result <= zDim || zDim == UNLIMITED_Z);
 	//@ ensures \forall int z; isValidCell(x,y,z); isEmptyCell(x,y,z) == (z > \result);
 	/*@ pure */ public int getTowerHeight(int x, int y) throws CoordinatesOutOfBoundsException {
-		if (!isValidTower(x, y)) {
-			throw new CoordinatesOutOfBoundsException(x, y, this);
-		}
 		return getTower(x, y).size();
 	}
 	
@@ -316,7 +307,11 @@ public class Board {
 	 * @return Tower at (<code>x</code>, <code>y</code>)
 	 */
 	//@ requires isValidTower(x,y);
-	/*@ pure */ private List<Integer> getTower(int x, int y) {
+	/*@ pure */ private List<Integer> getTower(int x, int y) 
+					throws CoordinatesOutOfBoundsException {
+		if (!isValidTower(x, y)) {
+			throw new CoordinatesOutOfBoundsException(x, y, this);
+		}
 		return boardData.get((x - 1) + (y - 1) * yDim);
 	}
 	
@@ -395,14 +390,13 @@ public class Board {
 	/*@ ensures getCellOwner(x,y,getTowerHeight(x,y)) == playerID && 
 	  @ 								getTowerHeight(x,y) == \old(getTowerHeight(x,y)) + 1;
 	 */
-	public void makeMove(int x, int y, Integer playerID) throws CoordinatesOutOfBoundsException, 
-																TowerAlreadyFullException {
+	public void makeMove(int x, int y, Integer playerID) throws IllegalCoordinatesException {
 		if (isValidMove(x, y)) {
 			getTower(x, y).add(playerID);
 		} else if (!isValidTower(x, y)) {
 			throw new CoordinatesOutOfBoundsException(x, y, this);
 		} else if (zDim != UNLIMITED_Z && getTowerHeight(x, y) >= zDim) {
-			throw new TowerAlreadyFullException();
+			throw new TowerAlreadyFullException(x, y, this);
 		}
 	}
 	
