@@ -13,6 +13,8 @@ public class BoardTest {
 	public static final int WIDTH = 7;
 	public static final int HEIGHT = 6;
 	public static final int WIN = 5;
+	public static final Integer PLAYER1 = 1;
+	public static final Integer PLAYER2 = 2;
 	/**
 	 * Testing variables for default board.
 	 * Assuming the default board has equal X-,Y-,Z- and Winning-length.
@@ -71,14 +73,14 @@ public class BoardTest {
 	@Test
 	public void testCheckCellOwner() {
 		assertNull(board.getCellOwner(MIN, MIN, MIN));
-		board.makeMove(MIN, MIN, PlayerID.O);
-		assertEquals(board.getCellOwner(MIN, MIN, MIN), PlayerID.O);		
+		board.makeMove(MIN, MIN, PLAYER2);
+		assertEquals(board.getCellOwner(MIN, MIN, MIN), PLAYER2);		
 	}
 	
 	@Test
 	public void testIsEmptyCell() {
 		assertTrue(board.isEmptyCell(MIN, MIN, MIN));
-		board.makeMove(MIN, MIN, PlayerID.O);
+		board.makeMove(MIN, MIN, PLAYER2);
 		assertFalse(board.isEmptyCell(MIN, MIN, MIN));
 	}
 	
@@ -88,7 +90,7 @@ public class BoardTest {
 		for (int i = MIN; i <= MAX; i++) {
 			for (int j = MIN; j <= MAX; j++) {
 				for (int k = MIN; k <= MAX; k++) {
-					board.makeMove(i, j, PlayerID.O);
+					board.makeMove(i, j, PLAYER2);
 				}
 			}
 		}
@@ -98,11 +100,11 @@ public class BoardTest {
 	@Test
 	public void getTowerHeight() {
 		assertEquals(0, board.getTowerHeight(MIN, MAX));
-		board.makeMove(MIN, MAX, PlayerID.O);
+		board.makeMove(MIN, MAX, PLAYER2);
 		assertEquals(1, board.getTowerHeight(MIN, MAX));
-		board.makeMove(MIN, MAX, PlayerID.O);
+		board.makeMove(MIN, MAX, PLAYER2);
 		assertEquals(2, board.getTowerHeight(MIN, MAX));
-		board.makeMove(MIN, MAX, PlayerID.O);
+		board.makeMove(MIN, MAX, PLAYER2);
 		assertEquals(3, board.getTowerHeight(MIN, MAX));
 	}
 	
@@ -112,20 +114,20 @@ public class BoardTest {
 		for (int z = MIN; z <= MAX; z++) {
 			for (int y = MIN; y <= MAX; y++) {
 				for (int x = MIN; x <= MAX; x++) {
-					board.makeMove(x, y, PlayerID.O);
+					board.makeMove(x, y, PLAYER2);
 				}
 				for (int i = MIN; i <= MAX; i++) {
-					assertTrue(board.hasWon(i, y, z));
+					assertTrue(board.hasWon(i, y));
 				}
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int i = MIN; i <= MAX; i++) {
 			board.makeMove(i, MIN, playerID);
-			playerID = playerID.other();
+			playerID = PLAYER1;
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	// Test Y - dimension for every X and every Z layer;
@@ -134,20 +136,20 @@ public class BoardTest {
 		for (int z = MIN; z <= MAX; z++) {
 			for (int x = MIN; x <= MAX; x++) {
 				for (int y = MIN; y <= MAX; y++) {
-					board.makeMove(x, y, PlayerID.O);
+					board.makeMove(x, y, PLAYER2);
 				}
 				for (int i = 1; i <= 4; i++) {
-					assertTrue(board.hasWon(x, i, z));
+					assertTrue(board.hasWon(x, i));
 				}
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int i = MIN; i <= MAX; i++) {
 			board.makeMove(MIN, i, playerID);
-			playerID = playerID.other();
+			playerID = PLAYER1;
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 		
 	}
 	
@@ -157,20 +159,20 @@ public class BoardTest {
 		for (int x = MIN; x <= MAX; x++) {
 			for (int y = MIN; y <= MAX; y++) {
 				for (int z = MIN; z <= MAX; z++) {
-					board.makeMove(x, y, PlayerID.O);
+					board.makeMove(x, y, PLAYER2);
 				}
 				for (int i = MIN; i <= MAX; i++) {
-					assertTrue(board.hasWon(x, y, i));
+					assertTrue(board.hasWon(x, y));
 				}
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int i = MIN; i <= MAX; i++) {
 			board.makeMove(MIN, i, playerID);
-			playerID = playerID.other();
+			playerID = PLAYER1;
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	// Test X+Y-direction for every Z-Layer
@@ -179,19 +181,19 @@ public class BoardTest {
 	public void testHasWonXpYDir() {
 		for (int z = MIN; z <= MAX; z++) {
 			for (int i = MIN; i <= MAX; i++) {
-				board.makeMove(i, i, PlayerID.O);
+				board.makeMove(i, i, PLAYER2);
 			}
 			for (int j = MIN; j <= MAX; j++) {
-				assertTrue(board.hasWon(j, j, z));
+				assertTrue(board.hasWon(j, j));
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int i = MIN; i <= MAX; i++) {
 			board.makeMove(i, i, playerID);
-			playerID = playerID.other();
+			playerID = PLAYER1;
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	// Test X-Y-direction for every Z-Layer
@@ -200,19 +202,19 @@ public class BoardTest {
 	public void testHasWonXmYDir() {		
 		for (int z = MIN; z <= MAX; z++) {
 			for (int i = 0; i < MAX; i++) {
-				board.makeMove(MAX - i, MIN + i, PlayerID.O);
+				board.makeMove(MAX - i, MIN + i, PLAYER2);
 			}
 			for (int j = 0; j < MAX; j++) {
 				assertTrue(board.hasWon(MAX - j, MIN + j, z));
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int i = 0; i < MAX; i++) {
-			board.makeMove(MAX - i, MIN + i, PlayerID.O);
-			playerID = playerID.other();
+			board.makeMove(MAX - i, MIN + i, PLAYER2);
+			playerID = PLAYER1;
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	//Test X+Z-direction for every Y-Layer;
@@ -222,22 +224,22 @@ public class BoardTest {
 		for (int y = MIN; y <= MAX; y++) {
 			for (int x = MIN; x <= MAX; x++) {
 				for (int z = MIN; z <= x; z++) {
-					board.makeMove(x, y, PlayerID.O);
+					board.makeMove(x, y, PLAYER2);
 				}
 			}
 			for (int i = MIN; i <= MAX; i++) {
-				assertTrue(board.hasWon(i, y, i));
+				assertTrue(board.hasWon(i, y));
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int x = MIN; x <= MAX; x++) {
 			for (int z = MIN; z <= x; z++) {
 				board.makeMove(x, MIN, playerID);
-				playerID = playerID.other();
+				playerID = PLAYER1;
 			}
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	//Test X-Z-direction for every Y-Layer;
@@ -245,22 +247,22 @@ public class BoardTest {
 	@Test 
 	public void testHasWonXmZDir() {
 		//Short Test, not elaborated (to delete)
-		board.makeMove(4, 1, PlayerID.O);
-		board.makeMove(3, 1, PlayerID.O);
-		board.makeMove(3, 1, PlayerID.O);
-		board.makeMove(2, 1, PlayerID.O);
-		board.makeMove(2, 1, PlayerID.O);
-		board.makeMove(2, 1, PlayerID.O);
-		board.makeMove(1, 1, PlayerID.O);
-		board.makeMove(1, 1, PlayerID.O);
-		board.makeMove(1, 1, PlayerID.O);
-		board.makeMove(1, 1, PlayerID.O);		
-		assertTrue(board.hasWon(4, 1, 1));
+		board.makeMove(4, 1, PLAYER2);
+		board.makeMove(3, 1, PLAYER2);
+		board.makeMove(3, 1, PLAYER2);
+		board.makeMove(2, 1, PLAYER2);
+		board.makeMove(2, 1, PLAYER2);
+		board.makeMove(2, 1, PLAYER2);
+		board.makeMove(1, 1, PLAYER2);
+		board.makeMove(1, 1, PLAYER2);
+		board.makeMove(1, 1, PLAYER2);
+		board.makeMove(1, 1, PLAYER2);		
+		assertTrue(board.hasWon(4, 1));
 		board.reset();
 		for (int y = MIN; y <= MAX; y++) {
 			for (int x = MIN; x <= MAX; x++) {
 				for (int z = MAX; z >= x; z--) {
-					board.makeMove(x, y, PlayerID.O);
+					board.makeMove(x, y, PLAYER2);
 				}
 			}
 			for (int i = MIN; i <= MAX; i++) {
@@ -268,14 +270,14 @@ public class BoardTest {
 			}
 		}
 		board.reset();
-		PlayerID playerID = PlayerID.O;
+		Integer playerID = PLAYER2;
 		for (int x = MIN; x <= MAX; x++) {
 			for (int z = MAX; z >= x; z--) {
 				board.makeMove(x, MIN, playerID);
-				playerID = playerID.other();
+				playerID = PLAYER1;
 			}
 		}
-		assertFalse(board.hasWon(MIN, MIN, MIN));
+		assertFalse(board.hasWon(MIN, MIN));
 	}
 	
 	//Test Y+Z-direction
@@ -357,17 +359,17 @@ public class BoardTest {
 	
 	@Test
 	public void testMakeMove() {
-		board.makeMove(1, 1, PlayerID.O);
+		board.makeMove(1, 1, PLAYER2);
 		assertFalse(board.isEmptyCell(1, 1, 1));
 		assertTrue(board.isEmptyCell(1, 1, 2));
 		assertTrue(board.isEmptyCell(1, 1, 3));
 		assertTrue(board.isEmptyCell(1, 1, 4));
-		board.makeMove(1, 1, PlayerID.O);
-		board.makeMove(1, 1, PlayerID.X);
-		assertEquals(board.getCellOwner(1, 1, 1), PlayerID.O);
-		assertEquals(board.getCellOwner(1, 1, 2), PlayerID.O);
-		assertNotEquals(board.getCellOwner(1, 1, 3), PlayerID.O);
-		assertEquals(board.getCellOwner(1, 1, 3), PlayerID.X);
+		board.makeMove(1, 1, PLAYER2);
+		board.makeMove(1, 1, PLAYER2);
+		assertEquals(board.getCellOwner(1, 1, 1), PLAYER2);
+		assertEquals(board.getCellOwner(1, 1, 2), PLAYER2);
+		assertNotEquals(board.getCellOwner(1, 1, 3), PLAYER2);
+		assertEquals(board.getCellOwner(1, 1, 3), PLAYER2);
 	}
 	
 	@Test
@@ -379,11 +381,11 @@ public class BoardTest {
 				}
 			}
 		}
-		board.makeMove(1, 2, PlayerID.O);
-		board.makeMove(1, 2, PlayerID.X);
-		board.makeMove(1, 2, PlayerID.O);	
-		board.makeMove(3, 2, PlayerID.X);
-		board.makeMove(4, 2, PlayerID.O);
+		board.makeMove(1, 2, PLAYER2);
+		board.makeMove(1, 2, PLAYER2);
+		board.makeMove(1, 2, PLAYER2);	
+		board.makeMove(3, 2, PLAYER2);
+		board.makeMove(4, 2, PLAYER2);
 		board.reset();
 		for (int i = 1; i <= 4; i++) {
 			for (int j = 1; j <= 4; j++) {

@@ -13,9 +13,9 @@ public interface Strategy {
 	 * @param id player ID of the player using this strategy
 	 * @return the index of the next move following this strategy
 	 */
-	//@ requires board != null && id !=null;
-	//@ requires id == PlayerID.X || id == PlayerID.O;
+	//@ requires board != null;
+	//@ requires id >=0;
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
-	public TowerCoordinates determineMove(Board board, PlayerID id);
+	public TowerCoordinates determineMove(Board board, int id);
 
 }

@@ -1,6 +1,6 @@
 package model;
 
-public class TowerIsAlreadyFullException extends IllegalArgumentException {
+public class TowerIsAlreadyFullException extends DummyException {
 	@Override
 	public String getMessage() { 
 		return "";

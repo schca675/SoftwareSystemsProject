@@ -1,6 +1,6 @@
 package model;
 
-public class CoordinatesOutOfBoundsException extends IllegalArgumentException {
+public class CoordinatesOutOfBoundsException extends DummyException {
 	private static final long serialVersionUID = 1L;
 	private int x;
 	private int y;

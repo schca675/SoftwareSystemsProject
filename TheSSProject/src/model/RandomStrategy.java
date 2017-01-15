@@ -17,10 +17,10 @@ public class RandomStrategy implements Strategy {
 	 * @return the index of the next move following this strategy
 	 */
 	//@ requires board != null;
-	//@ requires id == PlayerID.X || id == PlayerID.O;
+	//@ requires id >= 0;
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
-	public TowerCoordinates determineMove(Board board, PlayerID id) {
+	public TowerCoordinates determineMove(Board board, int id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

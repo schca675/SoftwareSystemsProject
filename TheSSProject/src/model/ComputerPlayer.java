@@ -15,8 +15,8 @@ public class ComputerPlayer extends Player {
 	 * @param id Player ID the computer Player gets
 	 */
 	//@ requires strategy != null;
-	//@ requires id == PlayerID.X || id == PlayerID.O;
-	public ComputerPlayer(Strategy strategy, PlayerID id) {
+	//@ requires id>=0;
+	public ComputerPlayer(Strategy strategy, int id) {
 		super(strategy.getName(), id);
 		this.strategy = strategy;
 	}
@@ -25,8 +25,8 @@ public class ComputerPlayer extends Player {
 	 * Creates a new computer player with the strategy "Random" and given player ID.
 	 * @param id Player ID the computer Player gets
 	 */
-	//@ requires id == PlayerID.X || id == PlayerID.O;
-	public ComputerPlayer(PlayerID id) {
+	//@ requires id >=0;
+	public ComputerPlayer(int id) {
 		super("Randi", id);
 		this.strategy = new RandomStrategy();
 	}
@@ -42,7 +42,6 @@ public class ComputerPlayer extends Player {
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	
-	@Override
 	public TowerCoordinates determineMove(Board board) {
 		return strategy.determineMove(board, this.playerID);
 	}

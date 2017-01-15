@@ -2,30 +2,15 @@ package view;
 
 import java.util.Scanner;
 
-import controller.Game;
-import model.HumanPlayer;
-import model.Player;
-import model.PlayerID;
+import controller.Client;
 
-public class FourWins {
-	public static void main(String[] args) {
-		if (args.length == Game.NUMBER_PLAYERS) {
-			// Strategy strategy;
-			PlayerID playerID = PlayerID.O;
-			Player a = new HumanPlayer(args[0], playerID);
-			Player b = new HumanPlayer(args[1], playerID.other());
-			
-			// code needed to enlarge the dimensions)
-			/*if (!readBoolean("Do you want to play with default board?", "y", "n")) {
-			System.out.println("Please enter your dimensions.");
-			// code to follow
-			} else {
-			} */
-			
-			Game game = new Game(a, b);
-			game.start();
-		}
+
+public class ClientTUI {
+
+	public static void start() {
+	
 	}
+	
 	
 	/**
 	 * Determines whether the user enters Yes or No.

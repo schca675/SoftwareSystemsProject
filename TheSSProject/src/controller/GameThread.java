@@ -11,7 +11,7 @@ import model.DummyException;
 import model.Player;
 import model.TowerCoordinates;
 
-public class Game {
+public class GameThread extends Thread {
 	
 	// <------ Instance variables ------>
 	
@@ -35,7 +35,7 @@ public class Game {
 	/*@ requires players != null && 
 	  @ (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
 	*/
-	public Game(List<Player> players) {
+	public GameThread(List<Player> players) {
 		board = new Board();
 		this.players = new ArrayList<Player>(players.size()); 
 		this.players.addAll(players);
@@ -58,7 +58,7 @@ public class Game {
 	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == Board.UNLIMITED_Z);
 	  @ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	*/
-	public Game(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
+	public GameThread(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
 		board = new Board(xDim, yDim, zDim, winningLength);
 		this.players = new ArrayList<Player>(players.size()); 
 		this.players.addAll(players);
@@ -95,13 +95,12 @@ public class Game {
 	 * he is replaced by a Computer player with random strategy.
 	 * If a computer player tries an invalid move //TODO
 	 */
-	// not checked yet.
+	// TODO include the communication here.
 	public void play() {
-		currentSituation();
 		boolean winning = false;
 		Player currentplayer = players.get(currentPlayerIndex);
 		while (!winning && !board.isFull()) {
-			TowerCoordinates coord = currentplayer.determineMove(board);
+			TowerCoordinates coord = getMove(currentplayer);
 			try {
 				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
 			} catch (DummyException e) {
@@ -111,27 +110,64 @@ public class Game {
 					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
 				} catch (DummyException ex) {
 					//TODO
-				}
-				
+				}				
 			}
+			informClients(coord, currentplayer.playerID);
 			winning = board.hasWon(coord.getX(), coord.getY());
 			if (!winning) {
-				// following code only works because we have 2 players
-				currentPlayerIndex = 1 - currentPlayerIndex;
-				currentplayer = players.get(currentPlayerIndex);
+				if (numberOfPlayers == 2) {
+					currentPlayerIndex = 1 - currentPlayerIndex;
+				} else {
+					currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+				}
+				currentplayer = players.get(currentPlayerIndex);	
 			}
-			currentSituation();
 		}
 		if (winning) {
 			//  The currentplayer is the winner.
-			System.out.println("Player " + currentplayer.name + " with Player ID " 
-					+ currentplayer.playerID + " is the winner!");
+			//TODO
 		} else {
 			// The board is full, so there is a draw.
-			System.out.println("Draw. There is no winner");
+			//TODO
 		}
 	}
 	
+	/**
+	 * Requests the next move from the currentplayer via the communication of the socket.
+	 * @param current current player
+	 * @return the coordinates, the current player wants to play.
+	 */
+	//TODO
+	private TowerCoordinates getMove(Player current) {
+		return null;
+	}
+	
+	/**
+	 * Communicates the next moves to all its clients.
+	 * @param coord Coordinates for the next move.
+	 * @param id ID of player that executes the move.
+	 */
+	private void informClients(TowerCoordinates coord, int id) {
+		
+	}
+	
+	/**
+	 * Terminates the game.
+	 * The final situation is communicated to the players (Win or Draw)
+	 * and the Server disconnects from the clients.
+	 * @param winning
+	 */
+	private void finalSituation(boolean winning) {
+		if (winning) {
+			//  The currentplayer is the winner.
+			//TODO
+		} else {
+			// The board is full, so there is a draw.
+			//TODO
+		}
+		//TODO
+		// Disconnecting
+	}
 	/**
 	 * Determines whether the user enters Yes or No.
 	 * @param message Message to print on the screen.
