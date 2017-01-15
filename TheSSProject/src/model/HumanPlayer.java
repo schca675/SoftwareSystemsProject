@@ -30,10 +30,10 @@ public class HumanPlayer extends Player {
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	@Override
-    public Coordinates determineMove(Board board) {
+    public TowerCoordinates determineMove(Board board) {
 		String message = "It is your turn, " + this.name + " ("  
 				+ this.playerID.toString() + "), what is your choice?";
-		Coordinates coord = readCoord(message); 
+		TowerCoordinates coord = readCoord(message); 
 		while (!board.checkMove(coord.getX(), coord.getY())) {
 			coord = readCoord("Invalid choice: " + message);
 		}
@@ -45,7 +45,7 @@ public class HumanPlayer extends Player {
 	 * @param message Message that should be printed.
 	 * @return Coordinates that the player entered.
 	 */
-	public Coordinates readCoord(String message) {
+	public TowerCoordinates readCoord(String message) {
 		int x = -1;
 		int y = -1;
 		int countInt = 0;
@@ -70,7 +70,7 @@ public class HumanPlayer extends Player {
 				}
 			}		
 		}
-		return new Coordinates(x, y);
+		return new TowerCoordinates(x, y);
 	}
 
 }

@@ -147,9 +147,9 @@ public class Board {
 	 */
 	/*@ ensures \forall Coordinates coord; \result.contains(coord); 
 	  @										checkMove(coord.getX(),coord.getY()); 
-	/*@ pure */ public List<Coordinates> getAvailableTowers() {
+	/*@ pure */ public List<TowerCoordinates> getAvailableTowers() {
 		ListIterator<List<Integer>> iterator = boardData.listIterator();
-		List<Coordinates> availableTowers = new ArrayList<Coordinates>();
+		List<TowerCoordinates> availableTowers = new ArrayList<TowerCoordinates>();
 		if (zDim == UNLIMITED_Z) {
 			while (iterator.hasNext()) {
 				availableTowers.add(getTowerCoordinates(iterator.nextIndex()));
@@ -160,7 +160,7 @@ public class Board {
 				int x = getTowerCoordinates(iterator.nextIndex()).getX();
 				int y = getTowerCoordinates(iterator.nextIndex()).getY();
 				if (getTowerHeight(x, y) < zDim) {
-					availableTowers.add(new Coordinates(x, y));
+					availableTowers.add(new TowerCoordinates(x, y));
 				}
 				iterator.next();
 			}
@@ -339,10 +339,10 @@ public class Board {
 	 */
 	//@ requires i >= 0 && i < xDim * yDim - 1;
 	//@ ensures isValidTower(\result.getX(),\result.getY());
-	/*@ pure */ private Coordinates getTowerCoordinates(int i) {
+	/*@ pure */ private TowerCoordinates getTowerCoordinates(int i) {
 		int x = i % yDim + 1;
 		int y = i / yDim + 1;
-		return new Coordinates(x, y);
+		return new TowerCoordinates(x, y);
 	}
 	
 	

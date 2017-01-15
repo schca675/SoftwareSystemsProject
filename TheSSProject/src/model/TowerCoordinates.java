@@ -1,6 +1,6 @@
 package model;
 
-public class Coordinates {
+public class TowerCoordinates {
 	
 	// <------ Instance variables ------>	
 	private int x;
@@ -14,7 +14,7 @@ public class Coordinates {
 	 * @param y coordinate of the y axis
 	 */
 	//@ ensures getX() == x && getY() == y; 
-	public Coordinates(int x, int y) {
+	public TowerCoordinates(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}

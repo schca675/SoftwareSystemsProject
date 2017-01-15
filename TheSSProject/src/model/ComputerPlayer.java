@@ -43,7 +43,7 @@ public class ComputerPlayer extends Player {
 	//@ ensures board.checkMove(\result.getX(),\result.getY());
 	
 	@Override
-	public Coordinates determineMove(Board board) {
+	public TowerCoordinates determineMove(Board board) {
 		return strategy.determineMove(board, this.playerID);
 	}
 

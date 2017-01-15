@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 import model.Board;
-import model.Coordinates;
+import model.TowerCoordinates;
 import model.Player;
 import model.PlayerID;
 
@@ -110,7 +110,7 @@ public class Game {
 		boolean winning = false;
 		Player currentplayer = players[currentPlayerIndex];
 		while (!winning && !board.isFull()) {
-			Coordinates coord = currentplayer.determineMove(board);
+			TowerCoordinates coord = currentplayer.determineMove(board);
 			currentplayer.makeMove(board, coord);
 			winning = board.hasWon(coord.getX(), coord.getY());
 			if (!winning) {
