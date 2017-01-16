@@ -67,7 +67,7 @@ public class ClientHandler extends Thread {
      * @throws IOException
      */
     private void listRecipes(Writer out) throws IOException {
-    	File[] files = new File("recipes").listFiles();
+    	File[] files = new File("C:\\Cathy_University\\Info_Module 1\\Week 8").listFiles();
     	for (File file : files) {
 			out.write(file.getName() + System.lineSeparator());
 		}
