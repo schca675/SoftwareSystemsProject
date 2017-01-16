@@ -22,11 +22,11 @@ public class BoardTest {
 	/*@ requires Board.DEFAULT_XDIM == Board.DEFAULT_YDIM 
 	  @ == Board.DEFAULT_ZDIM == Board.DEFAULT_WIN;  */
 	public static final int MIN = 1;
-	public static final int MAX = Board.DEFAULT_XDIM;
+	public static final int MAX = Board.DEFAULT_DIM;
 	//@ requires Board.DEFAULT_XDIM > 1;
-	public static final int BET = Board.DEFAULT_XDIM - 1;
+	public static final int BET = Board.DEFAULT_DIM - 1;
 	public static final int TOLOW = 0;
-	public static final int TOHIGH = Board.DEFAULT_XDIM + 1;
+	public static final int TOHIGH = Board.DEFAULT_DIM + 1;
 	
 	private Board board;
 	private Board specialBoard;

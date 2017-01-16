@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Peer for a simple client-server application.
@@ -43,11 +44,15 @@ public class Peer implements Runnable {
     public void run() {
     	String message;
     	try {
-    		while ((message = in.readLine()) != null) {
+    		message = in.readLine();
+    		while (message != "" && message != null && !message.equals("exit")) {
     			System.out.println(message);
+    			message = in.readLine();
     		}
+    		this.shutDown();
     	} catch (IOException e) {
-    		System.err.println(e);
+    		this.shutDown();
+    		
     	}
     }
 
@@ -58,17 +63,46 @@ public class Peer implements Runnable {
      * On Peer.EXIT the method ends
      */
     public void handleTerminalInput() {
-    	String input = readString("Enter input");
+    	boolean stop = false;
+    	while (!stop) {
+			String input =  readString("Enter input:");
+			
+			try {
+				out.write(input);
+				out.newLine();
+				out.flush();
+				
+				if (input.equals("exit")) {
+					this.shutDown();
+					break;
+				}
+			} catch (IOException e) {
+				System.out.println("Connection terminated.");
+				stop = true;
+			}
+    			
+    	}
+    	/*String input = readString("Enter input");
     	while (!input.equals("exit")) {
 			try {
 				out.write(input);
 				out.newLine();
 				out.flush();
+				input = readString("Enter input");
 			} catch (IOException e) {
-				System.err.println(e.getMessage());
+				System.out.println("Socket is closed handleTerminal in while" + e.getMessage());
+				input = "exit";
 			}
-			input = readString("Enter input");
     	}
+    	try {
+			out.write(input);
+			out.newLine();
+			out.flush();
+		} catch (IOException e) {
+			System.out.println("IO Exception: handle Terminal : " + e.getMessage());
+		} finally {
+			this.shutDown();
+		} */
 /*    	Scanner scanny = new Scanner(System.in);
     	String line = "strt";
     	while (!line.equals("exit")) {
@@ -91,11 +125,11 @@ public class Peer implements Runnable {
      */
     public void shutDown() {
     	try {
-    		in.close();
-        	out.close();
+    		out.close();
+        	in.close();
         	sock.close();
     	} catch (IOException e) {
-    		System.err.println(e);
+    		System.out.println("Problems while the shut down");
     	}
     }
 
