@@ -29,7 +29,7 @@ public class Client extends Observable {
 		socket = null;
 		me = null;
 		players = new ArrayList<Player>();
-		view = new ClientTUI();
+		view = new ClientTUI(this); 
 	}
 
 	/**
