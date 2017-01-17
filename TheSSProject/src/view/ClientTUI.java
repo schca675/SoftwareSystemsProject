@@ -16,7 +16,7 @@ public class ClientTUI {
 	 * Constructs a new TUI for a client.
 	 * @param client Client the TUI belongs to.
 	 */
-	public ClientTUI(Client client) {
+	public ClientTUI(Client client) { 
 		this.client = client;
 		scanny = new Scanner(System.in);
 	}
