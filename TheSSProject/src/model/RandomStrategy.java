@@ -1,5 +1,8 @@
 package model;
 
+import java.util.List;
+import java.util.Random;
+
 public class RandomStrategy implements Strategy {
 
 	// <------ Queries ------>
@@ -21,8 +24,9 @@ public class RandomStrategy implements Strategy {
 	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	@Override
 	public TowerCoordinates determineMove(Board board, int id) {
-		// TODO Auto-generated method stub
-		return null;
+		List<TowerCoordinates> availableTowers = board.getAvailableTowers();
+		Random random = new Random();
+		return availableTowers.get(random.nextInt(availableTowers.size()));
 	}
 
 }

@@ -1,5 +1,8 @@
 package controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,17 +10,21 @@ import java.util.Scanner;
 
 import model.Board;
 import model.ComputerPlayer;
+import model.HumanPlayer;
+import model.IllegalBoardConstructorArgumentsException;
 import model.IllegalCoordinatesException;
 import model.Player;
 import model.TowerCoordinates;
 
-public class Game {
+public class StandaloneGame {
 	
 	// <------ Instance variables ------>
 	
 	//@ private invariant board != null;
 	//@ private invariant players != null && (players.size() == numberOfPlayers);
-	//@ private invariant (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
+	// The line below is the one the JML compiler complains about, specifically the last part. 
+	// For JML, isn't this assumed by default?
+	// private invariant (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i) != null);
 	//@ private invariant currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
 	private Board board;
 	private List<Player> players;
@@ -29,13 +36,12 @@ public class Game {
 	/**
 	 * Create a game with default setting and rules and a random starter.
 	 * 
-	 * @param player1 Player 1 
-	 * @param player2 Player 2
+	 * @param players Players to play this game
 	 */
 	/*@ requires players != null && 
 	  @ (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
 	*/
-	public Game(List<Player> players) {
+	public StandaloneGame(List<Player> players) {
 		board = new Board();
 		this.players = new ArrayList<Player>(players.size()); 
 		this.players.addAll(players);
@@ -45,8 +51,7 @@ public class Game {
 	
 	/**
 	 * Creates a game with specified dimensions of the board, winning length and random starter.
-	 * @param player1 Player 1
-	 * @param player2 Player 2
+	 * @param players Players to play this game
 	 * @param xDim X dimension of the board
 	 * @param yDim Y dimension of the board
 	 * @param zDim Z dimension of the board, -1 specifies unlimited
@@ -58,10 +63,13 @@ public class Game {
 	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == Board.UNLIMITED_Z);
 	  @ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	*/
-	public Game(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
-		board = new Board(xDim, yDim, zDim, winningLength);
-		this.players = new ArrayList<Player>(players.size()); 
-		this.players.addAll(players);
+	public StandaloneGame(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
+		try {
+			board = new Board(xDim, yDim, zDim, winningLength);
+		} catch (IllegalBoardConstructorArgumentsException e) {
+			System.err.println(e.getMessage());
+		}
+		this.players = players;
 		currentPlayerIndex = randomStarter();
 		numberOfPlayers = players.size();
 	}
@@ -74,17 +82,19 @@ public class Game {
 	 */
 	//@ ensures \result >= 0 && \result < numberOfPlayers;
 	public int randomStarter() {
-		Random random = new Random();
-		return random.nextInt(numberOfPlayers);	
+		return 0;
+/*		Random random = new Random();
+		return random.nextInt(numberOfPlayers);	*/
 	}
 	
 	// <------ Commands ------>
 	
-	/**
-	 * Starts the game.
-	 */
-	public void start() {
-		play();
+	public static void main(String[] args) {
+		List<Player> players = new ArrayList<Player>(2);
+		players.add(new HumanPlayer("Henk", 0));
+		players.add(new ComputerPlayer(1));
+		StandaloneGame game = new StandaloneGame(players);
+		game.play();
 	}
 	
 	/**
@@ -95,41 +105,66 @@ public class Game {
 	 * he is replaced by a Computer player with random strategy.
 	 * If a computer player tries an invalid move //TODO
 	 */
-	// not checked yet.
 	public void play() {
 		currentSituation();
-		boolean winning = false;
-		Player currentplayer = players.get(currentPlayerIndex);
-		while (!winning && !board.isFull()) {
-			TowerCoordinates coord = currentplayer.determineMove(board);
+		boolean gameOver = false;
+		int attempts = 0;
+		while (!gameOver) {
+			Player currentPlayer = players.get(currentPlayerIndex);
+			TowerCoordinates coords;
+			if (currentPlayer instanceof HumanPlayer) {
+				coords = requestHumanMove(currentPlayer.playerID);
+			} else {
+				ComputerPlayer computerPlayer = (ComputerPlayer) currentPlayer;
+				coords = computerPlayer.determineMove(board);
+			}
 			try {
-				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-			} catch (IllegalCoordinatesException e) {
-				currentplayer = new ComputerPlayer(currentplayer.playerID);
-				coord = ((ComputerPlayer) currentplayer).determineMove(board);
-				try {
-					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-				} catch (IllegalCoordinatesException ex) {
-					//TODO
+				board.makeMove(coords.getX(), coords.getY(), currentPlayer.playerID);
+				if (board.hasWon(coords.getX(), coords.getY())) {
+					System.out.println("Player " + currentPlayer.name + " has won");
+					gameOver = true;
+				} else if (board.isFull()) {
+					System.out.println("Draw, board is full");
+					gameOver = true;
+				} else {			
+					currentPlayerIndex = currentPlayerIndex + 1;
+					currentPlayerIndex = currentPlayerIndex % numberOfPlayers;
+					attempts = 0;
 				}
-				
+			} catch (NullPointerException e) {
+				attempts++;
+			} catch (IllegalCoordinatesException e) {
+				attempts++;
+				if (currentPlayer instanceof HumanPlayer) {
+					System.out.println(e.getMessage());
+				}
+			} finally {
+				if (attempts > 3) {
+					gameOver = true;
+				}
+				currentSituation();
 			}
-			winning = board.hasWon(coord.getX(), coord.getY());
-			if (!winning) {
-				// following code only works because we have 2 players
-				currentPlayerIndex = 1 - currentPlayerIndex;
-				currentplayer = players.get(currentPlayerIndex);
+		}
+	}
+	
+	public TowerCoordinates requestHumanMove(int playerID) {
+		String message = "Player " + playerID + ", make your move. Enter in format: x y";
+		System.out.println(message);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			String[] splitInput = reader.readLine().split(" ");
+			if (splitInput.length == 2 && splitInput[0].length() == 1 
+					&& splitInput[1].length() == 1) {
+				int x = Integer.parseInt(splitInput[0]);
+				int y = Integer.parseInt(splitInput[1]);
+				return new TowerCoordinates(x, y);
 			}
-			currentSituation();
+		} catch (NumberFormatException e) {
+			System.out.println(message);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
-		if (winning) {
-			//  The currentplayer is the winner.
-			System.out.println("Player " + currentplayer.name + " with Player ID " 
-					+ currentplayer.playerID + " is the winner!");
-		} else {
-			// The board is full, so there is a draw.
-			System.out.println("Draw. There is no winner");
-		}
+		return null;
 	}
 	
 	/**

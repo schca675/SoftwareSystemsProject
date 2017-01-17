@@ -1,7 +1,5 @@
 package model;
 
-import java.util.Scanner;
-
 public class HumanPlayer extends Player {
 
 	// <------ Constructors ------>
@@ -13,20 +11,20 @@ public class HumanPlayer extends Player {
 	 * @param id Player ID of the player
 	 */
 	//@ requires name != null;
-	//@ requires id == PlayerID.X || id == PlayerID.O;
+	//@ requires id >= 0;
 	//@ ensures this.name == name && this.playerID == id;
-	public HumanPlayer(String name, PlayerID id) {
+	public HumanPlayer(String name, int id) {
 		super(name, id);
 	}
 	
 	// <------ Queries ------>
 	
-	/**
+/*	*//**
 	 * Determines the coordinates of the field for the next move.
 	 * 
 	 * @param board current board, the game is played on.
 	 * @return index of the field for the next move.
-	 */
+	 *//*
 	//@ requires board != null && !board.isFull();
 	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	@Override
@@ -39,12 +37,12 @@ public class HumanPlayer extends Player {
 		}
 		return coord;
 	}
-	/**
+	*//**
 	 * Reads the coordinates from System.in.
 	 * 
 	 * @param message Message that should be printed.
 	 * @return Coordinates that the player entered.
-	 */
+	 *//*
 	public TowerCoordinates readCoord(String message) {
 		int x = -1;
 		int y = -1;
@@ -71,6 +69,6 @@ public class HumanPlayer extends Player {
 			}		
 		}
 		return new TowerCoordinates(x, y);
-	}
+	}*/
 
 }

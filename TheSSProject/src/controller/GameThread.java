@@ -18,7 +18,9 @@ public class GameThread extends Thread {
 	
 	//@ private invariant board != null;
 	//@ private invariant players != null && (players.size() == numberOfPlayers);
-	//@ private invariant (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
+	// The line below is the one the JML compiler complains about, specifically the last part. 
+	// For JML, isn't this assumed by default?
+	// private invariant (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i) != null);
 	//@ private invariant currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
 	private Board board;
 	private List<Player> players;
