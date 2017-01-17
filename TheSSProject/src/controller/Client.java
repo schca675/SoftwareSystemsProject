@@ -16,20 +16,37 @@ public class Client extends Observable {
 	//Observable if not implemented in Board
 	
 	private Board board;
-	private Socket socket;
 	private Player me;
 	private List<Player> players;
 	private ClientTUI view;
+	private InetAddress addr;
+	private Socket socket;
+	private int port;
+	
+	/**
+	 * Connecting to server.
+	 */
+	public void connect() {
+		if (!(addr == null) && !(socket == null) && port >= 0 && port <= 65535) {
+			//Check the IP address
+//			try {
+//				addr = InetAddress.getByName(addr);
+//			}
+		}
+		
+	}
 	
 	/**
 	 * Constructor, empty for now.
 	 */
 	public Client() {
+		view = new ClientTUI(this); 
 		board = null;
-		socket = null;
 		me = null;
 		players = new ArrayList<Player>();
-		view = new ClientTUI(this); 
+		socket = null;
+		addr = null;
+		port = -1;
 	}
 
 	/**
