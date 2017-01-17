@@ -97,6 +97,7 @@ public class StandaloneGame {
 		game.play();
 	}
 	
+	//Henk
 	/**
 	 * Runs the game.
 	 * Game starts with an empty board and 
