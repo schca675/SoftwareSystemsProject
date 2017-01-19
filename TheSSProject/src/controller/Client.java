@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 
 import model.Board;
 import model.IllegalCoordinatesException;
@@ -17,8 +18,7 @@ import model.Strategy;
 import model.TowerCoordinates;
 import view.ClientTUI;
 
-public class Client extends Observable {
-	//Observable if not implemented in Board
+public class Client implements Observer {
 	private ClientTUI view;
 	
 	//needed for the server connection.
@@ -86,7 +86,7 @@ public class Client extends Observable {
 	
 	//TUI catches Exception!!
 	public void setPort(int port) throws InvalidPortException {
-		if (port >= 0 && port <= 65535) {
+		if (port >= 1000 && port <= 65535) {
 			this.port = port;
 		} else {
 			throw new InvalidPortException(port);
@@ -200,4 +200,12 @@ public class Client extends Observable {
 		client.start();
 	}
 
+	// Observer pattern
+	@Override
+	public void update(Observable observable, Object type) {
+		if (observable instanceof Board && type instanceof Integer) {
+			Board board = (Board) observable;
+			view.printBoard(board.deepDataCopy(), board.xDim, board.yDim, board.zDim);
+		}
+	}
 }

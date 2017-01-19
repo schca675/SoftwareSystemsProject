@@ -2,10 +2,10 @@ package view;
 
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Observable;
 import java.util.Scanner;
 
 import controller.Client;
+import model.InvalidPortException;
 import model.TowerCoordinates;
 
 
@@ -79,13 +79,21 @@ public class ClientTUI {
 	 * @param observable Observable object that notified the TUI.
 	 * @param boardData Data of the board (observable object)
 	 */
-	// check ? wild cards.
-	public void update(Observable observable, Object boardData) {
-		if (observable instanceof Client && boardData instanceof List<?>) {
-			try {
-				representation((List<List<Integer>>) boardData);
-			} catch (ClassCastException e) {
-				// TODO does it need to do sth?
+	//TODO check boundaries
+	public void printBoard(List<List<Integer>> boardData, int x, int y, int z) {
+		for (int k = 0; k < z; k++) {
+			System.out.println("Level " + k + "\n\n");
+			for (int j = 0; j < y; j++) {
+				for (int i = 0; i < x; i++) {
+					System.out.println("----");	
+				}
+				StringBuilder cells = new StringBuilder();
+				for (int h = 0; h < x; h++) {
+					
+				}
+			}
+			for (int i = 0; i < x; i++) {
+				System.out.println("----");	
 			}
 		}
 	}
@@ -168,6 +176,9 @@ public class ClientTUI {
 		}
 	}
 	
+	/**
+	 * Determines if the player wants to play with default or own dimensions.
+	 */
 	public void determineDimensions() {
 		System.out.println("With which dimensions do you want to play?\n"
 				+ " - Def for default dimensions (4x4x4)\n"
@@ -193,6 +204,9 @@ public class ClientTUI {
 		}
 	}
 	
+	/**
+	 * Ask the user for all the necessary information to make a connection.
+	 */
 	public void determineConnections() {
 		boolean entered = false;
 		//Check the Internetaddress
@@ -206,9 +220,28 @@ public class ClientTUI {
 				System.out.println("Invalid address name");
 			}
 		}
+		//Check the port number.
+		entered = false;
+		int port = -1;
+		while (!entered) {
+			port = getInt("Please enter a port number (between 1000 an 65535)");
+			try {
+				client.setPort(port);
+				entered = true;
+			} catch (InvalidPortException e) {
+				System.out.println("Invalid port number");
+			}
+		}
+		
+		
 	
 	}
 	
+	/**
+	 * Gets a string from the Terminal.
+	 * @param message message to write on the Terminal
+	 * @return Line entered by the user.
+	 */
 	public String getString(String message) {
 		System.out.println(message);
 		while (true) {
@@ -260,18 +293,14 @@ public class ClientTUI {
 	 * The method determines the own dimensions of the user and communicates them to the client.
 	 */
 	public void getDimensions(){
-		//get the x dimension
-		System.out.println("Please enter the x dimension (integer): ");
-		int x = getInt();
+		//get the x dimension.
+		int x = getInt("Please enter the x dimension (integer): ");
 		//TODO Communicate the x integer to the client.
-		System.out.println("Please enter the y dimension (integer): ");
-		int y = getInt();
+		int y = getInt("Please enter the y dimension (integer): ");
 		//TODO Communicate the y integer to the client.
-		System.out.println("Please enter the z dimension (integer): ");
-		int z = getInt();
+		int z = getInt("Please enter the z dimension (integer): ");
 		//TODO Communicate the z integer to the client.
-		System.out.println("Please enter the winning length (integer): ");
-		int win = getInt();
+		int win = getInt("Please enter the winning length (integer): ");
 		//TODO Communicate the winning length to the client.
 		System.out.println("The entered dimensions are: \n - "
 				+ x + " for the x dimension\n - "
@@ -285,7 +314,8 @@ public class ClientTUI {
 	 * @return entered dimension.
 	 */
 	//@ensures \result >=1;
-	public int getInt() {
+	public int getInt(String message) {
+		System.out.println(message);
 		int x = -1;
 		while (x < 1) {
 			if (scanny.hasNextInt()) {
