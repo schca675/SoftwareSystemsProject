@@ -169,7 +169,7 @@ public class ClientTUI {
 						chosen = true;
 						break;
 					case "Own":
-						//TODO new function that determines valid dimensions from the user 
+						getDimensions();
 						//TODO let the board handle it.
 						chosen = true;
 						break;
@@ -218,6 +218,50 @@ public class ClientTUI {
 	}
 	
 	// <<---------- Methods needed by determineDimensions ------- >>
+	/**
+	 * The method determines the own dimensions of the user and communicates them to the client.
+	 */
+	public void getDimensions(){
+		//get the x dimension
+		System.out.println("Please enter the x dimension (integer): ");
+		int x = getInt();
+		//TODO Communicate the x integer to the client.
+		System.out.println("Please enter the y dimension (integer): ");
+		int y = getInt();
+		//TODO Communicate the y integer to the client.
+		System.out.println("Please enter the z dimension (integer): ");
+		int z = getInt();
+		//TODO Communicate the z integer to the client.
+		System.out.println("Please enter the winning length (integer): ");
+		int win = getInt();
+		//TODO Communicate the winning length to the client.
+		System.out.println("The entered dimensions are: \n - "
+				+ x + " for the x dimension\n - "
+				+ y + " for the y dimension\n - "
+				+ z + " for the z dimension\n - "
+				+ win + " for the winning length.");
+	}
+	
+	/**
+	 * The method asks the client for a valid integer (positive integer).
+	 * @return entered dimension.
+	 */
+	//@ensures \result >=1;
+	public int getInt() {
+		int x = -1;
+		while (x < 1) {
+			if (scanny.hasNextInt()) {
+				x = scanny.nextInt();
+				if (x < 1) {
+					System.out.println("Please enter a positive integer: ");
+				}
+			} else if (scanny.hasNext()) {
+				scanny.next();
+				System.out.println("Please enter an integer: ");
+			} 
+		}
+		return x;
+	}
 	
 	//<<----------- Methods needed by determine Move ------------>>
 	

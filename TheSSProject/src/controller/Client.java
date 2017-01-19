@@ -16,16 +16,28 @@ import view.ClientTUI;
 
 public class Client extends Observable {
 	//Observable if not implemented in Board
-	
-	private Board board;
-	private String playerName;
-	private Strategy strategy;
-	private Player me;
-	private List<Player> players;
 	private ClientTUI view;
+	
+	//needed for the server connection.
 	private InetAddress addr;
 	private Socket socket;
 	private int port;
+	
+	// needed for the game.
+	private Board board;
+	private List<Player> players;
+	private Player me;
+	
+	// needed in case the user wants to play as human player.
+	private String playerName;
+	// needed in case the user wants to play as computer player.
+	private Strategy strategy;
+	
+	// needed in case the client wants to play with own dimensions.
+	private int x;
+	private int y;
+	private int z;
+	private int win;
 	
 	/**
 	 * Constructor, empty for now.
@@ -40,6 +52,10 @@ public class Client extends Observable {
 		socket = null;
 		addr = null;
 		port = -1;
+		x = Board.DEFAULT_DIM;
+		y = Board.DEFAULT_DIM;
+		z = Board.DEFAULT_DIM;
+		win = Board.DEFAULT_WIN;
 	}
 	/**
 	 * Connecting to server.
