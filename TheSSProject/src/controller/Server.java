@@ -1,5 +1,6 @@
 package controller;
 
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +37,26 @@ public class Server {
 	private List<Player> lobbyPlayerList;
 	private Map<Player, Socket> playerMap;
 	private PlayerIDProvider playerIDProvider;
+	private ServerSocket serverSocket;
 	
 	/** 
 	 * Main method to launch the server.
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		int port;
+		boolean enableExtensions;
+		
+		if (args.length == 2 && (args[1].equals("true") || args[1].equals("false"))) {
+			try {
+				port = Integer.parseInt(args[0]);
+				enableExtensions = Boolean.parseBoolean(args[1]);
+			} catch (NumberFormatException e) {
+				System.out.println(USAGE);
+			}
+		} else {
+			System.out.println(USAGE);
+		}
 		
 	}
 	

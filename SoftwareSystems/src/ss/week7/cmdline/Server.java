@@ -33,7 +33,7 @@ public class Server {
     	} catch (NumberFormatException e) {
     		System.out.println(USAGE);
     		System.out.println("ERRROR: port " + args[1] + " is not an integer");
-    		System.exit(0);
+    		System.exit(0); //bla
     	}
     	
     	//Try to open a server socket
