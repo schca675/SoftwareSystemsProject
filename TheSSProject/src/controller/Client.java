@@ -9,6 +9,8 @@ import java.util.Observable;
 import model.Board;
 import model.IllegalCoordinatesException;
 import model.Player;
+import model.RandomStrategy;
+import model.Strategy;
 import model.TowerCoordinates;
 import view.ClientTUI;
 
@@ -16,6 +18,8 @@ public class Client extends Observable {
 	//Observable if not implemented in Board
 	
 	private Board board;
+	private String playerName;
+	private Strategy strategy;
 	private Player me;
 	private List<Player> players;
 	private ClientTUI view;
@@ -23,6 +27,20 @@ public class Client extends Observable {
 	private Socket socket;
 	private int port;
 	
+	/**
+	 * Constructor, empty for now.
+	 */
+	public Client() {
+		view = new ClientTUI(this); 
+		board = null;
+		playerName = "Initial";
+		strategy = null;
+		me = null;
+		players = new ArrayList<Player>();
+		socket = null;
+		addr = null;
+		port = -1;
+	}
 	/**
 	 * Connecting to server.
 	 */
@@ -36,27 +54,22 @@ public class Client extends Observable {
 		
 	}
 	
-	/**
-	 * Constructor, empty for now.
-	 */
-	public Client() {
-		view = new ClientTUI(this); 
-		board = null;
-		me = null;
-		players = new ArrayList<Player>();
-		socket = null;
-		addr = null;
-		port = -1;
-	}
-
-	/**
-	 * Connects to the server at given address.
-	 * @param adress
-	 */
-	public void connectToServer(InetAddress adress) {
-		
+	//<<---- Methods needed by the TUI --------------->
+	
+	
+	public void setPlayerName(String name) {
+		playerName = name;
 	}
 	
+	public void setStrategy(String name) {
+		switch (name) {
+			case "Randi":
+				strategy = new RandomStrategy();
+				break;
+			default:
+				strategy = new RandomStrategy();
+		}
+	}
 	
 	/**
 	 * Reads a server message from the socket, and calls appropriate methods.
