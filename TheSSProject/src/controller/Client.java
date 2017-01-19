@@ -72,10 +72,13 @@ public class Client implements Observer {
 		if (human) { 
 			playerName = view.determinePlayerName();
 		} else {
-			boolean valid = false;
-			while (!valid) {
-				String notDone = view.determineStrategy();
-				//TODO new System with strategy determining with integers and a list.
+			String typeStrategy = view.determineStrategy();
+			switch (typeStrategy) {
+				case "Randi":
+					strategy = new RandomStrategy();
+					break;
+				default:
+					strategy = new RandomStrategy();
 			}
 		}
 		
@@ -106,7 +109,7 @@ public class Client implements Observer {
 				setInetAddress(address);
 				entered = true;
 			} catch (UnknownHostException e) {
-				System.out.println("Invalid address name");
+				view.errorMessage(1);
 			}
 			
 		}
@@ -120,7 +123,7 @@ public class Client implements Observer {
 				setPort(newPort);
 				entered = true;
 			} catch (InvalidPortException e) {
-				System.out.println("Invalid port number");
+				view.errorMessage(2);
 			}
 		}
 		connect();
@@ -207,9 +210,9 @@ public class Client implements Observer {
 			//Check the IP address
 			try {
 				socket = new Socket(addr, port);
-				view.socketCreated();
+				view.valid(1);
 			} catch (IOException e) {
-				view.noConnection();
+				view.errorMessage(5);
 				reset(); 
 			}
 			
@@ -224,7 +227,7 @@ public class Client implements Observer {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			view.printMessage("Problem while disconnecting");
+			view.errorMessage(3);
 		}
 	}
 	
@@ -270,12 +273,11 @@ public class Client implements Observer {
 				boolean valid = false;
 				TowerCoordinates coord = new TowerCoordinates(-1, -1);
 				while (!valid) {
-					coord = view.determineMove("Please enter the "
-						+ "coordinates of your next move");
+					coord = view.determineMove(); 
 					if (board.isValidMove(coord.getX(), coord.getY())) {
 						valid = true;
 					} else {
-						view.printMessage("Invalid coordinates \n");
+						view.errorMessage(4);
 					} 
 				}
 				return coord;

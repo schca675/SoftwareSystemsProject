@@ -1,11 +1,9 @@
 package view;
 
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Scanner;
 
 import controller.Client;
-import model.InvalidPortException;
 import model.TowerCoordinates;
 
 
@@ -55,11 +53,9 @@ public class ClientTUI {
 						play = true; 
 						break;
 					default:
-						System.out.println("Invalid input");
+						errorMessage(6);
 				}
 			}
-			
-		//List<List<Integer>> = new ArrayList<List<Integer>>(4);
 		
 		}
 	}
@@ -72,10 +68,6 @@ public class ClientTUI {
 		System.out.println(message);
 	}
 	
-	public void noConnection() {
-		System.out.println("The connection failed. You return to the start menu.\n");
-		startMenu();
-	}
 	/**
 	 * Asks the user for the next move and returns its tower coordinates.
 	 * @param prompt Message to print on the screen.
@@ -83,8 +75,8 @@ public class ClientTUI {
 	 */
 	// make a while loop in client which is only broken when the input given by the Tui 
 	// does not throw an exception, could use 2 different Strings to print the message.
-	public TowerCoordinates determineMove(String prompt) {
-		System.out.println(prompt);
+	public TowerCoordinates determineMove() {
+		System.out.println("Please enter the coordinates of your next move");
 		String format = "Please write the coordinates in this form: x y";
 		return readCoordinates(format);
 	}
@@ -94,7 +86,7 @@ public class ClientTUI {
 	 * @param observable Observable object that notified the TUI.
 	 * @param boardData Data of the board (observable object)
 	 */
-	//TODO check boundaries
+	//TODO check boundaries / representation
 	public void printBoard(List<List<Integer>> boardData, int x, int y, int z, int id) {
 		for (int k = 0; k < z; k++) {
 			System.out.println("Level " + k + "\n\n");
@@ -195,7 +187,7 @@ public class ClientTUI {
 					case "Com":
 						return false;
 					default:
-						System.out.println("Invalid input");
+						errorMessage(6);
 				}
 			}
 		}
@@ -217,46 +209,24 @@ public class ClientTUI {
 					case "Own":
 						return false;
 					default:
-						System.out.println("Invalid input");
+						errorMessage(6);
 				}
 			}
 		}
 	}
 	
 	/**
-	 * Ask the user for all the necessary information to make a connection.
+	 * Asks for an Internet address to connect to.
+	 * @return Internet address.
 	 */
-	public void determineConnections() {
-		boolean entered = false;
-		//Check the Internetaddress
-		String address = null;
-		while (!entered) {
-			address = getString("Please enter a Internet Address you want to connect to (String)");
-			try {
-				client.setInetAddress(address);
-				entered = true;
-			} catch (UnknownHostException e) {
-				System.out.println("Invalid address name");
-			}
-		}
-		//Check the port number.
-		entered = false;
-		int port = -1;
-		while (!entered) {
-			port = getInt("Please enter a port number (between 1000 an 65535)");
-			try {
-				client.setPort(port);
-				entered = true;
-			} catch (InvalidPortException e) {
-				System.out.println("Invalid port number");
-			}
-		}
-	} 
-	
 	public String getInetAddress() {
 		return getString("Please enter a Internet Address you want to connect to (String)");
 	}
 	
+	/**
+	 * Asks for a port number to connect to.
+	 * @return port number.
+	 */
 	public int getPort() {
 		return getInt("Please enter a port number (between 1000 an 65535)");
 	}
@@ -302,12 +272,16 @@ public class ClientTUI {
 		String strategy;
 		System.out.println("Please name the Computer should play with:\n"
 				+ "The following are implemented:\n"
-				+ " - Randi for a player with Random strategy");
+				+ " - Randi for a player with Random strategy\n");
 		while (true) {
 			if (scanny.hasNextLine()) {
 				strategy = scanny.nextLine();
-				if (!strategy.equals("")) {
-					return strategy;
+				switch (strategy) {
+					case  "Randi":
+						return "Randi";
+					default:
+						errorMessage(7);
+						break;
 				}
 			}
 		}
@@ -425,8 +399,52 @@ public class ClientTUI {
 	}
 
 	// <<---------- Methods to transfer messages -------->>
-	public void socketCreated() {
-		System.out.println("Socket created");
+	/**
+	 * Successfull messages.
+	 * @param type
+	 */
+	public void valid(int type) {
+		switch (type) {
+			case 1:
+				System.out.println("Socket created");
+				break;
+			default:
+				break;
+		}
+	}
+	
+	/**
+	 * Prints the error message.
+	 * @param type what kind of message should be printed.
+	 */
+	//TODO work with enum.
+	public void errorMessage(int type) {
+		switch (type) {
+			case 1:
+				System.out.println("Invalid address name.\n");
+				break;
+			case 2:
+				System.out.println("Invalid Port number.\n");
+				break;
+			case 3: 
+				System.out.println("Problem while disconnecting.\n");
+				break;
+			case 4:
+				System.out.println("Invalid coordinates.\n");
+				break;
+			case 5:
+				System.out.println("The connection failed. You return to the start menu.\n");
+				startMenu();
+				break;
+			case 6:
+				System.out.println("Invalid input");
+				break;
+			case 7:
+				System.out.println("Not a valid Strategy");
+				break;
+			default:
+				break;
+		}
 	}
 	
 	
