@@ -1,5 +1,6 @@
 package view;
 
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Observable;
 import java.util.Scanner;
@@ -89,6 +90,16 @@ public class ClientTUI {
 		}
 	}
 	
+	/**
+	 * Gets called by the client when no connection is made.
+	 * Client can try again with the same game settings and 
+	 * other communication details or return to start menu.
+	 */
+	public void noConnection() {
+		//TODO
+	}
+	
+	
 	// <<------- Menus called by the StartMenu ---------->>
 	/**
 	 * Prints additional information for the game.
@@ -112,6 +123,8 @@ public class ClientTUI {
 		//Determine if user wants to play with default or own dimensions 
 		// and communicates it to the client controller.
 		determineDimensions();
+		//Determine the connection details of the server, the client want to connect to.
+		determineConnections();
 	}
 	
 	/**
@@ -176,6 +189,31 @@ public class ClientTUI {
 					default:
 						System.out.println("Invalid input");
 				}
+			}
+		}
+	}
+	
+	public void determineConnections() {
+		boolean entered = false;
+		//Check the Internetaddress
+		String address = null;
+		while (!entered) {
+			address = getString("Please enter a Internet Address you want to connect to (String)");
+			try {
+				client.setInetAddress(address);
+				entered = true;
+			} catch (UnknownHostException e) {
+				System.out.println("Invalid address name");
+			}
+		}
+	
+	}
+	
+	public String getString(String message) {
+		System.out.println(message);
+		while (true) {
+			if (scanny.hasNext()) {
+				return scanny.next();
 			}
 		}
 	}

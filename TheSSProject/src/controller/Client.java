@@ -1,13 +1,16 @@
 package controller;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
 import model.Board;
 import model.IllegalCoordinatesException;
+import model.InvalidPortException;
 import model.Player;
 import model.RandomStrategy;
 import model.Strategy;
@@ -61,17 +64,34 @@ public class Client extends Observable {
 	 * Connecting to server.
 	 */
 	public void connect() {
-		if (!(addr == null) && !(socket == null) && port >= 0 && port <= 65535) {
+		//Socket and Port and IPaddress in the TUI.
+		if (!(addr == null) && port >= 0 && port <= 65535) {
 			//Check the IP address
-//			try {
-//				addr = InetAddress.getByName(addr);
-//			}
+			try {
+				socket = new Socket(addr, port);
+			} catch (IOException e) {
+				view.noConnection();
+			}
+			
 		}
 		
 	}
 	
 	//<<---- Methods needed by the TUI --------------->
 	
+	//TUI catches Exception!!
+	public void setInetAddress(String address) throws UnknownHostException {
+		this.addr = InetAddress.getByName(address);
+	}
+	
+	//TUI catches Exception!!
+	public void setPort(int port) throws InvalidPortException {
+		if (port >= 0 && port <= 65535) {
+			this.port = port;
+		} else {
+			throw new InvalidPortException(port);
+		}
+	}
 	
 	public void setPlayerName(String name) {
 		playerName = name;
