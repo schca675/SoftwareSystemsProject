@@ -1,5 +1,6 @@
 package controller;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -34,10 +35,19 @@ public class Server {
 		}
 	}
 	
+	private int port;
+	private boolean enableExtensions;
 	private List<Player> lobbyPlayerList;
 	private Map<Player, Socket> playerMap;
 	private PlayerIDProvider playerIDProvider;
 	private ServerSocket serverSocket;
+	private static final String USAGE = "";
+	
+	public Server(int port, boolean enableExtensions) throws IOException {
+		this.port = port;
+		this.enableExtensions = enableExtensions;
+		serverSocket = new ServerSocket(port);
+	}
 	
 	/** 
 	 * Main method to launch the server.
@@ -47,17 +57,26 @@ public class Server {
 		int port;
 		boolean enableExtensions;
 		
-		if (args.length == 2 && (args[1].equals("true") || args[1].equals("false"))) {
-			try {
+		try {
+			if (args.length == 2 && (args[1].equals("true") || args[1].equals("false")) && 
+					Integer.parseInt(args[0]) >= 0 && Integer.parseInt(args[0]) <= 65535) {
 				port = Integer.parseInt(args[0]);
 				enableExtensions = Boolean.parseBoolean(args[1]);
-			} catch (NumberFormatException e) {
+				Server server = new Server(port, enableExtensions);
+				server.goListen();
+			} else {
 				System.out.println(USAGE);
 			}
-		} else {
+		} catch (NumberFormatException e) {
 			System.out.println(USAGE);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
-		
+	}
+	
+	public void goListen() throws IOException {
+		Socket socket = serverSocket.accept();
+		// Protocol is needed here.
 	}
 	
 	/**
