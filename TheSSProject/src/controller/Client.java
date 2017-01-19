@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import model.Board;
+import model.ComputerPlayer;
 import model.IllegalCoordinatesException;
 import model.InvalidPortException;
 import model.Player;
@@ -51,7 +51,7 @@ public class Client implements Observer {
 		playerName = "Initial";
 		strategy = null;
 		me = null;
-		players = new ArrayList<Player>();
+		players = null;
 		socket = null;
 		addr = null;
 		port = -1;
@@ -60,43 +60,116 @@ public class Client implements Observer {
 		z = Board.DEFAULT_DIM;
 		win = Board.DEFAULT_WIN;
 	}
+	
+	//<<--------- Methods to communicate with TUI -------->>
+	
 	/**
-	 * Connecting to server.
+	 * Initialises a game.
 	 */
-	public void connect() {
-		//Socket and Port and IPaddress in the TUI.
-		if (!(addr == null) && port >= 0 && port <= 65535) {
-			//Check the IP address
+	public void playMenu() {
+		//Determine if user is a computer or a human player 
+		boolean human = view.determinePlayer();
+		if (human) { 
+			playerName = view.determinePlayerName();
+		} else {
+			boolean valid = false;
+			while (!valid) {
+				String notDone = view.determineStrategy();
+				//TODO new System with strategy determining with integers and a list.
+			}
+		}
+		
+		//Determine if user wants to play with default or own dimensions 
+		// and communicates it to the client controller.
+		boolean defaultDim = view.determineDimensions();
+		if (defaultDim) {
+			x = Board.DEFAULT_DIM;
+			y = Board.DEFAULT_DIM;
+			z = Board.DEFAULT_DIM;
+			win = Board.DEFAULT_WIN;
+		} else {
+			x = view.getXDimension();
+			y = view.getYDimension();
+			z = view.getZDimension();
+			win = view.getWinDimension();
+		}
+		view.displayDimensions(x, y, z, win);
+		
+		//Determine the connection details of the server, the client want to connect to.
+		boolean entered = false;
+		
+		//Check the Internetaddress
+		String address = null;
+		while (!entered) {
+			address = view.getInetAddress();
 			try {
-				socket = new Socket(addr, port);
-			} catch (IOException e) {
-				view.noConnection();
+				setInetAddress(address);
+				entered = true;
+			} catch (UnknownHostException e) {
+				System.out.println("Invalid address name");
 			}
 			
 		}
 		
+		//Check the port number.
+		entered = false;
+		int newPort = -1;
+		while (!entered) {
+			newPort = view.getPort();
+			try {
+				setPort(newPort);
+				entered = true;
+			} catch (InvalidPortException e) {
+				System.out.println("Invalid port number");
+			}
+		}
+		connect();
 	}
 	
-	//<<---- Methods needed by the TUI --------------->
+	public void terminateMenu() {
+		view.terminateMenu();
+		shutdown();
+	}
 	
+	//<<---- Methods needed to do the setup --------------->
+	
+	/**
+	 * Determines the Internet Addres to connect to.
+	 * @param address Internet Address to connect to.
+	 * @throws UnknownHostException Exception if the given Internet Adress is not valid.
+	 */
 	//TUI catches Exception!!
 	public void setInetAddress(String address) throws UnknownHostException {
 		this.addr = InetAddress.getByName(address);
 	}
 	
+	/**
+	 * Determines the port to connect to.
+	 * Only port numbers above 1000 are accepted.
+	 * @param port Port to connect to.
+	 * @throws InvalidPortException Exception if the given port is not in a valid range.
+	 */
 	//TUI catches Exception!!
-	public void setPort(int port) throws InvalidPortException {
-		if (port >= 1000 && port <= 65535) {
-			this.port = port;
+	public void setPort(int newport) throws InvalidPortException {
+		if (newport >= 1000 && newport <= 65535) {
+			this.port = newport;
 		} else {
-			throw new InvalidPortException(port);
+			throw new InvalidPortException(newport);
 		}
 	}
 	
+	/**
+	 * Sets the me-player's name in case me is a Human Player.
+	 * @param name Name of the me-player
+	 */
 	public void setPlayerName(String name) {
 		playerName = name;
 	}
 	
+	/**
+	 * Sets the me-player's strategy in case  me is a Computer Player.
+	 * @param name name of the strategy.
+	 */
 	public void setStrategy(String name) {
 		switch (name) {
 			case "Randi":
@@ -107,6 +180,7 @@ public class Client implements Observer {
 		}
 	}
 	
+	// <--------- Connection methods --------->>
 	/**
 	 * Reads a server message from the socket, and calls appropriate methods.
 	 */
@@ -123,21 +197,23 @@ public class Client implements Observer {
 	}
 	
 
-	
 	/**
-	 * Makes the connection to server, calls readTUIMessage(), if rules are fine setup game, 
-	 * else notify TUI.
-	 * @param message
+	 * Connecting to server.
+	 * If the connection fails, the TUI gets informed and the client resets.
 	 */
-	public void startGame(String message) {
-		
-	}
-	
-	/**
-	 * Reads the message, calls appropriate methods.
-	 * @param message
-	 */
-	public void readTUIMessage(String message) {
+	public void connect() {
+		//Socket and Port and IPaddress in the TUI.
+		if (!(addr == null) && port >= 0 && port <= 65535) {
+			//Check the IP address
+			try {
+				socket = new Socket(addr, port);
+				view.socketCreated();
+			} catch (IOException e) {
+				view.noConnection();
+				reset(); 
+			}
+			
+		}
 		
 	}
 	
@@ -145,8 +221,26 @@ public class Client implements Observer {
 	 * Disconnects from the server.
 	 */
 	private void disconnect() {
-		
+		try {
+			socket.close();
+		} catch (IOException e) {
+			view.printMessage("Problem while disconnecting");
+		}
 	}
+	
+	// <<---- Game related methods ---------->>
+	/**
+	 * Makes the connection to server, calls readTUIMessage(), if rules are fine setup game, 
+	 * else notify TUI.
+	 * @param message
+	 */
+	public void startGame() {
+		if (me != null && players != null && board != null) {
+			//TODO
+		}
+	}
+	
+
 	
 	/** 
 	 * Makes the moves on the board, handles boards exception after getting the coordinates from 
@@ -155,9 +249,9 @@ public class Client implements Observer {
 	 * @param y Y Coordinate of the Tower, the player is playing.
 	 * @param id ID of the player whose move it is.
 	 */
-	public void makeMove(int x, int y, int id) {
+	public void makeMove(int newX, int newY, int newID) {
 		try {
-			board.makeMove(x, y, id);
+			board.makeMove(newX, newY, newID);
 		} catch (IllegalCoordinatesException e) {
 			disconnect();
 		}
@@ -166,12 +260,29 @@ public class Client implements Observer {
 	/** 
 	 * Determines the next move to play, asks TUI in case of Human Player or the method of Computer
 	 * Player, handles exceptions before server communication (local check).
-	 * @param x
-	 * @param y
-	 * @return
+	 * @return the TowerCoordinates the me-Player wants to play.
 	 */
-	public TowerCoordinates determineMove(int x, int y) {
-		return null;
+	public TowerCoordinates determineMove() {
+		if (me != null) {
+			if (me instanceof ComputerPlayer) {
+				return ((ComputerPlayer) me).determineMove(board);
+			} else {
+				boolean valid = false;
+				TowerCoordinates coord = new TowerCoordinates(-1, -1);
+				while (!valid) {
+					coord = view.determineMove("Please enter the "
+						+ "coordinates of your next move");
+					if (board.isValidMove(coord.getX(), coord.getY())) {
+						valid = true;
+					} else {
+						view.printMessage("Invalid coordinates \n");
+					} 
+				}
+				return coord;
+			}
+		} else {
+			return null;
+		}
 	}
 	
 	/** 
@@ -179,16 +290,28 @@ public class Client implements Observer {
 	 * @return
 	 */
 
-	public List<List<Integer>> getBoardData() {
-		return null;
-	}
-	
-
+// <<--------- Start/End of application ----------->>
 	/**
 	 * Starts the TUI, so starts the communication with the user.
 	 */
 	public void start() {
 		view.start();
+	}
+	
+	public void reset() {
+		view = new ClientTUI(this); 
+		board = null;
+		playerName = "Initial";
+		strategy = null;
+		me = null;
+		players = null;
+		socket = null;
+		addr = null;
+		port = -1;
+		x = Board.DEFAULT_DIM;
+		y = Board.DEFAULT_DIM;
+		z = Board.DEFAULT_DIM;
+		win = Board.DEFAULT_WIN;
 	}
 
 	/**
@@ -199,13 +322,31 @@ public class Client implements Observer {
 		Client client = new Client();
 		client.start();
 	}
+	
+	/**
+	 * Terminates the application.
+	 */
+	public void shutdown() {
+		//TODO
+	}
 
-	// Observer pattern
+// << --------- Observer pattern ------------>>
+	/**
+	 * After a change is made on the board, the client will alert the TUI 
+	 * to print the changed situation.
+	 * @param observable Board to observe.
+	 * @param type Type of change the board has made.
+	 */
 	@Override
 	public void update(Observable observable, Object type) {
 		if (observable instanceof Board && type instanceof Integer) {
-			Board board = (Board) observable;
-			view.printBoard(board.deepDataCopy(), board.xDim, board.yDim, board.zDim);
+			Board playboard = (Board) observable;
+			int id = 1;
+			if (players != null) {
+				id = players.size();
+			}
+			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
+					playboard.yDim, playboard.zDim, id);
 		}
 	}
 }
