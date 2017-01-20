@@ -1,7 +1,6 @@
 package controller;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +39,12 @@ public class Server {
 	private List<Player> lobbyPlayerList;
 	private Map<Player, Socket> playerMap;
 	private PlayerIDProvider playerIDProvider;
-	private ServerSocket serverSocket;
 	private static final String USAGE = "";
+	private view.ServerTUI view;
 	
-	public Server(int port, boolean enableExtensions) throws IOException {
+	public Server(int port, boolean enableExtensions, view.ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
-		serverSocket = new ServerSocket(port);
 	}
 	
 	/** 
@@ -62,8 +60,11 @@ public class Server {
 					Integer.parseInt(args[0]) >= 0 && Integer.parseInt(args[0]) <= 65535) {
 				port = Integer.parseInt(args[0]);
 				enableExtensions = Boolean.parseBoolean(args[1]);
-				Server server = new Server(port, enableExtensions);
-				server.goListen();
+				view.ServerTUI view = new view.ServerTUI();
+				Server server = new Server(port, enableExtensions, view);
+				ServerListener listener = new ServerListener(port, view);
+				listener.addObserver((Observer) server);
+				listener.run();
 			} else {
 				System.out.println(USAGE);
 			}
@@ -74,9 +75,19 @@ public class Server {
 		}
 	}
 	
-	public void goListen() throws IOException {
-		Socket socket = serverSocket.accept();
-		// Protocol is needed here.
+	public void update(Observable o, Object arg) {
+		// Client connects
+		if (arg instanceof Socket) {
+			System.out.println(((Socket) arg).getInetAddress() + " connected at port " + ((Socket) arg).getPort());
+			//initConnection((Socket) arg);
+		// Message, atm just errors
+		} else if (arg instanceof String) {
+			System.err.println(o.toString() + arg);
+		}
+	}
+	
+	public void initConnection(Socket socket) {
+		ServerPeer peer = new ServerPeer(socket, view);
 	}
 	
 	/**
