@@ -27,9 +27,13 @@ public class Client implements Observer {
 	private int port;
 	
 	// needed for the game.
+	/*@ private invariant (playGame ==> (board != null 
+	  @ && players != null && me != null && hintGiver !=null)); */
+	private boolean playGame;
 	private Board board;
 	private List<Player> players;
 	private Player me;
+	private ComputerPlayer hintGiver;
 	
 	// needed in case the user wants to play as human player.
 	private String playerName;
@@ -51,6 +55,7 @@ public class Client implements Observer {
 		playerName = "Initial";
 		strategy = null;
 		me = null;
+		hintGiver = new ComputerPlayer(-1);
 		players = null;
 		socket = null;
 		addr = null;
@@ -266,7 +271,7 @@ public class Client implements Observer {
 	 * @return the TowerCoordinates the me-Player wants to play.
 	 */
 	public TowerCoordinates determineMove() {
-		if (me != null) {
+		if (me != null && board != null) {
 			if (me instanceof ComputerPlayer) {
 				return ((ComputerPlayer) me).determineMove(board);
 			} else {
@@ -288,7 +293,10 @@ public class Client implements Observer {
 	}
 	
 	public TowerCoordinates determineHint() {
-		return null;	
+		if (board != null) {
+			return hintGiver.determineMove(board);
+		}
+		return new TowerCoordinates(-1, -1);	
 	}
 	
 	/** 
@@ -348,8 +356,7 @@ public class Client implements Observer {
 		if (observable instanceof Board && type instanceof Integer) {
 			Board playboard = (Board) observable;
 			int id = 1;
-				id = players.size();
-			}
+			id = players.size();
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
 		}

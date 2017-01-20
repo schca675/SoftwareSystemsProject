@@ -56,8 +56,7 @@ public class ClientTUI {
 						errorMessage(6);
 				}
 			}
-		
-		}
+		}		
 	}
 	
 	/**
@@ -107,20 +106,19 @@ public class ClientTUI {
 	//TODO check boundaries / representation
 	public void printBoard(List<List<Integer>> boardData, int x, int y, int z, int id) {
 		for (int k = 0; k < z; k++) {
-			System.out.println("Level " + k + "\n\n");
+			System.out.println("\nLevel " + (k + 1) + "\n");
 			for (int j = 0; j < y; j++) {
 				System.out.println(drawLine(id, x));
 				System.out.println(dashedLine(id, x));
 				StringBuilder cells = new StringBuilder();
 				for (int h = 0; h < x; h++) {
-					cells.append("| " + boardData.get(h).get(j) + " |");
+					cells.append("|   " + boardData.get(h).get(j) + "   ");
 				}
+				cells.append("|");
 				System.out.println(cells.toString());
 				System.out.println(dashedLine(id, x));
 			}
-			for (int i = 0; i < x; i++) {
-				System.out.println("----");	
-			}
+			System.out.println(drawLine(id, x));
 		}
 	}
 	
@@ -131,16 +129,19 @@ public class ClientTUI {
 	 * @return the finished line.
 	 */
 	//@ requires amount >= 0 && times > 0;
+	//TODO amount /10 not working yet.
 	public String drawLine(int amount, int times) {
 		String part = "";
-		for (int i = 0; i < (amount / 10 + 1 + 4); i++) {
-			part = part + "_";
+		int idLength = (int) (Math.log10(amount) + 1);
+		for (int i = 0; i < (idLength + 4 + 2); i++) {
+			part = part + "-";
 		}
+		part = part + "+";
 		StringBuilder line = new StringBuilder();
+		line.append('+');
 		for (int j = 0; j < times; j++) {
 			line.append(part);
 		}
-		line.append("\n");
 		return line.toString();
 	}
 	
@@ -153,14 +154,15 @@ public class ClientTUI {
 	//@ requires amount >= 0 && times > 0;
 	public String dashedLine(int amount, int times) {
 		String part = "|";
-		for (int i = 0; i < (amount / 10 + 1 + 4); i++) {
+		int idLength = (int) (Math.log10(amount) + 1);
+		for (int i = 0; i < (idLength + 4 + 2); i++) {
 			part = part + " ";
 		}
 		StringBuilder line = new StringBuilder();
 		for (int j = 0; j < times; j++) {
 			line.append(part);
 		}
-		line.append("| \n");
+		line.append('|');
 		return line.toString();
 	}
 		
@@ -466,7 +468,7 @@ public class ClientTUI {
 	}
 	
 	
-	// <<--------- Not needed methods yet ------------->>
+	// <<--------- Request input methods ------------->>
 	/**
 	 * Determines whether the user enters Yes or No.
 	 * @param message Message to print on the screen.
