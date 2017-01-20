@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Observable;
 
-public class Board {
+public class Board extends Observable {
 	
 	// <------ Constants ------>
 	

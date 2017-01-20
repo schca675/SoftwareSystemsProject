@@ -274,7 +274,7 @@ public class Client implements Observer {
 				TowerCoordinates coord = new TowerCoordinates(-1, -1);
 				while (!valid) {
 					coord = view.determineMove(); 
-					if (board.isValidMove(coord.getX(), coord.getY())) {
+					if (coord != null && board.isValidMove(coord.getX(), coord.getY())) {
 						valid = true;
 					} else {
 						view.errorMessage(4);
@@ -285,6 +285,10 @@ public class Client implements Observer {
 		} else {
 			return null;
 		}
+	}
+	
+	public TowerCoordinates determineHint() {
+		return null;	
 	}
 	
 	/** 
@@ -344,7 +348,6 @@ public class Client implements Observer {
 		if (observable instanceof Board && type instanceof Integer) {
 			Board playboard = (Board) observable;
 			int id = 1;
-			if (players != null) {
 				id = players.size();
 			}
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 

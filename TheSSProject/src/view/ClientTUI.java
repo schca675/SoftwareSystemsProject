@@ -73,12 +73,30 @@ public class ClientTUI {
 	 * @param prompt Message to print on the screen.
 	 * @return tower Coordinates for the next move.
 	 */
-	// make a while loop in client which is only broken when the input given by the Tui 
-	// does not throw an exception, could use 2 different Strings to print the message.
+
+	//TODO check it.
 	public TowerCoordinates determineMove() {
-		System.out.println("Please enter the coordinates of your next move");
-		String format = "Please write the coordinates in this form: x y";
-		return readCoordinates(format);
+		boolean validMove = false;
+		while (!validMove) {
+			System.out.println("Please enter the coordinates of"
+					+ " your next move or write \"Hint\" to get a suggested move");
+			if (scanny.hasNextInt()) {
+				String format = "Please write the coordinates in this form: x y";
+				return readCoordinates(format);
+			} else if (scanny.hasNext()) {
+				String input = scanny.next();
+				if (input.equals("Hint")) {
+					TowerCoordinates coord = client.determineHint();
+					System.out.println("This move is suggested: \n x = "
+							+ coord.getX() + "\n y = " + coord.getY());
+					validMove = readBoolean("Do you want to play this move?", "yes", "no");
+					if (validMove) { 
+						return coord;
+					}
+				}
+			}
+		}
+		return null;	
 	}
 	
 	/**
