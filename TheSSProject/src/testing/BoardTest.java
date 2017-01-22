@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import model.Board;
-import model.PlayerID;
+import model.IllegalBoardConstructorArgumentsException;
 
 public class BoardTest {
 	
@@ -23,7 +23,7 @@ public class BoardTest {
 	  @ == Board.DEFAULT_ZDIM == Board.DEFAULT_WIN;  */
 	public static final int MIN = 1;
 	public static final int MAX = Board.DEFAULT_DIM;
-	//@ requires Board.DEFAULT_XDIM > 1;
+	//@ requires Board.DEFAULT_DIM > 1;
 	public static final int BET = Board.DEFAULT_DIM - 1;
 	public static final int TOLOW = 0;
 	public static final int TOHIGH = Board.DEFAULT_DIM + 1;
@@ -34,16 +34,20 @@ public class BoardTest {
 	@Before
 	public void setUp() {
 		board = new Board();
-		specialBoard = new Board(LENGTH, WIDTH, HEIGHT, WIN);
+		try {
+			specialBoard = new Board(LENGTH, WIDTH, HEIGHT, WIN);
+		} catch (IllegalBoardConstructorArgumentsException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	// <------ Test the constructors ------>
 	 
 	@Test
 	public void testDefaultDimension() {
-		assertEquals(Board.DEFAULT_XDIM, board.xDim);
-		assertEquals(Board.DEFAULT_YDIM, board.yDim);
-		assertEquals(Board.DEFAULT_ZDIM, board.zDim);
+		assertEquals(Board.DEFAULT_DIM, board.xDim);
+		assertEquals(Board.DEFAULT_DIM, board.yDim);
+		assertEquals(Board.DEFAULT_DIM, board.zDim);
 		assertEquals(Board.DEFAULT_WIN, board.winningLength);
 	}
 
