@@ -477,6 +477,8 @@ public class ClientTUI {
 			case 12:
 				System.out.println("Protocol irregularities");
 				break;
+			case 13:
+				System.out.println("Server sent an illegal move.");
 			default:
 				break;
 		}

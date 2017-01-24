@@ -409,6 +409,8 @@ public class Board extends Observable {
 	public void makeMove(int x, int y, Integer playerID) throws IllegalCoordinatesException {
 		if (isValidMove(x, y)) {
 			getTower(x, y).add(playerID);
+			setChanged();
+			notifyObservers(1);
 		} else if (!isValidTower(x, y)) {
 			throw new CoordinatesOutOfBoundsException(x, y, this);
 		} else if (zDim != UNLIMITED_Z && getTowerHeight(x, y) >= zDim) {

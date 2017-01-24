@@ -18,22 +18,14 @@ import model.Strategy;
 import model.TowerCoordinates;
 import view.ClientTUI;
 
-public class Client implements Observer {
+public class Client {
 	private ClientTUI view;
 	
 	//needed for the server connection.
 	private InetAddress addr;
 	private Socket socket;
 	private int port;
-	
-	// needed for the game.
-	/*@ private invariant (playGame ==> (board != null 
-	  @ && players != null && me != null && hintGiver !=null)); */
-	private boolean playGame;
-	private Board board;
-	private List<Player> players;
-	private Player me;
-	private ComputerPlayer hintGiver;
+	private Thread client;
 	
 	// needed in case the user wants to play as human player.
 	private String playerName;
@@ -46,17 +38,17 @@ public class Client implements Observer {
 	private int z;
 	private int win;
 	
+	//needed in case the player wants a hint.
+	private ComputerPlayer hintGiver;
+	private Board board;
+	
 	/**
 	 * Constructor, empty for now.
 	 */
 	public Client() { 
 		view = new ClientTUI(this); 
-		board = null;
 		playerName = "Initial";
 		strategy = null;
-		me = null;
-		hintGiver = new ComputerPlayer(-1);
-		players = null;
 		socket = null;
 		addr = null;
 		port = -1;
@@ -64,6 +56,7 @@ public class Client implements Observer {
 		y = Board.DEFAULT_DIM;
 		z = Board.DEFAULT_DIM;
 		win = Board.DEFAULT_WIN;
+		hintGiver = new ComputerPlayer(-1);
 	}
 	
 	//<<--------- Methods to communicate with TUI -------->>
@@ -205,7 +198,7 @@ public class Client implements Observer {
 				reset(); 
 			}
 			try {
-				Thread client = new ClientCommunication(socket, view, playerName);
+				client = new ClientCommunication(socket, view, playerName, this);
 				client.start();
 				try {
 					client.join();
@@ -235,61 +228,11 @@ public class Client implements Observer {
 	}
 	
 	// <<---- Game related methods ---------->>
+	
 	/**
-	 * Makes the connection to server, calls readTUIMessage(), if rules are fine setup game, 
-	 * else notify TUI.
-	 * @param message
+	 * Gives the playing user a hint.
+	 * @return the hint of the internal computerplayer.
 	 */
-	public void startGame() {
-		if (me != null && players != null && board != null) {
-			//TODO
-		}
-	}
-	
-
-	
-	/** 
-	 * Makes the moves on the board, handles boards exception after getting the coordinates from 
-	 * the server.
-	 * @param x X Coordinate of the Tower, the player is playing.
-	 * @param y Y Coordinate of the Tower, the player is playing.
-	 * @param id ID of the player whose move it is.
-	 */
-	public void makeMove(int newX, int newY, int newID) {
-		try {
-			board.makeMove(newX, newY, newID);
-		} catch (IllegalCoordinatesException e) {
-			disconnect();
-		}
-	}
-	
-	/** 
-	 * Determines the next move to play, asks TUI in case of Human Player or the method of Computer
-	 * Player, handles exceptions before server communication (local check).
-	 * @return the TowerCoordinates the me-Player wants to play.
-	 */
-	public TowerCoordinates determineMove() {
-		if (me != null && board != null) {
-			if (me instanceof ComputerPlayer) {
-				return ((ComputerPlayer) me).determineMove(board);
-			} else {
-				boolean valid = false;
-				TowerCoordinates coord = new TowerCoordinates(-1, -1);
-				while (!valid) {
-					coord = view.determineMove(); 
-					if (coord != null && board.isValidMove(coord.getX(), coord.getY())) {
-						valid = true;
-					} else {
-						view.errorMessage(4);
-					} 
-				}
-				return coord;
-			}
-		} else {
-			return null;
-		}
-	}
-	
 	public TowerCoordinates determineHint() {
 		if (board != null) {
 			return hintGiver.determineMove(board);
@@ -297,10 +240,6 @@ public class Client implements Observer {
 		return new TowerCoordinates(-1, -1);	
 	}
 	
-	/** 
-	 * Gets the board data from the board for use by the UI.
-	 * @return
-	 */
 
 // <<--------- Start/End of application ----------->>
 	/**
@@ -312,11 +251,8 @@ public class Client implements Observer {
 	
 	public void reset() {
 		view.errorMessage(10); 
-		board = null;
 		playerName = "Initial";
 		strategy = null;
-		me = null;
-		players = null;
 		socket = null;
 		addr = null;
 		port = -1;
@@ -343,21 +279,5 @@ public class Client implements Observer {
 		//TODO
 	}
 
-// << --------- Observer pattern ------------>>
-	/**
-	 * After a change is made on the board, the client will alert the TUI 
-	 * to print the changed situation.
-	 * @param observable Board to observe.
-	 * @param type Type of change the board has made.
-	 */
-	@Override
-	public void update(Observable observable, Object type) {
-		if (observable instanceof Board && type instanceof Integer) {
-			Board playboard = (Board) observable;
-			int id = 1;
-			id = players.size();
-			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
-					playboard.yDim, playboard.zDim, id);
-		}
-	}
+
 }
