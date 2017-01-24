@@ -49,7 +49,7 @@ public class Client implements Observer {
 	/**
 	 * Constructor, empty for now.
 	 */
-	public Client() {
+	public Client() { 
 		view = new ClientTUI(this); 
 		board = null;
 		playerName = "Initial";
@@ -214,13 +214,27 @@ public class Client implements Observer {
 		if (!(addr == null) && port >= 0 && port <= 65535) {
 			//Check the IP address
 			try {
-				socket = new Socket(addr, port);
+				socket = new Socket(addr, port);				
 				view.valid(1);
 			} catch (IOException e) {
 				view.errorMessage(5);
 				reset(); 
 			}
-			
+			try {
+				Thread client = new ClientCommunication(socket, view);
+				client.start();
+				try {
+					client.join();
+				} catch (InterruptedException e) {
+					//do nothing
+				}
+				
+			} catch (IOException e) {
+				view.errorMessage(8);
+				reset();
+			} finally {
+				reset();
+			}		
 		}
 		
 	}
@@ -313,7 +327,7 @@ public class Client implements Observer {
 	}
 	
 	public void reset() {
-		view = new ClientTUI(this); 
+		view.errorMessage(10); 
 		board = null;
 		playerName = "Initial";
 		strategy = null;
@@ -326,6 +340,7 @@ public class Client implements Observer {
 		y = Board.DEFAULT_DIM;
 		z = Board.DEFAULT_DIM;
 		win = Board.DEFAULT_WIN;
+		view.startMenu();
 	}
 
 	/**

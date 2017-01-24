@@ -18,7 +18,7 @@ public class ClientTUI {
 	public ClientTUI(Client client) { 
 		this.client = client;
 		scanny = new Scanner(System.in);
-	}
+	} 
 	
 	/**
 	 * Starts the TUI with the startMenu.
@@ -453,14 +453,23 @@ public class ClientTUI {
 				System.out.println("Invalid coordinates.\n");
 				break;
 			case 5:
-				System.out.println("The connection failed. You return to the start menu.\n");
+				System.out.println("The socket connection failed. You return to the start menu.\n");
 				startMenu();
 				break;
 			case 6:
-				System.out.println("Invalid input");
+				System.out.println("Invalid input\n");
 				break;
 			case 7:
-				System.out.println("Not a valid Strategy");
+				System.out.println("Not a valid Strategy.\n");
+				break;	
+			case 8: 
+				System.out.println("The Stream connection failed.\n");
+				break;
+			case 9:
+				System.out.println("Problems while communicating with the server.\n");
+				break;
+			case 10: 
+				System.out.println("You return to the start menu.\n");
 				break;
 			default:
 				break;
