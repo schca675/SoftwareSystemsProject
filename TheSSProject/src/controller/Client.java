@@ -190,22 +190,6 @@ public class Client implements Observer {
 	
 	// <--------- Connection methods --------->>
 	/**
-	 * Reads a server message from the socket, and calls appropriate methods.
-	 */
-	public void readServerMessage() {
-		
-	}
-	
-	/**
-	 * Sends a message to the server via the socket.
-	 * @param message
-	 */
-	public void sendServerMessage(String message) {
-		
-	}
-	
-
-	/**
 	 * Connecting to server.
 	 * If the connection fails, the TUI gets informed and the client resets.
 	 */
@@ -221,7 +205,7 @@ public class Client implements Observer {
 				reset(); 
 			}
 			try {
-				Thread client = new ClientCommunication(socket, view);
+				Thread client = new ClientCommunication(socket, view, playerName);
 				client.start();
 				try {
 					client.join();
@@ -231,7 +215,7 @@ public class Client implements Observer {
 				
 			} catch (IOException e) {
 				view.errorMessage(8);
-				reset();
+				reset(); 
 			} finally {
 				reset();
 			}		

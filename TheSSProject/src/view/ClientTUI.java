@@ -466,10 +466,16 @@ public class ClientTUI {
 				System.out.println("The Stream connection failed.\n");
 				break;
 			case 9:
-				System.out.println("Problems while communicating with the server.\n");
+				System.out.println("Problems while writing to the server.\n");
 				break;
 			case 10: 
 				System.out.println("You return to the start menu.\n");
+				break;
+			case 11:
+				System.out.println("Problems while listening to the server");
+				break;
+			case 12:
+				System.out.println("Protocol irregularities");
 				break;
 			default:
 				break;
