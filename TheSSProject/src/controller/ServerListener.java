@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Observable;
 
 public class ServerListener extends Observable implements Runnable {
@@ -25,7 +26,9 @@ public class ServerListener extends Observable implements Runnable {
 		}
 		while (!exit) {
 			try {
-				notifyObservers(listener.accept());
+				Socket socket = listener.accept();
+				setChanged();
+				notifyObservers(socket);
 			} catch (IOException e) {
 				notifyObservers(LISTEN_ERROR);
 			}

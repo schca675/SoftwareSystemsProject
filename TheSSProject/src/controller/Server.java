@@ -8,8 +8,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import model.Player;
+import view.ServerTUI;
 
-public class Server {
+public class Server implements Observer {
 	public class PlayerIDProvider implements Observer {
 		private List<Integer> usedIDs;
 		
@@ -34,10 +35,15 @@ public class Server {
 		}
 	}
 	
+	public static final int EXT_PLAYERS = 2;
+	public static final int EXT_DIM = 0;
+	public static final int EXT_WINLENGTH = 0;
+	
 	private int port;
 	private boolean enableExtensions;
 	private List<Player> lobbyPlayerList;
-	private Map<Player, Socket> playerMap;
+	private Map<Player, Socket> socketMap;
+	private Map<Player, Capabilities> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
 	private static final String USAGE = "";
 	private view.ServerTUI view;
@@ -45,6 +51,9 @@ public class Server {
 	public Server(int port, boolean enableExtensions, view.ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
+		ServerListener listener = new ServerListener(port, view);
+		listener.addObserver(this);
+		listener.run();
 	}
 	
 	/** 
@@ -60,11 +69,8 @@ public class Server {
 					Integer.parseInt(args[0]) >= 0 && Integer.parseInt(args[0]) <= 65535) {
 				port = Integer.parseInt(args[0]);
 				enableExtensions = Boolean.parseBoolean(args[1]);
-				view.ServerTUI view = new view.ServerTUI();
-				Server server = new Server(port, enableExtensions, view);
-				ServerListener listener = new ServerListener(port, view);
-				listener.addObserver((Observer) server);
-				listener.run();
+				ServerTUI view = new ServerTUI();
+				new Server(port, enableExtensions, view);
 			} else {
 				System.out.println(USAGE);
 			}
@@ -75,11 +81,13 @@ public class Server {
 		}
 	}
 	
+	@Override
 	public void update(Observable o, Object arg) {
 		// Client connects
 		if (arg instanceof Socket) {
-			System.out.println(((Socket) arg).getInetAddress() + " connected at port " + ((Socket) arg).getPort());
-			//initConnection((Socket) arg);
+			System.out.println("Client with IP " + ((Socket) arg).getInetAddress() + 
+					" connected at port " + ((Socket) arg).getPort());
+			initConnection((Socket) arg);
 		// Message, atm just errors
 		} else if (arg instanceof String) {
 			System.err.println(o.toString() + arg);
@@ -88,6 +96,16 @@ public class Server {
 	
 	public void initConnection(Socket socket) {
 		ServerPeer peer = new ServerPeer(socket, view);
+		peer.run();
+		if (enableExtensions) {
+			peer.sendCapabilities(EXT_PLAYERS, false, EXT_DIM, EXT_DIM, EXT_DIM, EXT_WINLENGTH, false);
+		} else {
+			peer.sendCapabilities(2, false, 4, 4, 4, 4, false);
+		}
+	}
+	
+	public List<Player> matchPlayers() {
+		
 	}
 	
 	/**
