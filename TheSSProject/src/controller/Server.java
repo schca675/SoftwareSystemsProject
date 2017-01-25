@@ -38,12 +38,14 @@ public class Server implements Observer {
 	public static final int EXT_PLAYERS = 2;
 	public static final int EXT_DIM = 0;
 	public static final int EXT_WINLENGTH = 0;
+	public static final boolean EXT_ROOMS = false;
+	public static final boolean EXT_CHAT = false;
 	
 	private int port;
 	private boolean enableExtensions;
 	private List<Player> lobbyPlayerList;
 	private Map<Player, Socket> socketMap;
-	private Map<Player, Capabilities> capabilitiesMap;
+	private Map<Player, ClientCapabilities> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
 	private static final String USAGE = "";
 	private view.ServerTUI view;
@@ -95,12 +97,16 @@ public class Server implements Observer {
 	}
 	
 	public void initConnection(Socket socket) {
-		ServerPeer peer = new ServerPeer(socket, view);
-		peer.run();
+		ServerPeer peer = null;
+		try {
+			peer = new ServerPeer(socket, view);
+			peer.run();
+		} catch (IOException e) { }
 		if (enableExtensions) {
-			peer.sendCapabilities(EXT_PLAYERS, false, EXT_DIM, EXT_DIM, EXT_DIM, EXT_WINLENGTH, false);
+			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, EXT_DIM, 
+					EXT_DIM, EXT_DIM, EXT_WINLENGTH, EXT_CHAT));
 		} else {
-			peer.sendCapabilities(2, false, 4, 4, 4, 4, false);
+			peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
 		}
 	}
 	

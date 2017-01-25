@@ -11,4 +11,6 @@ public class ServerTUI {
 	public void update(String message) {
 		System.out.println(message);
 	}
+	
+	public void printMessage(String message) {}
 }

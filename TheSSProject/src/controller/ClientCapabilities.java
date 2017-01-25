@@ -1,6 +1,6 @@
 package controller;
 
-public class Capabilities {
+public class ClientCapabilities {
 	public final int amountOfPlayers;
 	public final String playerName;
 	public final boolean roomSupport;
@@ -11,7 +11,7 @@ public class Capabilities {
 	public final boolean chatSupport;
 	public final boolean autoRefresh;
 	
-	public Capabilities(int amountOfPlayers, String playerName, boolean roomSupport, int maxXDim, 
+	public ClientCapabilities(int amountOfPlayers, String playerName, boolean roomSupport, int maxXDim, 
 			int maxYDim, int maxZDim, int winLength, boolean chatSupport, boolean autoRefresh) {
 		this.amountOfPlayers = amountOfPlayers;
 		this.playerName = playerName;
