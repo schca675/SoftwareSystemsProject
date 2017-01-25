@@ -419,9 +419,18 @@ public class ClientTUI {
 	}
 
 	// <<---------- Methods to transfer messages -------->>
+	
+	/**
+	 * Print a message on the Terminal.
+	 * @param message Message to print.
+	 */
+	public void print(String message) {
+		System.out.println(message);
+	}
+	
 	/**
 	 * Successfull messages.
-	 * @param type
+	 * @param type Type of successfull message.
 	 */
 	public void valid(int type) {
 		switch (type) {

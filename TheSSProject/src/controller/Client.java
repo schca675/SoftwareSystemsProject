@@ -43,7 +43,7 @@ public class Client {
 	private Board board;
 	
 	/**
-	 * Constructor, empty for now.
+	 * Creates a new client.
 	 */
 	public Client() { 
 		view = new ClientTUI(this); 
@@ -127,9 +127,12 @@ public class Client {
 		connect();
 	}
 	
+	/**
+	 * Calls the terminate Menu.
+	 */
 	public void terminateMenu() {
 		view.terminateMenu();
-		shutdown();
+		disconnect();
 	}
 	
 	//<<---- Methods needed to do the setup --------------->
@@ -219,6 +222,7 @@ public class Client {
 	/** 
 	 * Disconnects from the server.
 	 */
+	//TODO see if this is needed.
 	private void disconnect() {
 		try {
 			socket.close();
@@ -271,13 +275,4 @@ public class Client {
 		Client client = new Client();
 		client.start();
 	}
-	
-	/**
-	 * Terminates the application.
-	 */
-	public void shutdown() {
-		//TODO
-	}
-
-
 }

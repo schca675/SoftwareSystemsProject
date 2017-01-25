@@ -104,7 +104,7 @@ public class ClientCommunication extends Thread implements Observer {
 		try { 
 			message = in.readLine();
 			react(message);
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			disconnect();
 		}
 	}
@@ -114,6 +114,10 @@ public class ClientCommunication extends Thread implements Observer {
 	 */
 	public void react(String input)  {
 		String[] message = input.split(" ");
+		//TODO to be deleted.
+		for (int i = 0; i < message.length; i++){
+			System.out.println(i + " : " + message[i]);
+		}
 		if (message.length >= 1) {
 			switch (message[0]) {
 				case SERVERCAPABILITIES:
@@ -130,6 +134,7 @@ public class ClientCommunication extends Thread implements Observer {
 				case ASSIGNID:
 					try {
 						if (message.length == 2) {
+							
 							int id = Integer.parseInt(message[1]);
 							me = new Player(name, id);
 						}
@@ -209,15 +214,33 @@ public class ClientCommunication extends Thread implements Observer {
 					break;
 				case NOTIFYEND:
 					// Should not be received if no game is on.
-					if (playing && message.length == 3) {
-						//TODO;
+					if (playing && message.length >= 2) {
+						try {
+							int reason = Integer.parseInt(message[1]);
+							int id = -1;
+							String result = "";
+							if (reason == 1 && message.length == 3) {
+								id = Integer.parseInt(message[2]);
+								result = determineEnd(reason, id);
+							} else {
+								result = determineEnd(reason);
+							}
+							view.print(result);
+						} catch (NumberFormatException e) {
+							view.errorMessage(12);
+							disconnect();
+						}
 					} else {
 						view.errorMessage(12);
 						disconnect();
 					}
 					break;
 				case ERROR:
-					//TODO;
+					if (message.length == 2) {
+						String type = message[1];
+						String error = getError(type);
+						view.print(error);
+					}
 					break;
 				default:
 					break;
@@ -252,7 +275,7 @@ public class ClientCommunication extends Thread implements Observer {
 			out.close();
 			in.close();
 			socket.close();
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			view.errorMessage(3);
 		}
 	}
@@ -267,7 +290,6 @@ public class ClientCommunication extends Thread implements Observer {
 	 */
 	//@ requires message.length == 8;
 	public String serverCapabilities(String[] message) throws InvalidSyntaxException {
-		//TODO
 		int amount = Integer.parseInt(message[1]);
 		boolean room = giveBoolean(message[2]);
 		int maxX = Integer.parseInt(message[3]);
@@ -348,11 +370,11 @@ public class ClientCommunication extends Thread implements Observer {
 	public Board makeBoard(String dimensions) throws InvalidSyntaxException, 
 		IllegalBoardConstructorArgumentsException, NumberFormatException {
 		String[] dims = dimensions.split("|");
-		if (dims.length == 4) {
+		if (dims.length == 7) {
 			int x = Integer.parseInt(dims[0]);
-			int y = Integer.parseInt(dims[1]);
-			int z = Integer.parseInt(dims[2]);
-			int win = Integer.parseInt(dims[4]);
+			int y = Integer.parseInt(dims[2]);
+			int z = Integer.parseInt(dims[4]);
+			int win = Integer.parseInt(dims[6]);
 			return new Board(x, y, z, win);
 		} else {
 			throw new InvalidSyntaxException(dimensions, " all the dimensions of the board");
@@ -371,7 +393,7 @@ public class ClientCommunication extends Thread implements Observer {
 		NumberFormatException {
 		List<Player> result = new ArrayList<Player>();
 		for (int i = 0; i < input.length; i++) {
-			String[] details = input[i].split("|");
+			String[] details = input[i].split("\\|");
 			if (details.length >= 2) {
 				int id = Integer.parseInt(details[0]);
 				String playerIName = details[1];
@@ -449,6 +471,42 @@ public class ClientCommunication extends Thread implements Observer {
 		}
 	}
 	
+	/**
+	 * Determine the type of end of the game.
+	 * @param reason reason why the game ended.
+	 * @param id player ID of the winner, in case of a win. 
+	 * @return String stating the end.
+	 */
+	public String determineEnd(int reason, int id) {
+		switch (reason) {
+			case 1:
+				return "Player " + id + " won the game";
+			default:
+				return determineEnd(reason);		
+		}
+	}
+	
+	/**
+	 * Determine the type of end of the game.
+	 * @param reason reason why the game ended.
+	 * @return String stating the end.
+	 */
+	public String determineEnd(int reason) {
+		switch (reason) {
+			case 1:
+				return "There is a winner.";
+			case 2:
+				return "Board is full: Draw.";
+			case 3:
+				return "A player disconnected, the game stops. No winner.";
+			case 4:
+				return "Current player did not respond within the "
+						+ "timeout, so the game stops. No winner";
+			default:
+				return "Unknown end situation";	
+		}
+	}
+	
 	// << --------- Observer pattern ------------>>
 		/**
 		 * After a change is made on the board, the client will alert the TUI 
@@ -468,4 +526,34 @@ public class ClientCommunication extends Thread implements Observer {
 	}
 
 
+	// <<------ Function provided by the interface ----->>
+	/**
+	 * Function to get Error message by error code defined in protocol.
+	 * @author Merel Meekes.
+	 * @param number String with error code defined in Protocol
+	 * @return Error explanation or null if invalid error code.
+	 */
+	public static String getError(String number) {
+		String result = null;
+		if (number.equals("1")) {
+			result = "Client has not yet sent capabilities message, Server cannot proceed";
+		} else if (number.equals("2")) {
+			result = "Room sent in message joinRoom does not exist";
+		} else if (number.equals("3")) {
+			result = "The chosen room is no longer available, either it already filled up or was "
+					+ "empty for too long";
+		} else if (number.equals("4")) {
+			result = "The input given by the client isn�t valid at this moment";
+		} else if (number.equals("5")) {
+			result = "The given move is not possible on this board";
+		} else if (number.equals("6")) {
+			result = "Client is not allowed to leave the room after the game has started";
+		} else if (number.equals("7")) {
+			result = "A message with piping in a wrong place was received";
+		} else {
+			result = "unknown error";
+		}
+
+		return result;
+	}
 }
