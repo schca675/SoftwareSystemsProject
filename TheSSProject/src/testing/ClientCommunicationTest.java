@@ -14,6 +14,9 @@ import view.ClientTUI;
 
 public class ClientCommunicationTest {
 
+	//TODO Observer hint does not work here
+	//TODO ComputerPlayer does not work
+	//TODO Representation does not work like this
 	/**
 	 * Test all the client communication Class method which do not need a Server connection.
 	 * @param args does not need any.
@@ -128,12 +131,16 @@ public class ClientCommunicationTest {
 		TowerCoordinates coords = client.determineMove();
 		System.out.println("Coordinates of this form: " + coords);
 		System.out.println("\n - with Computer player:");
+		//TODO does not work.
 		client.makeMe(null, new RandomStrategy(), 1);
 		coords = client.determineMove();
 		System.out.println("Coordinates of this form: " + coords);
 		
-		
-		//Test splitString
-		// client.react("startGame 3|4|4|4 2|Frank|342 3|kevin|345");
+		//Test makeMove
+		System.out.println("\nTest make Move:");
+		client.makeMove(2, 2, 1);
+		client.makeMove(2, 2, 1);
+		client.makeMove(2, 2, 1);
+		client.makeMove(2, 2, 1);
 	}
 }

@@ -90,7 +90,11 @@ public class Board extends Observable {
 			return isValidTower(x, y);
 		} else {
 			try {
-				return isValidTower(x, y) && getTowerHeight(x, y) < zDim;
+				if (isValidTower(x, y) && getTowerHeight(x, y) < zDim) {
+					return true;	
+				} else {
+					return false;
+				}
 			} catch (CoordinatesOutOfBoundsException e) {
 				return false;
 			}
@@ -193,7 +197,7 @@ public class Board extends Observable {
 	 */
 	//@ ensures \result == (\forall int x,y,z; isValidCell(x,y,z); !isEmptyCell(x,y,z));
 	/*@ pure @*/ public boolean isFull() {
-		if (zDim == UNLIMITED_Z) {
+		if (zDim == UNLIMITED_Z) { 
 			return false;
 		} else {
 			for (List<Integer> tower : boardData) {
@@ -225,8 +229,9 @@ public class Board extends Observable {
 			}
 		} else {
 			while (iterator.hasNext()) {
-				int x = getTowerCoordinates(iterator.nextIndex()).getX();
-				int y = getTowerCoordinates(iterator.nextIndex()).getY();
+				int next = iterator.nextIndex();
+				int x = getTowerCoordinates(next).getX();
+				int y = getTowerCoordinates(next).getY();
 				try {
 					if (getTowerHeight(x, y) < zDim) {
 						availableTowers.add(new TowerCoordinates(x, y));
@@ -236,7 +241,6 @@ public class Board extends Observable {
 					System.err.println(e.getMessage());
 					return null;
 				}
-				iterator.next();
 			}
 		}
 		return availableTowers;
@@ -336,7 +340,8 @@ public class Board extends Observable {
 		if (!isValidTower(x, y)) {
 			throw new CoordinatesOutOfBoundsException(x, y, this);
 		}
-		return boardData.get((x - 1) + (y - 1) * yDim);
+		return boardData.get((x - 1) + (y - 1) * xDim);
+		//TODO changed.
 	}
 	
 	/** 

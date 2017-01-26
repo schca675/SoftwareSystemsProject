@@ -115,8 +115,14 @@ public class ClientTUI extends Observable {
 				System.out.println(dashedLine(id, x));
 				StringBuilder cells = new StringBuilder();
 				for (int h = 0; h < x; h++) {
-					cells.append("|   " + boardData.get(h).get(j) + "   ");
-				}
+					if (boardData.get(h * y + j).size() < z + 1) {
+						System.out.println(h + " that was h and here is : " + (h*y + j));
+						System.out.println("Size: " + boardData.get(h * y + j).size());
+						cells.append("|   " + printMiddle(id) + "   ");
+					} else {
+						cells.append("|   " + boardData.get(h + j * x).get(j) + "   ");
+					}
+				} 
 				cells.append("|");
 				System.out.println(cells.toString());
 				System.out.println(dashedLine(id, x));
@@ -169,6 +175,14 @@ public class ClientTUI extends Observable {
 		return line.toString();
 	}
 		
+	public String printMiddle(int amount) {
+		int idLength = (int) (Math.log10(amount) + 1);
+		String result = "";
+		for (int i = 1; i <= idLength; i++) {
+			result = result + "/";
+		}
+		return result;
+	}
 	// <<------- Menus called by the StartMenu ---------->>
 	/**
 	 * Prints additional information for the game.

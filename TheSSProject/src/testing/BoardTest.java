@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -525,6 +527,11 @@ public class BoardTest {
 		}
 	}
 	
+	@Test
+	public void testDeepDataCopy() {
+		List<List<Integer>> data = board.deepDataCopy();
+		
+	}
 //	@Test
 //	public void testReset() {
 //		for (int i = 1; i <= 4; i++) {

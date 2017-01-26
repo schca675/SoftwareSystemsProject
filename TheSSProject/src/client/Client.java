@@ -52,7 +52,7 @@ public class Client {
 	/**
 	 * Initialises a game.
 	 */
-	public void playMenu() {
+	public void playMenu() { 
 		//Determine if user is a computer or a human player 
 		boolean human = view.determinePlayer();
 		if (human) { 

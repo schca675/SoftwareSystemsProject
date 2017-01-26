@@ -11,7 +11,7 @@ public class RandomStrategy implements Strategy {
 	
 	@Override
 	public String getName() {
-		return "Random strategy";
+		return "Randi";
 	}
 
 	//To do 

@@ -544,7 +544,8 @@ public class ClientCommunication implements Observer, Runnable {
 		if (observable instanceof Board && type instanceof Integer) {
 			Board playboard = (Board) observable;
 			int id = 1;
-			id = players.size();
+			//id = players.size();
+			id = 2;
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
 		} else if (observable instanceof ClientTUI && type.equals("Hint")) {
