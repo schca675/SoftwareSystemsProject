@@ -447,7 +447,7 @@ public class ClientTUI {
 	 * @param type what kind of message should be printed.
 	 */
 	//TODO work with enum.
-	public void errorMessage(int type) {
+	public void errorMessage(int type) { 
 		switch (type) {
 			case 1:
 				System.out.println("Invalid address name.\n");

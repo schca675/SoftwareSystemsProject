@@ -439,7 +439,8 @@ public class ClientCommunication extends Thread implements Observer {
 				boolean valid = false;
 				TowerCoordinates coord = new TowerCoordinates(-1, -1);
 				while (!valid) {
-					coord = view.determineMove(); 
+					//coord = client.determineMove(); 
+					//TODO hint
 					if (coord != null && board.isValidMove(coord.getX(), coord.getY())) {
 						valid = true;
 					} else {
@@ -487,7 +488,7 @@ public class ClientCommunication extends Thread implements Observer {
 	}
 	
 	/**
-	 * Determine the type of end of the game.
+	 * Determine the type of end of the game. 
 	 * @param reason reason why the game ended.
 	 * @return String stating the end.
 	 */
@@ -526,7 +527,7 @@ public class ClientCommunication extends Thread implements Observer {
 	}
 
 
-	// <<------ Function provided by the interface ----->>
+	// <<------ Function provided by the protocol interface ----->>
 	/**
 	 * Function to get Error message by error code defined in protocol.
 	 * @author Merel Meekes.
@@ -543,7 +544,7 @@ public class ClientCommunication extends Thread implements Observer {
 			result = "The chosen room is no longer available, either it already filled up or was "
 					+ "empty for too long";
 		} else if (number.equals("4")) {
-			result = "The input given by the client isn�t valid at this moment";
+			result = "The input given by the client is not valid at this moment";
 		} else if (number.equals("5")) {
 			result = "The given move is not possible on this board";
 		} else if (number.equals("6")) {

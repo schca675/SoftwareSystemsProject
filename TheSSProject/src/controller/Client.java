@@ -233,11 +233,16 @@ public class Client {
 	
 	// <<---- Game related methods ---------->>
 	
+	
+	public TowerCoordinates determineMove(Board board) {
+		return view.determineMove();
+	}
+	
 	/**
 	 * Gives the playing user a hint.
 	 * @return the hint of the internal computerplayer.
 	 */
-	public TowerCoordinates determineHint() {
+	public TowerCoordinates determineHint(Board board) {
 		if (board != null) {
 			return hintGiver.determineMove(board);
 		}

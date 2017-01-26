@@ -334,7 +334,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing XmY");
 		}
 	}
 	
@@ -356,7 +356,7 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing XpZ");
 		}
 	}
 	
@@ -384,17 +384,17 @@ public class BoardTest {
 	public void testHasWonXmZDir() {
 		//Short Test, not elaborated (to delete)
 		try {
-			board.makeMove(4, 1, PLAYER2);
-			board.makeMove(3, 1, PLAYER2);
-			board.makeMove(3, 1, PLAYER2);
-			board.makeMove(2, 1, PLAYER2);
-			board.makeMove(2, 1, PLAYER2);
-			board.makeMove(2, 1, PLAYER2);
-			board.makeMove(1, 1, PLAYER2);
-			board.makeMove(1, 1, PLAYER2);
-			board.makeMove(1, 1, PLAYER2);
-			board.makeMove(1, 1, PLAYER2);		
-			assertTrue(board.hasWon(4, 1));
+//			board.makeMove(4, 1, PLAYER2);
+//			board.makeMove(3, 1, PLAYER2);
+//			board.makeMove(3, 1, PLAYER2);
+//			board.makeMove(2, 1, PLAYER2);
+//			board.makeMove(2, 1, PLAYER2);
+//			board.makeMove(2, 1, PLAYER2);
+//			board.makeMove(1, 1, PLAYER2);
+//			board.makeMove(1, 1, PLAYER2);
+//			board.makeMove(1, 1, PLAYER2);
+//			board.makeMove(1, 1, PLAYER2);		
+//			assertTrue(board.hasWon(4, 1));
 			//board.reset();
 			for (int y = MIN; y <= MAX; y++) {
 				for (int x = MIN; x <= MAX; x++) {
@@ -423,7 +423,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing 1");
+			System.out.println("Exceptions while testing XmZ");
 		}
 	}
 	
