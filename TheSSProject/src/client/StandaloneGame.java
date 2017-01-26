@@ -1,5 +1,8 @@
-package controller;
+package client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,12 +10,13 @@ import java.util.Scanner;
 
 import model.Board;
 import model.ComputerPlayer;
-import model.CoordinatesOutOfBoundsException;
+import model.HumanPlayer;
+import model.IllegalBoardConstructorArgumentsException;
 import model.IllegalCoordinatesException;
 import model.Player;
 import model.TowerCoordinates;
 
-public class GameThread extends Thread {
+public class StandaloneGame {
 	
 	// <------ Instance variables ------>
 	
@@ -32,13 +36,12 @@ public class GameThread extends Thread {
 	/**
 	 * Create a game with default setting and rules and a random starter.
 	 * 
-	 * @param player1 Player 1 
-	 * @param player2 Player 2
+	 * @param players Players to play this game
 	 */
 	/*@ requires players != null && 
 	  @ (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
 	*/
-	public GameThread(List<Player> players) {
+	public StandaloneGame(List<Player> players) {
 		board = new Board();
 		this.players = new ArrayList<Player>(players.size()); 
 		this.players.addAll(players);
@@ -48,8 +51,7 @@ public class GameThread extends Thread {
 	
 	/**
 	 * Creates a game with specified dimensions of the board, winning length and random starter.
-	 * @param player1 Player 1
-	 * @param player2 Player 2
+	 * @param players Players to play this game
 	 * @param xDim X dimension of the board
 	 * @param yDim Y dimension of the board
 	 * @param zDim Z dimension of the board, -1 specifies unlimited
@@ -61,10 +63,13 @@ public class GameThread extends Thread {
 	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == Board.UNLIMITED_Z);
 	  @ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
 	*/
-	public GameThread(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
-		board = new Board(xDim, yDim, zDim, winningLength);
-		this.players = new ArrayList<Player>(players.size()); 
-		this.players.addAll(players);
+	public StandaloneGame(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
+		try {
+			board = new Board(xDim, yDim, zDim, winningLength);
+		} catch (IllegalBoardConstructorArgumentsException e) {
+			System.err.println(e.getMessage());
+		}
+		this.players = players;
 		currentPlayerIndex = randomStarter();
 		numberOfPlayers = players.size();
 	}
@@ -77,17 +82,19 @@ public class GameThread extends Thread {
 	 */
 	//@ ensures \result >= 0 && \result < numberOfPlayers;
 	public int randomStarter() {
-		Random random = new Random();
-		return random.nextInt(numberOfPlayers);	
+		return 0;
+/*		Random random = new Random();
+		return random.nextInt(numberOfPlayers);	*/
 	}
 	
 	// <------ Commands ------>
 	
-	/**
-	 * Starts the game.
-	 */
-	public void start() {
-		play();
+	public static void main(String[] args) {
+		List<Player> players = new ArrayList<Player>(2);
+		players.add(new HumanPlayer("Henk", 0));
+		players.add(new ComputerPlayer(1));
+		StandaloneGame game = new StandaloneGame(players);
+		game.play();
 	}
 	
 	/**
@@ -98,83 +105,68 @@ public class GameThread extends Thread {
 	 * he is replaced by a Computer player with random strategy.
 	 * If a computer player tries an invalid move //TODO
 	 */
-	// TODO include the communication here.
 	public void play() {
-		boolean winning = false;
-		Player currentplayer = players.get(currentPlayerIndex);
-		while (!winning && !board.isFull()) {
-			TowerCoordinates coord = getMove(currentplayer);
-			try {
-				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-			} catch (IllegalCoordinatesException e) {
-				currentplayer = new ComputerPlayer(currentplayer.playerID);
-				coord = ((ComputerPlayer) currentplayer).determineMove(board);
-				try {
-					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-				} catch (IllegalCoordinatesException ex) {
-					//TODO
-				}				
+		currentSituation();
+		boolean gameOver = false;
+		int attempts = 0;
+		while (!gameOver) {
+			Player currentPlayer = players.get(currentPlayerIndex);
+			TowerCoordinates coords;
+			if (currentPlayer instanceof HumanPlayer) {
+				coords = requestHumanMove(currentPlayer.playerID);
+			} else {
+				ComputerPlayer computerPlayer = (ComputerPlayer) currentPlayer;
+				coords = computerPlayer.determineMove(board);
 			}
-			informClients(coord, currentplayer.playerID);
 			try {
-				winning = board.hasWon(coord.getX(), coord.getY());
-			} catch (CoordinatesOutOfBoundsException e) {
-				winning = false;
-			}
-			if (!winning) {
-				if (numberOfPlayers == 2) {
-					currentPlayerIndex = 1 - currentPlayerIndex;
-				} else {
-					currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+				board.makeMove(coords.getX(), coords.getY(), currentPlayer.playerID);
+				if (board.hasWon(coords.getX(), coords.getY())) {
+					System.out.println("Player " + currentPlayer.name + " has won");
+					gameOver = true;
+				} else if (board.isFull()) {
+					System.out.println("Draw, board is full");
+					gameOver = true;
+				} else {			
+					currentPlayerIndex = currentPlayerIndex + 1;
+					currentPlayerIndex = currentPlayerIndex % numberOfPlayers;
+					attempts = 0;
 				}
-				currentplayer = players.get(currentPlayerIndex);	
+			} catch (NullPointerException e) {
+				attempts++;
+			} catch (IllegalCoordinatesException e) {
+				attempts++;
+				if (currentPlayer instanceof HumanPlayer) {
+					System.out.println(e.getMessage());
+				}
+			} finally {
+				if (attempts > 3) {
+					gameOver = true;
+				}
+				currentSituation();
 			}
-		}
-		if (winning) {
-			//  The currentplayer is the winner.
-			//TODO
-		} else {
-			// The board is full, so there is a draw.
-			//TODO
 		}
 	}
 	
-	/**
-	 * Requests the next move from the currentplayer via the communication of the socket.
-	 * @param current current player
-	 * @return the coordinates, the current player wants to play.
-	 */
-	//TODO
-	private TowerCoordinates getMove(Player current) {
+	public TowerCoordinates requestHumanMove(int playerID) {
+		String message = "Player " + playerID + ", make your move. Enter in format: x y";
+		System.out.println(message);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			String[] splitInput = reader.readLine().split(" ");
+			if (splitInput.length == 2 && splitInput[0].length() == 1 
+					&& splitInput[1].length() == 1) {
+				int x = Integer.parseInt(splitInput[0]);
+				int y = Integer.parseInt(splitInput[1]);
+				return new TowerCoordinates(x, y);
+			}
+		} catch (NumberFormatException e) {
+			System.out.println(message);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 	
-	/**
-	 * Communicates the next moves to all its clients.
-	 * @param coord Coordinates for the next move.
-	 * @param id ID of player that executes the move.
-	 */
-	private void informClients(TowerCoordinates coord, int id) {
-		
-	}
-	
-	/**
-	 * Terminates the game.
-	 * The final situation is communicated to the players (Win or Draw)
-	 * and the Server disconnects from the clients.
-	 * @param winning
-	 */
-	private void finalSituation(boolean winning) {
-		if (winning) {
-			//  The currentplayer is the winner.
-			//TODO
-		} else {
-			// The board is full, so there is a draw.
-			//TODO
-		}
-		//TODO
-		// Disconnecting
-	}
 	/**
 	 * Determines whether the user enters Yes or No.
 	 * @param message Message to print on the screen.

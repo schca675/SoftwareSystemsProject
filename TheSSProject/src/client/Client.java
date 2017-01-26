@@ -1,4 +1,4 @@
-package controller;
+package client;
 
 import java.io.IOException;
 import java.net.InetAddress;

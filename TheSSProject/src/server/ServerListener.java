@@ -1,4 +1,4 @@
-package controller;
+package server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,7 +13,7 @@ public class ServerListener extends Observable implements Runnable {
 	private ServerSocket listener;
 	boolean exit = false;
 	
-	public ServerListener(int port, view.ServerTUI view) {
+	public ServerListener(int port, server.ServerTUI view) {
 		this.port = port;
 	}
 	

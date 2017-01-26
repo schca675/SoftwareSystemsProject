@@ -1,4 +1,4 @@
-package controller;
+package server;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import client.ClientCapabilities;
 import model.Player;
-import view.ServerTUI;
 
 public class Server implements Observer {
 	public class PlayerIDProvider implements Observer {
@@ -48,9 +48,9 @@ public class Server implements Observer {
 	private Map<Player, ClientCapabilities> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
 	private static final String USAGE = "";
-	private view.ServerTUI view;
+	private server.ServerTUI view;
 	
-	public Server(int port, boolean enableExtensions, view.ServerTUI view) throws IOException {
+	public Server(int port, boolean enableExtensions, server.ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		ServerListener listener = new ServerListener(port, view);

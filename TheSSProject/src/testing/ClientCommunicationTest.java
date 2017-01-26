@@ -2,7 +2,7 @@ package testing;
 
 import java.util.List;
 
-import controller.ClientCommunication;
+import client.ClientCommunication;
 import model.Board;
 import model.IllegalBoardConstructorArgumentsException;
 import model.InvalidSyntaxException;

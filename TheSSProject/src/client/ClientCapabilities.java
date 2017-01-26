@@ -1,4 +1,4 @@
-package controller;
+package client;
 
 public class ClientCapabilities {
 	public final int amountOfPlayers;

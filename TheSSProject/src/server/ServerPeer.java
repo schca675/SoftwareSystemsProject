@@ -1,4 +1,4 @@
-package controller;
+package server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Observable;
-
-import view.ServerTUI;
 
 public class ServerPeer extends Observable {
 	private Socket socket;

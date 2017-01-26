@@ -3,7 +3,7 @@ package testing;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller.Client;
+import client.Client;
 import view.ClientTUI;
 
 public class ClientTUITest {

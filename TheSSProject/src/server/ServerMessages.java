@@ -1,9 +1,12 @@
-package controller;
+package server;
 
 import java.io.IOException;
 import java.util.List;
 
 import model.Player;
+import server.Protocol.EndID;
+import server.Protocol.ErrorID;
+import server.Protocol.Server;
 
 public class ServerMessages {
 	private static final String SPACE = " ";

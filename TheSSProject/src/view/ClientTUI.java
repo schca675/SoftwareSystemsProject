@@ -3,7 +3,7 @@ package view;
 import java.util.List;
 import java.util.Scanner;
 
-import controller.Client;
+import client.Client;
 import model.TowerCoordinates;
 
 

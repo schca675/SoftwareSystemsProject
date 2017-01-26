@@ -1,4 +1,4 @@
-package controller;
+package server;
 /**
  * The Class Protocol implements the protocol and provides functions to help implementing
  * the protocol. This protocol is for Group 7, Mod02 BIT/INF 2016/2017, UTWENTE
