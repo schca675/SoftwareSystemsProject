@@ -35,8 +35,25 @@ public class TowerCoordinates {
 		return this.y;
 	}
 	
+	/**
+	 * Transforms the TowerCoordinates into a String.
+	 * @return String representation of the TowerCoordinates.
+	 */
 	@Override
 	public String toString() {
 		return "x = " + x + ", y = " + y;
+	}
+	
+	/**
+	 * Compares two different TowerCoordinates.
+	 * @return true if they are the same, false if they are not.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof TowerCoordinates)) {
+			return false;
+		} else {
+			return ((TowerCoordinates) obj).getX() == x && ((TowerCoordinates) obj).getY() == y;
+		}
 	}
 }

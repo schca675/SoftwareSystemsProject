@@ -28,7 +28,7 @@ public class Board extends Observable {
 	public final int yDim;
 	public final int zDim;
 	public final int winningLength;
-	private List<List<Integer>> boardData;
+	private List<List<Integer>> boardData; 
 	
 	
 	// <------ CONSTRUCTORS ------>
@@ -59,8 +59,8 @@ public class Board extends Observable {
 		reset();
 	}
 	
-	/** Create a board with default settings and rules.
-	 * 
+	/** 
+	 * Create a board with default settings and rules.
 	 */
 	public Board() {
 		this.xDim = DEFAULT_DIM;
@@ -220,27 +220,19 @@ public class Board extends Observable {
 	  												isValidMove(coord.getX(),coord.getY()); 
 	  @*/
 	/*@ pure @*/ public List<TowerCoordinates> getAvailableTowers() {
-		ListIterator<List<Integer>> iterator = boardData.listIterator();
 		List<TowerCoordinates> availableTowers = new ArrayList<TowerCoordinates>();
-		if (zDim == UNLIMITED_Z) {
-			while (iterator.hasNext()) {
-				availableTowers.add(getTowerCoordinates(iterator.nextIndex()));
-				iterator.next();
-			}
-		} else {
-			while (iterator.hasNext()) {
-				int next = iterator.nextIndex();
-				int x = getTowerCoordinates(next).getX();
-				int y = getTowerCoordinates(next).getY();
-				try {
-					if (getTowerHeight(x, y) < zDim) {
-						availableTowers.add(new TowerCoordinates(x, y));
-					}
-				} catch (CoordinatesOutOfBoundsException e) { 
-					System.err.println("getAvailableTowers method  broken");
-					System.err.println(e.getMessage());
-					return null;
+		List<List<Integer>> allTowers = deepDataCopy();
+		for (int i = 0; i < allTowers.size(); i++) {
+			int x = getTowerCoordinates(i).getX();
+			int y = getTowerCoordinates(i).getY();
+			try {
+				if (getTowerHeight(x, y) < zDim) {
+					availableTowers.add(new TowerCoordinates(x, y));
 				}
+			} catch (CoordinatesOutOfBoundsException e) { 
+				System.err.println("getAvailableTowers method  broken");
+				System.err.println(e.getMessage());
+				return null;
 			}
 		}
 		return availableTowers;
@@ -335,7 +327,7 @@ public class Board extends Observable {
 	 * @return Tower at (<code>x</code>, <code>y</code>)
 	 */
 	//@ requires isValidTower(x,y);
-	/*@ pure @*/ private List<Integer> getTower(int x, int y) 
+	/*@ pure @*/ public List<Integer> getTower(int x, int y) 
 					throws CoordinatesOutOfBoundsException {
 		if (!isValidTower(x, y)) {
 			throw new CoordinatesOutOfBoundsException(x, y, this);
@@ -398,7 +390,7 @@ public class Board extends Observable {
 	 */
 	//@ requires i >= 0 && i < xDim * yDim - 1;
 	//@ ensures isValidTower(\result.getX(),\result.getY());
-	/*@ pure @*/ private TowerCoordinates getTowerCoordinates(int i) {
+	/*@ pure @*/ public TowerCoordinates getTowerCoordinates(int i) {
 		int x = i % yDim + 1;
 		int y = i / yDim + 1;
 		return new TowerCoordinates(x, y);
