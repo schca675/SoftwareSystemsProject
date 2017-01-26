@@ -14,8 +14,8 @@ import view.ClientTUI;
 
 public class ClientCommunicationTest {
 
-	//TODO Observer hint does not work here
-	//TODO ComputerPlayer does not work
+	//TODO Observer hint does not work here --> now works, to check in final version!
+	//TODO Representation of model
 	//TODO Representation does not work like this
 	/**
 	 * Test all the client communication Class method which do not need a Server connection.
@@ -25,6 +25,7 @@ public class ClientCommunicationTest {
 		Client testClient = new Client();
 		ClientTUI view = new ClientTUI(testClient);
 		ClientCommunication client = new ClientCommunication(view, "Test");
+		view.addObserver(client);
 		
 		// Test the send Client capabilities 
 		System.out.println("- Test the send Client's capabilities\n");
