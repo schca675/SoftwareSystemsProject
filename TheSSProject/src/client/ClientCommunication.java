@@ -18,16 +18,19 @@ import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
 import model.Player;
+import model.Strategy;
 import view.ClientTUI;
 
-public class ClientCommunication extends Thread implements Observer {
+public class ClientCommunication implements Observer, Runnable {
 	//<<------- Variables needed for a play -------->>
 	private Player me;
 	private String name;
+	private Strategy strategy;
 	private List<Player> players;
 	private Board board;
 	private boolean playing;
 	private Client client;
+	private ComputerPlayer hintGiver;
 	
 	private ClientTUI view;
 	
@@ -71,7 +74,7 @@ public class ClientCommunication extends Thread implements Observer {
 	 * @param view TUI of the client.
 	 * @throws IOException in case the streams can not be initialized.
 	 */
-	public ClientCommunication(Socket socket, ClientTUI view, String name,
+	public ClientCommunication(Socket socket, ClientTUI view, String name, Strategy strategy,
 			Client client) throws IOException {
 		this.view = view;
 		this.socket = socket;
@@ -79,13 +82,20 @@ public class ClientCommunication extends Thread implements Observer {
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		this.name = name;
+		this.strategy = strategy;
+		me = null;
+		playing = false;
+		board = null;
+		players = new ArrayList<Player>();
 	}
+	
 	/**
 	 * Constructor needed for testing purposes.
 	 * @param name name of player.
 	 */
 	
-	public ClientCommunication(String name) {
+	public ClientCommunication(ClientTUI view, String name) {
+		this.view = view;
 		this.name = name;
 	}
 	
@@ -114,10 +124,10 @@ public class ClientCommunication extends Thread implements Observer {
 	 */
 	public void react(String input)  {
 		String[] message = input.split(" ");
-		//TODO to be deleted.
-		for (int i = 0; i < message.length; i++){
-			System.out.println(i + " : " + message[i]);
-		}
+//		 to be deleted.
+//		for (int i = 0; i < message.length; i++){
+//			System.out.println(i + " : " + message[i]);
+//		}
 		if (message.length >= 1) {
 			switch (message[0]) {
 				case SERVERCAPABILITIES:
@@ -136,7 +146,7 @@ public class ClientCommunication extends Thread implements Observer {
 						if (message.length == 2) {
 							
 							int id = Integer.parseInt(message[1]);
-							me = new Player(name, id);
+							makeMe(name, strategy, id);
 						}
 					} catch (NumberFormatException e) {
 						view.errorMessage(12);
@@ -147,7 +157,7 @@ public class ClientCommunication extends Thread implements Observer {
 					// There have to be at least 2 players
 					if (message.length >= 4) {
 						try {
-							board = makeBoard(message[1]);
+							makeBoard(message[1]);
 							String[] playersString = new String[message.length - 2];
 							System.arraycopy(message, 2, playersString, 0, message.length - 2);
 							players = makePlayers(playersString);
@@ -157,7 +167,6 @@ public class ClientCommunication extends Thread implements Observer {
 								view.errorMessage(12);
 								disconnect();
 							}
-							//TODO Hint function.
 						} catch (InvalidSyntaxException | IllegalBoardConstructorArgumentsException 
 								| NumberFormatException e) {
 							view.errorMessage(12);
@@ -358,10 +367,25 @@ public class ClientCommunication extends Thread implements Observer {
 	public String sendCoordinates(TowerCoordinates move) {
 		return MAKEMOVE + " " + move.getX() + " " + move.getY();
 	}
+	
 	/**
-	 * Creates a board from the dimensions given as input.
+	 * Create the user's player.
+	 * @param meName name of the user's player.
+	 * @param meID id of the user's player.
+	 */
+	public void makeMe(String meName, Strategy meStrategy, int meID) {
+		if (meStrategy != null) {
+			me = new ComputerPlayer(meStrategy, meID);
+		} else if (meName != null) {
+			me = new Player(meName, meID);
+		}
+	}
+	
+	/**
+	 * Creates a board from the dimensions given as input. 
+	 * The client Communication thread saves this board.
 	 * @param dimensions String containing the dimensions.
-	 * @return Board the client should play on.
+	 * @return Copy of the board the client should play on.
 	 * @throws InvalidSyntaxException in case not all the dimensions are indicated in the string.
 	 * @throws IllegalBoardConstructorArgumentsException in case the server 
 	 * sends invalid dimensions to create a board.
@@ -375,7 +399,10 @@ public class ClientCommunication extends Thread implements Observer {
 			int y = Integer.parseInt(dims[2]);
 			int z = Integer.parseInt(dims[4]);
 			int win = Integer.parseInt(dims[6]);
-			return new Board(x, y, z, win);
+			board = new Board(x, y, z, win);
+			// This is the observer in case the board makes a move
+			board.addObserver(this);
+			return board.deepCopy();
 		} else {
 			throw new InvalidSyntaxException(dimensions, " all the dimensions of the board");
 		}
@@ -439,8 +466,7 @@ public class ClientCommunication extends Thread implements Observer {
 				boolean valid = false;
 				TowerCoordinates coord = new TowerCoordinates(-1, -1);
 				while (!valid) {
-					//coord = client.determineMove(); 
-					//TODO hint
+					coord =  view.determineMove(); 
 					if (coord != null && board.isValidMove(coord.getX(), coord.getY())) {
 						valid = true;
 					} else {
@@ -453,8 +479,6 @@ public class ClientCommunication extends Thread implements Observer {
 			return null;
 		}
 	}
-	
-	//TODO Hint thing.
 	
 	/** 
 	 * Makes the moves on the board, handles boards exception after getting the coordinates from 
@@ -523,6 +547,10 @@ public class ClientCommunication extends Thread implements Observer {
 			id = players.size();
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
+		} else if (observable instanceof ClientTUI && type.equals("Hint")) {
+			hintGiver = new ComputerPlayer(me.playerID);
+			TowerCoordinates coord = hintGiver.determineMove(board);
+			view.print("This move is proposed: " + coord.toString());
 		}
 	}
 

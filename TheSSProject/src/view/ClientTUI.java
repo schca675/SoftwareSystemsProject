@@ -1,13 +1,14 @@
 package view;
 
 import java.util.List;
+import java.util.Observable;
 import java.util.Scanner;
 
 import client.Client;
 import exc.TowerCoordinates;
 
 
-public class ClientTUI {
+public class ClientTUI extends Observable {
 	private Client client;
 	private Scanner scanny;
 	
@@ -85,13 +86,15 @@ public class ClientTUI {
 			} else if (scanny.hasNext()) {
 				String input = scanny.next();
 				if (input.equals("Hint")) {
-					TowerCoordinates coord = client.determineHint();
-					System.out.println("This move is suggested: \n x = "
-							+ coord.getX() + "\n y = " + coord.getY());
-					validMove = readBoolean("Do you want to play this move?", "yes", "no");
-					if (validMove) { 
-						return coord;
-					}
+//					TowerCoordinates coord = client.determineHint();
+//					System.out.println("This move is suggested: \n x = "
+//							+ coord.getX() + "\n y = " + coord.getY());
+//					validMove = readBoolean("Do you want to play this move?", "yes", "no");
+//					if (validMove) { 
+//						return coord;
+//					}
+					setChanged();
+					notifyObservers("Hint");				
 				}
 			}
 		}
@@ -250,21 +253,6 @@ public class ClientTUI {
 	public int getPort() {
 		return getInt("Please enter a port number (between 1000 an 65535)");
 	}
-
-	
-	/**
-	 * Gets a string from the Terminal.
-	 * @param message message to write on the Terminal
-	 * @return Line entered by the user.
-	 */
-	public String getString(String message) {
-		System.out.println(message);
-		while (true) {
-			if (scanny.hasNext()) {
-				return scanny.next();
-			}
-		}
-	}
 	
 	// <<------- Method needed by determinePlayer ----------->>
 	/**
@@ -301,7 +289,7 @@ public class ClientTUI {
 						return "Randi";
 					default:
 						errorMessage(7);
-						break;
+						break; 
 				}
 			}
 		}
@@ -359,64 +347,6 @@ public class ClientTUI {
 				+ z + " for the z dimension\n - "
 				+ win + " for the winning length.\n");
 	}
-	
-	/**
-	 * The method asks the client for a valid integer (positive integer).
-	 * @return entered dimension.
-	 */
-	//@ensures \result >=1;
-	public int getInt(String message) {
-		System.out.println(message);
-		int x = -1;
-		while (x < 1) {
-			if (scanny.hasNextInt()) {
-				x = scanny.nextInt();
-				if (x < 1) {
-					System.out.println("Please enter a positive integer: ");
-				}
-			} else if (scanny.hasNext()) {
-				scanny.next();
-				System.out.println("Please enter an integer: ");
-			} 
-		}
-		return x;
-	}
-	
-	//<<----------- Methods needed by determine Move ------------>>
-	
-	/**
-	 * Reads the coordinates provided by the user.
-	 * It only ensures the coordinates are indeed integers, not if they are valid towers.
-	 * 
-	 * @param message Message that should be printed.
-	 * @return Coordinates that the player entered.
-	 */
-	// checked
-	public TowerCoordinates readCoordinates(String format) {
-		int x = -1;
-		int y = -1;
-		int countInt = 0;
-		// read until getting two integers.
-		while (countInt != 2) {
-			if (scanny.hasNextLine()) {
-				Scanner integers = new Scanner(scanny.nextLine());
-				while (countInt < 2 && integers.hasNextInt()) {
-					if (countInt == 0) {
-						x = integers.nextInt();
-					} else if (countInt == 1) {
-						y = integers.nextInt();
-					}
-					countInt = countInt + 1;
-				}
-				integers.close();
-				if (countInt != 2) {
-					countInt = 0;
-					System.out.println(format);
-				}
-			}		
-		}
-		return new TowerCoordinates(x, y);
-	}
 
 	// <<---------- Methods to transfer messages -------->>
 	
@@ -435,7 +365,7 @@ public class ClientTUI {
 	public void valid(int type) {
 		switch (type) {
 			case 1:
-				System.out.println("Socket created");
+				System.out.println("Socket created\n");
 				break;
 			default:
 				break;
@@ -481,13 +411,14 @@ public class ClientTUI {
 				System.out.println("You return to the start menu.\n");
 				break;
 			case 11:
-				System.out.println("Problems while listening to the server");
+				System.out.println("Problems while listening to the server\n");
 				break;
 			case 12:
-				System.out.println("Protocol irregularities");
+				System.out.println("Protocol irregularities\n");
 				break;
 			case 13:
-				System.out.println("Server sent an illegal move.");
+				System.out.println("Server sent an illegal move.\n");
+				break;
 			default:
 				break;
 		}
@@ -523,6 +454,76 @@ public class ClientTUI {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * The method asks the client for a valid integer (positive integer).
+	 * @return entered dimension.
+	 */
+	//@ensures \result >=1;
+	public int getInt(String message) {
+		System.out.println(message);
+		int x = -1;
+		while (x < 1) {
+			if (scanny.hasNextInt()) {
+				x = scanny.nextInt();
+				if (x < 1) {
+					System.out.println("Please enter a positive integer: ");
+				}
+			} else if (scanny.hasNext()) {
+				scanny.next();
+				System.out.println("Please enter an integer: ");
+			} 
+		}
+		return x;
+	}
+	
+	/**
+	 * Reads the coordinates provided by the user.
+	 * It only ensures the coordinates are indeed integers, not if they are valid towers.
+	 * 
+	 * @param message Message that should be printed.
+	 * @return Coordinates that the player entered.
+	 */
+	// checked
+	public TowerCoordinates readCoordinates(String format) {
+		int x = -1;
+		int y = -1;
+		int countInt = 0;
+		// read until getting two integers.
+		while (countInt != 2) {
+			if (scanny.hasNextLine()) {
+				Scanner integers = new Scanner(scanny.nextLine());
+				while (countInt < 2 && integers.hasNextInt()) {
+					if (countInt == 0) {
+						x = integers.nextInt();
+					} else if (countInt == 1) {
+						y = integers.nextInt();
+					}
+					countInt = countInt + 1;
+				}
+				integers.close();
+				if (countInt != 2) {
+					countInt = 0;
+					System.out.println(format);
+				}
+			}		
+		}
+		return new TowerCoordinates(x, y);
+	}
+	
+	/**
+	 * Gets a string from the Terminal.
+	 * @param message message to write on the Terminal
+	 * @return Line entered by the user.
+	 */
+	public String getString(String message) {
+		System.out.println(message);
+		while (true) {
+			if (scanny.hasNext()) {
+				return scanny.next();
+			}
+		}
 	}
 
 }

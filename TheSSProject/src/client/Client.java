@@ -4,16 +4,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
-import exc.IllegalCoordinatesException;
 import exc.InvalidPortException;
-import exc.TowerCoordinates;
 import model.Board;
-import model.ComputerPlayer;
-import model.Player;
 import model.RandomStrategy;
 import model.Strategy;
 import view.ClientTUI;
@@ -38,10 +31,6 @@ public class Client {
 	private int z;
 	private int win;
 	
-	//needed in case the player wants a hint.
-	private ComputerPlayer hintGiver;
-	private Board board;
-	
 	/**
 	 * Creates a new client.
 	 */
@@ -56,7 +45,6 @@ public class Client {
 		y = Board.DEFAULT_DIM;
 		z = Board.DEFAULT_DIM;
 		win = Board.DEFAULT_WIN;
-		hintGiver = new ComputerPlayer(-1);
 	}
 	
 	//<<--------- Methods to communicate with TUI -------->>
@@ -201,7 +189,10 @@ public class Client {
 				reset(); 
 			}
 			try {
-				client = new ClientCommunication(socket, view, playerName, this);
+				ClientCommunication thisClient = new ClientCommunication(socket, view, 
+						playerName, strategy, this);
+				view.addObserver(thisClient);
+				client = new Thread(thisClient);
 				client.start();
 				try {
 					client.join();
@@ -231,25 +222,6 @@ public class Client {
 		}
 	}
 	
-	// <<---- Game related methods ---------->>
-	
-	
-	public TowerCoordinates determineMove(Board board) {
-		return view.determineMove();
-	}
-	
-	/**
-	 * Gives the playing user a hint.
-	 * @return the hint of the internal computerplayer.
-	 */
-	public TowerCoordinates determineHint(Board board) {
-		if (board != null) {
-			return hintGiver.determineMove(board);
-		}
-		return new TowerCoordinates(-1, -1);	
-	}
-	
-
 // <<--------- Start/End of application ----------->>
 	/**
 	 * Starts the TUI, so starts the communication with the user.

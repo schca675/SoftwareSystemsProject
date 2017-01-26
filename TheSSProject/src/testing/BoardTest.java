@@ -418,7 +418,11 @@ public class BoardTest {
 			for (int x = MIN; x <= MAX; x++) {
 				for (int z = MAX; z >= x; z--) {
 					board.makeMove(x, MIN, playerID);
-					playerID = PLAYER1;
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
 				}
 			}
 			assertFalse(board.hasWon(MIN, MIN));
