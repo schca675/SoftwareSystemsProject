@@ -43,33 +43,33 @@ public class ComputerPlayerTest {
 		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
 	}
 	
-//	@Test
-//	public void testDetermineRandisMove1() {
-//		TowerCoordinates coord = randi.determineMove(board);
-//		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
-//	}
-//	
-//	@Test
-//	public void testDetermineRandisMove2() {
-//		TowerCoordinates coord = randi.determineMove(board);
-//		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
-//	}
-//	
-//	@Test
-//	public void testDetermineRandisMove3() {
-//		TowerCoordinates coord = randi.determineMove(board);
-//		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
-//	}
-//	
-//	@Test
-//	public void testDetermineRandisMove4() {
-//		TowerCoordinates coord = randi.determineMove(board);
-//		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
-//	}
-//	
-//	@Test
-//	public void testDetermineRandisMove5() {
-//		TowerCoordinates coord = randi.determineMove(board);
-//		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
-//	}
+	@Test
+	public void testDetermineRandisMove1() {
+		TowerCoordinates coord = randi.determineMove(board);
+		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
+	}
+	
+	@Test
+	public void testDetermineRandisMove2() {
+		TowerCoordinates coord = randi.determineMove(board);
+		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
+	}
+	
+	@Test
+	public void testDetermineRandisMove3() {
+		TowerCoordinates coord = randi.determineMove(board);
+		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
+	}
+	
+	@Test
+	public void testDetermineRandisMove4() {
+		TowerCoordinates coord = randi.determineMove(board);
+		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
+	}
+	
+	@Test
+	public void testDetermineRandisMove5() {
+		TowerCoordinates coord = randi.determineMove(board);
+		assertTrue(board.isValidMove(coord.getX(), coord.getY()));
+	}
 }

@@ -391,8 +391,8 @@ public class Board extends Observable {
 	//@ requires i >= 0 && i < xDim * yDim - 1;
 	//@ ensures isValidTower(\result.getX(),\result.getY());
 	/*@ pure @*/ public TowerCoordinates getTowerCoordinates(int i) {
-		int x = i % yDim + 1;
-		int y = i / yDim + 1;
+		int x = i % xDim + 1;
+		int y = i / xDim + 1;
 		return new TowerCoordinates(x, y);
 	}
 	
