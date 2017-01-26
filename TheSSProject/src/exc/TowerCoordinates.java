@@ -1,4 +1,4 @@
-package model;
+package exc;
 
 public class TowerCoordinates {
 	

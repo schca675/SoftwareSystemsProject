@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import exc.CoordinatesOutOfBoundsException;
+import exc.IllegalCoordinatesException;
+import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
-import model.CoordinatesOutOfBoundsException;
-import model.IllegalCoordinatesException;
 import model.Player;
-import model.TowerCoordinates;
 
 public class GameThread extends Thread {
 	

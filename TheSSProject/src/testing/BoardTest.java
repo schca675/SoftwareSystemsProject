@@ -9,9 +9,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import exc.IllegalBoardConstructorArgumentsException;
+import exc.IllegalCoordinatesException;
 import model.Board;
-import model.IllegalBoardConstructorArgumentsException;
-import model.IllegalCoordinatesException;
 
 public class BoardTest {
 	

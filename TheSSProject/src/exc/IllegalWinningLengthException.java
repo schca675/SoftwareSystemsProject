@@ -1,4 +1,4 @@
-package model;
+package exc;
 
 public class IllegalWinningLengthException extends IllegalBoardConstructorArgumentsException {
 	private static final long serialVersionUID = 1L;

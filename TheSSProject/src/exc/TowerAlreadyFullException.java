@@ -1,4 +1,6 @@
-package model;
+package exc;
+
+import model.Board;
 
 public class TowerAlreadyFullException extends IllegalCoordinatesException {
 	private static final long serialVersionUID = 2L;

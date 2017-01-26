@@ -3,11 +3,11 @@ package testing;
 import java.util.List;
 
 import client.ClientCommunication;
+import exc.IllegalBoardConstructorArgumentsException;
+import exc.InvalidSyntaxException;
+import exc.TowerCoordinates;
 import model.Board;
-import model.IllegalBoardConstructorArgumentsException;
-import model.InvalidSyntaxException;
 import model.Player;
-import model.TowerCoordinates;
 
 public class ClientCommunicationTest {
 

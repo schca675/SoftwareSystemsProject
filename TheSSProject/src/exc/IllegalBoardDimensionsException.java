@@ -1,4 +1,6 @@
-package model;
+package exc;
+
+import model.Board;
 
 public class IllegalBoardDimensionsException extends IllegalBoardConstructorArgumentsException {
 	private static final long serialVersionUID = 1L;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import client.Client;
-import model.TowerCoordinates;
+import exc.TowerCoordinates;
 
 
 public class ClientTUI {

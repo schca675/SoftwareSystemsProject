@@ -1,4 +1,4 @@
-package model;
+package exc;
 
 public class IllegalBoardConstructorArgumentsException extends Exception {
 	private static final long serialVersionUID = 1L;

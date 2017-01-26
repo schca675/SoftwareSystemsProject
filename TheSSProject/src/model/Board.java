@@ -6,6 +6,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Observable;
 
+import exc.CoordinatesOutOfBoundsException;
+import exc.IllegalBoardConstructorArgumentsException;
+import exc.IllegalBoardDimensionsException;
+import exc.IllegalCoordinatesException;
+import exc.IllegalWinningLengthException;
+import exc.TowerAlreadyFullException;
+import exc.TowerCoordinates;
+
 public class Board extends Observable {
 	
 	// <------ Constants ------>

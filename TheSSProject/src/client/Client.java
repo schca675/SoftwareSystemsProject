@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import exc.IllegalCoordinatesException;
+import exc.InvalidPortException;
+import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
-import model.IllegalCoordinatesException;
-import model.InvalidPortException;
 import model.Player;
 import model.RandomStrategy;
 import model.Strategy;
-import model.TowerCoordinates;
 import view.ClientTUI;
 
 public class Client {

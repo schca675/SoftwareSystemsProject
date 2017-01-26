@@ -1,4 +1,4 @@
-package model;
+package exc;
 
 public class InvalidSyntaxException extends Exception {
 	public InvalidSyntaxException(String tested, String type) {

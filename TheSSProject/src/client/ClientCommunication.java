@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import exc.IllegalBoardConstructorArgumentsException;
+import exc.IllegalCoordinatesException;
+import exc.InvalidSyntaxException;
+import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
-import model.IllegalBoardConstructorArgumentsException;
-import model.IllegalCoordinatesException;
-import model.InvalidSyntaxException;
 import model.Player;
-import model.TowerCoordinates;
 import view.ClientTUI;
 
 public class ClientCommunication extends Thread implements Observer {
