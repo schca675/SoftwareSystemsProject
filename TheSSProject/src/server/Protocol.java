@@ -4,6 +4,13 @@ package server;
  * the protocol. This protocol is for Group 7, Mod02 BIT/INF 2016/2017, UTWENTE
  */
 public class Protocol {
+	
+	public static final boolean isDefinedClientCommand(String s) {
+		return s.equals(Client.SENDCAPABILITIES) || s.equals(Client.JOINROOM) || 
+				s.equals(Client.GETROOMLIST) || s.equals(Client.LEAVEROOM) || 
+				s.equals(Client.MAKEMOVE) || s.equals(Client.SENDMESSAGE) || 
+				s.equals(Client.REQUESTLEADERBOARD);
+	}
 
 	/**
 	 * Server to client messages.
