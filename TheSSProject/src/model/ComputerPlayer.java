@@ -1,7 +1,5 @@
 package model;
 
-import exc.TowerCoordinates;
-
 public class ComputerPlayer extends Player {
 	
 	// <------ Instance variables ------>	

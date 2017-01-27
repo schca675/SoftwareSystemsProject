@@ -1,7 +1,5 @@
 package model;
 
-import exc.TowerCoordinates;
-
 public interface Strategy {
 	/**
 	 * Get the name of the strategy.

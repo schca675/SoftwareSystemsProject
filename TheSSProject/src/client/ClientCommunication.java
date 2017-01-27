@@ -14,11 +14,12 @@ import java.util.Observer;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.IllegalCoordinatesException;
 import exc.InvalidSyntaxException;
-import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
 import model.Player;
 import model.Strategy;
+import model.TowerCoordinates;
+import server.Protocol;
 import view.ClientTUI;
 
 public class ClientCommunication implements Observer, Runnable {
@@ -29,7 +30,6 @@ public class ClientCommunication implements Observer, Runnable {
 	private List<Player> players;
 	private Board board;
 	private boolean playing;
-	private Client client;
 	private ComputerPlayer hintGiver;
 	
 	private ClientTUI view;
@@ -48,25 +48,25 @@ public class ClientCommunication implements Observer, Runnable {
 	public static final int TRUE = 1;
 	
 	// < -------- Server to Client messages ----------->
-	public static final String SERVERCAPABILITIES = "serverCapabilities";
-	public static final String SENDLISTROOMS = "sendListRooms";
-	public static final String ASSIGNID = "assignID";
-	public static final String STARTGAME = "startGame";
-	public static final String TURNOFPLAYER = "playerTurn";
-	public static final String NOTIFYMOVE = "notifyMove";
-	public static final String NOTIFYEND = "notifyEnd";
-	public static final String ERROR = "error";
-	public static final String NOTIFYMESSAGE = "notifyMessage";
-	public static final String SENDLEADERBOARD = "sendLeaderBoard";
+	public static final String SERVERCAPABILITIES = Protocol.Server.SERVERCAPABILITIES;
+	public static final String SENDLISTROOMS = Protocol.Server.SENDLISTROOMS;
+	public static final String ASSIGNID = Protocol.Server.ASSIGNID;
+	public static final String STARTGAME = Protocol.Server.STARTGAME;
+	public static final String TURNOFPLAYER = Protocol.Server.TURNOFPLAYER;
+	public static final String NOTIFYMOVE = Protocol.Server.NOTIFYMOVE;
+	public static final String NOTIFYEND = Protocol.Server.NOTIFYEND;
+	public static final String ERROR = Protocol.Server.ERROR;
+	public static final String NOTIFYMESSAGE = Protocol.Server.NOTIFYMESSAGE;
+	public static final String SENDLEADERBOARD = Protocol.Server.SENDLEADERBOARD;
 	
 	// < --------- Client to server messages --------------->
-	public static final String SENDCAPABILITIES = "sendCapabilities";
-	public static final String JOINROOM = "joinRoom";
-	public static final String GETROOMLIST = "getRoomList";
-	public static final String LEAVEROOM = "leaveRoom";
-	public static final String MAKEMOVE = "makeMove";
-	public static final String SENDMESSAGE = "sendMessage";
-	public static final String REQUESTLEADERBOARD = "requestLeaderboard";
+	public static final String SENDCAPABILITIES = Protocol.Client.SENDCAPABILITIES;
+	public static final String MAKEMOVE = Protocol.Client.MAKEMOVE;
+	public static final String JOINROOM = Protocol.Client.JOINROOM;
+	public static final String GETROOMLIST = Protocol.Client.GETROOMLIST;
+	public static final String LEAVEROOM = Protocol.Client.LEAVEROOM;
+	public static final String SENDMESSAGE = Protocol.Client.SENDMESSAGE;
+	public static final String REQUESTLEADERBOARD = Protocol.Client.REQUESTLEADERBOARD;
 	
 	/**
 	 * Creates a new Client Communication thread.
@@ -78,7 +78,6 @@ public class ClientCommunication implements Observer, Runnable {
 			Client client) throws IOException {
 		this.view = view;
 		this.socket = socket;
-		this.client = client;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		this.name = name;
@@ -97,6 +96,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public ClientCommunication(ClientTUI view, String name) {
 		this.view = view;
 		this.name = name;
+		players = new ArrayList<Player>();
 	}
 	
 	/**
@@ -160,7 +160,7 @@ public class ClientCommunication implements Observer, Runnable {
 							makeBoard(message[1]);
 							String[] playersString = new String[message.length - 2];
 							System.arraycopy(message, 2, playersString, 0, message.length - 2);
-							players = makePlayers(playersString);
+							makePlayers(playersString);
 							if (me != null) {
 								playing = true;
 							} else {
@@ -411,6 +411,7 @@ public class ClientCommunication implements Observer, Runnable {
 	/**
 	 * Creates a list of players from a String array 
 	 * containing all the informations about the different players.
+	 * It returns a copy of the player for the game for testing purposes.
 	 * @param input Array with all the players. Every element represents one player.
 	 * @return List of all the players described in the input.
 	 * @throws InvalidSyntaxException in case not all the information for a player are present.
@@ -431,6 +432,7 @@ public class ClientCommunication implements Observer, Runnable {
 				throw new InvalidSyntaxException(input[i], "player");
 			}
 		}
+		players.addAll(result);
 		return result;
 	}
 
@@ -463,6 +465,7 @@ public class ClientCommunication implements Observer, Runnable {
 			if (me instanceof ComputerPlayer) {
 				return ((ComputerPlayer) me).determineMove(board);
 			} else {
+				view.printModel(board.xDim, board.yDim);
 				boolean valid = false;
 				TowerCoordinates coord = new TowerCoordinates(-1, -1);
 				while (!valid) {
@@ -544,8 +547,7 @@ public class ClientCommunication implements Observer, Runnable {
 		if (observable instanceof Board && type instanceof Integer) {
 			Board playboard = (Board) observable;
 			int id = 1;
-			//id = players.size();
-			id = 2;
+			id = players.size();
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
 		} else if (observable instanceof ClientTUI && type.equals("Hint")) {
@@ -557,33 +559,13 @@ public class ClientCommunication implements Observer, Runnable {
 
 
 	// <<------ Function provided by the protocol interface ----->>
+	
 	/**
 	 * Function to get Error message by error code defined in protocol.
-	 * @author Merel Meekes.
 	 * @param number String with error code defined in Protocol
 	 * @return Error explanation or null if invalid error code.
 	 */
 	public static String getError(String number) {
-		String result = null;
-		if (number.equals("1")) {
-			result = "Client has not yet sent capabilities message, Server cannot proceed";
-		} else if (number.equals("2")) {
-			result = "Room sent in message joinRoom does not exist";
-		} else if (number.equals("3")) {
-			result = "The chosen room is no longer available, either it already filled up or was "
-					+ "empty for too long";
-		} else if (number.equals("4")) {
-			result = "The input given by the client is not valid at this moment";
-		} else if (number.equals("5")) {
-			result = "The given move is not possible on this board";
-		} else if (number.equals("6")) {
-			result = "Client is not allowed to leave the room after the game has started";
-		} else if (number.equals("7")) {
-			result = "A message with piping in a wrong place was received";
-		} else {
-			result = "unknown error";
-		}
-
-		return result;
+		return Protocol.getError(number);
 	}
 }

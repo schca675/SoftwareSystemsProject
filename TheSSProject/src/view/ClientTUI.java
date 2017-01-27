@@ -5,7 +5,7 @@ import java.util.Observable;
 import java.util.Scanner;
 
 import client.Client;
-import exc.TowerCoordinates;
+import model.TowerCoordinates;
 
 
 public class ClientTUI extends Observable {
@@ -73,8 +73,6 @@ public class ClientTUI extends Observable {
 	 * @param prompt Message to print on the screen.
 	 * @return tower Coordinates for the next move.
 	 */
-
-	//TODO check it.
 	public TowerCoordinates determineMove() {
 		boolean validMove = false;
 		while (!validMove) {
@@ -86,13 +84,6 @@ public class ClientTUI extends Observable {
 			} else if (scanny.hasNext()) {
 				String input = scanny.next();
 				if (input.equals("Hint")) {
-//					TowerCoordinates coord = client.determineHint();
-//					System.out.println("This move is suggested: \n x = "
-//							+ coord.getX() + "\n y = " + coord.getY());
-//					validMove = readBoolean("Do you want to play this move?", "yes", "no");
-//					if (validMove) { 
-//						return coord;
-//					}
 					setChanged();
 					notifyObservers("Hint");				
 				}
@@ -101,33 +92,56 @@ public class ClientTUI extends Observable {
 		return null;	
 	}
 	
+	//TODO Javadoc implement that it gets printed.
+	/**
+	 * Print the model of the board, whit the indices to be used.
+	 * @param xmax
+	 * @param ymax
+	 */
+	public void printModel(int xmax, int ymax) {
+		System.out.println("Model of the board:\nThe indices are as follows:");
+		int middleLength = digitLength(xmax) + 1 /*space*/ + digitLength(ymax);
+		String format = "%" + middleLength + "s";
+		for (int x = 1; x <= xmax; x++) {
+			System.out.println(drawLine(middleLength, ymax));
+			System.out.println(dashedLine(middleLength, ymax));
+			StringBuilder cells = new StringBuilder();
+			for (int y = 1; y <= ymax; y++) {
+				String cell = x + " " + y;
+				cells.append("|   " + String.format(format, cell) + "   ");
+			}
+			cells.append("|");
+			System.out.println(cells.toString());
+			System.out.println(dashedLine(middleLength, ymax));
+		}
+		System.out.println(drawLine(middleLength, ymax));
+	}
+	
 	/**
 	 * Prints the situation of the current board, after a move has been made.
 	 * @param observable Observable object that notified the TUI.
 	 * @param boardData Data of the board (observable object)
 	 */
-	//TODO check boundaries / representation
-	public void printBoard(List<List<Integer>> boardData, int x, int y, int z, int id) {
-		for (int k = 0; k < z; k++) {
-			System.out.println("\nLevel " + (k + 1) + "\n");
-			for (int j = 0; j < y; j++) {
-				System.out.println(drawLine(id, x));
-				System.out.println(dashedLine(id, x));
+	public void printBoard(List<List<Integer>> boardData, int xmax, int ymax, int zmax, int id) {
+		for (int z = 0; z < zmax; z++) {
+			System.out.println("\nLevel " + (z + 1) + "\n");
+			for (int x = 0; x < xmax; x++) {
+				System.out.println(drawLine(digitLength(id), ymax));
+				System.out.println(dashedLine(digitLength(id), ymax));
 				StringBuilder cells = new StringBuilder();
-				for (int h = 0; h < x; h++) {
-					if (boardData.get(h * y + j).size() < z + 1) {
-						System.out.println(h + " that was h and here is : " + (h*y + j));
-						System.out.println("Size: " + boardData.get(h * y + j).size());
-						cells.append("|   " + printMiddle(id) + "   ");
+				for (int y = 0; y < ymax; y++) {
+					int index = x + y * xmax;
+					if (boardData.get(index).size() < z + 1) {
+						cells.append("|   " + printMiddle(digitLength(id)) + "   ");
 					} else {
-						cells.append("|   " + boardData.get(h + j * x).get(j) + "   ");
+						cells.append("|   " + boardData.get(index).get(z) + "   ");
 					}
 				} 
 				cells.append("|");
 				System.out.println(cells.toString());
-				System.out.println(dashedLine(id, x));
+				System.out.println(dashedLine(digitLength(id), ymax));
 			}
-			System.out.println(drawLine(id, x));
+			System.out.println(drawLine(digitLength(id), ymax));
 		}
 	}
 	
@@ -137,11 +151,9 @@ public class ClientTUI extends Observable {
 	 * @param times Amount of x cells of the board.
 	 * @return the finished line.
 	 */
-	//@ requires amount >= 0 && times > 0;
-	//TODO amount /10 not working yet.
-	public String drawLine(int amount, int times) {
+	//@ requires idLength >= 0 && times > 0;
+	public String drawLine(int idLength, int times) {
 		String part = "";
-		int idLength = (int) (Math.log10(amount) + 1);
 		for (int i = 0; i < (idLength + 4 + 2); i++) {
 			part = part + "-";
 		}
@@ -160,10 +172,9 @@ public class ClientTUI extends Observable {
 	 * @param times Amount of x cells of the board.
 	 * @return the finished drawing element.
 	 */
-	//@ requires amount >= 0 && times > 0;
-	public String dashedLine(int amount, int times) {
+	//@ requires idLength >= 0 && times > 0;
+	public String dashedLine(int idLength, int times) {
 		String part = "|";
-		int idLength = (int) (Math.log10(amount) + 1);
 		for (int i = 0; i < (idLength + 4 + 2); i++) {
 			part = part + " ";
 		}
@@ -175,11 +186,24 @@ public class ClientTUI extends Observable {
 		return line.toString();
 	}
 		
-	public String printMiddle(int amount) {
-		int idLength = (int) (Math.log10(amount) + 1);
+	/**
+	 * Return the highest amount of digits of the player IDs.
+	 * @param playerAmount amount of players playing.
+	 * @return amount of digits.
+	 */
+	public int digitLength(int playerAmount) {
+		return (int) (Math.log10(playerAmount) + 1);
+	}
+	
+	/**
+	 * Print the middle in case there is no entry yet.
+	 * @param amount
+	 * @return
+	 */
+	public String printMiddle(int idLength) {
 		String result = "";
 		for (int i = 1; i <= idLength; i++) {
-			result = result + "/";
+			result = result + " ";
 		}
 		return result;
 	}

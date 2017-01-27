@@ -12,7 +12,6 @@ import exc.IllegalBoardDimensionsException;
 import exc.IllegalCoordinatesException;
 import exc.IllegalWinningLengthException;
 import exc.TowerAlreadyFullException;
-import exc.TowerCoordinates;
 
 public class Board extends Observable {
 	

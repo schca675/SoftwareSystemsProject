@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import exc.TowerCoordinates;
+import model.TowerCoordinates;
 
 public class TestTowerCoordinates {
 

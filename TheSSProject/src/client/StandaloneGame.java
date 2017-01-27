@@ -10,11 +10,11 @@ import java.util.Scanner;
 
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.IllegalCoordinatesException;
-import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
 import model.HumanPlayer;
 import model.Player;
+import model.TowerCoordinates;
 
 public class StandaloneGame {
 	

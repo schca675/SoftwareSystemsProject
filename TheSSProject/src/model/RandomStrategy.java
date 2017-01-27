@@ -3,8 +3,6 @@ package model;
 import java.util.List;
 import java.util.Random;
 
-import exc.TowerCoordinates;
-
 public class RandomStrategy implements Strategy {
 
 	// <------ Queries ------>

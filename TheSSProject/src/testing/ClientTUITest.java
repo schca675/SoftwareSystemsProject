@@ -7,7 +7,7 @@ import client.Client;
 import client.ClientCommunication;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.InvalidSyntaxException;
-import exc.TowerCoordinates;
+import model.TowerCoordinates;
 import view.ClientTUI;
 
 public class ClientTUITest {
@@ -41,6 +41,18 @@ public class ClientTUITest {
 		List<List<Integer>> display4 = createBoardData(1, 1, 1, 4);
 		view.printBoard(display4, 1, 1, 1, 4);
 		
+		//Representation of the board model
+		System.out.println("\nRepresentation of the model:\n");
+		System.out.println("Board with dimensions x = 4, y = 4:\n");
+		view.printModel(4, 4);
+		System.out.println("Board with dimensions x = 5, y = 3:\n");
+		view.printModel(5, 3);
+		System.out.println("Board with dimensions x = 3, y = 5:\n");
+		view.printModel(3, 5);
+		System.out.println("Board with dimensions x = 10, y = 4:\n");
+		view.printModel(10, 4);
+		System.out.println("Board with dimensions x = 15, y = 30:\n");
+		view.printModel(15, 30);
 		
 		
 		//Test printMessage

@@ -7,10 +7,10 @@ import java.util.Scanner;
 
 import exc.CoordinatesOutOfBoundsException;
 import exc.IllegalCoordinatesException;
-import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
 import model.Player;
+import model.TowerCoordinates;
 
 public class GameThread extends Thread {
 	

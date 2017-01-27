@@ -6,11 +6,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import exc.TowerCoordinates;
 import model.Board;
 import model.ComputerPlayer;
 import model.RandomStrategy;
 import model.Strategy;
+import model.TowerCoordinates;
 
 public class ComputerPlayerTest {
 

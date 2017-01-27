@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.IllegalCoordinatesException;
-import exc.TowerCoordinates;
 import model.Board;
+import model.TowerCoordinates;
 
 public class BoardTest {
 	

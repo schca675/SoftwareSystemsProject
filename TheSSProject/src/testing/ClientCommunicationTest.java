@@ -6,10 +6,10 @@ import client.Client;
 import client.ClientCommunication;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.InvalidSyntaxException;
-import exc.TowerCoordinates;
 import model.Board;
 import model.Player;
 import model.RandomStrategy;
+import model.TowerCoordinates;
 import view.ClientTUI;
 
 public class ClientCommunicationTest {
@@ -139,9 +139,37 @@ public class ClientCommunicationTest {
 		
 		//Test makeMove
 		System.out.println("\nTest make Move:");
+		System.out.println("\nMake move 2 2");
 		client.makeMove(2, 2, 1);
+		System.out.println("\nMake move 2 2");
 		client.makeMove(2, 2, 1);
+		System.out.println("\nMake move 2 2");
 		client.makeMove(2, 2, 1);
+		System.out.println("\nMake move 2 2");
+		client.makeMove(2, 2, 1);
+		System.out.println("\nMake move 2 2");
+		client.makeMove(2, 2, 1);
+		System.out.println("\nMake move 2 3");
+		client.makeMove(2, 3, 1);
+		System.out.println("\nMake move 2 3");
+		client.makeMove(2, 3, 1);
+		System.out.println("\nMake move 2 3");
+		client.makeMove(2, 3, 1);
+		System.out.println("\nMake move 2 3");
+		client.makeMove(2, 3, 1);
+		System.out.println("\nMake move 4 4");
+		client.makeMove(4, 4, 1);
+		System.out.println("\nMake move 1 2");
+		client.makeMove(1, 2, 1);
+		System.out.println("\nMake move 1 2");
+		client.makeMove(1, 2, 1);
+		System.out.println("\nMake move 1 5");
+		client.makeMove(1, 5, 1);
+		System.out.println("\nMake move 3 2");
+		client.makeMove(3, 2, 1);
+		System.out.println("\nMake move 1 4");
+		client.makeMove(1, 4, 1);
+		System.out.println("\nMake move 2 2");
 		client.makeMove(2, 2, 1);
 	}
 }
