@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import client.ClientCapabilities;
 import model.Player;
@@ -49,13 +52,15 @@ public class Server implements Observer {
 	private PlayerIDProvider playerIDProvider;
 	private static final String USAGE = "";
 	private server.ServerTUI view;
+	private Lock mainLock = new ReentrantLock();
+	private Condition noMessages = mainLock.newCondition();
 	
 	public Server(int port, boolean enableExtensions, server.ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		ServerListener listener = new ServerListener(port, view);
 		listener.addObserver(this);
-		listener.run();
+		new Thread(listener).start();
 	}
 	
 	/** 
@@ -100,7 +105,9 @@ public class Server implements Observer {
 		ServerPeer peer = null;
 		try {
 			peer = new ServerPeer(socket, view);
-			peer.run();
+			peer.changeLock(mainLock, noMessages);
+			new Thread(peer).start();
+			// Go wait for messages
 		} catch (IOException e) { }
 		if (enableExtensions) {
 			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, EXT_DIM, 

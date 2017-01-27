@@ -71,7 +71,7 @@ public class ServerMessages {
 		return Protocol.Server.ERROR + SPACE + Protocol.ErrorID.ILLEGALSTRING;
 	}
 	
-	private static int boolToInt(boolean bool) {
+	public static int boolToInt(boolean bool) {
 		return bool ? 1 : 0;
 	}
 
