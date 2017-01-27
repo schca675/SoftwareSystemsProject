@@ -3,7 +3,6 @@ package model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Observable;
 
 import exc.CoordinatesOutOfBoundsException;
@@ -283,7 +282,7 @@ public class Board extends Observable {
 	//@ ensures \result == null || \result instanceof Integer;
 	/*@ pure nullable @*/ public Integer getCellOwner(int x, int y, int z) throws 
 					CoordinatesOutOfBoundsException {
-		if (z <= getTowerHeight(x, y)) {
+		if (z <= getTowerHeight(x, y) && z > 0) {
 			return getTower(x, y).get(z - 1);
 		} else {
 			return null;

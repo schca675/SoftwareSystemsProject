@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 
 import exc.InvalidPortException;
 import model.Board;
+import model.MessageType;
 import model.RandomStrategy;
 import model.Strategy;
 import view.ClientTUI;
@@ -95,7 +96,7 @@ public class Client {
 				setInetAddress(address);
 				entered = true;
 			} catch (UnknownHostException e) {
-				view.errorMessage(1);
+				view.errorMessage(MessageType.INVALID_ADDRESS);
 			}
 			
 		}
@@ -109,7 +110,7 @@ public class Client {
 				setPort(newPort);
 				entered = true;
 			} catch (InvalidPortException e) {
-				view.errorMessage(2);
+				view.errorMessage(MessageType.INVALID_PORT);
 			}
 		}
 		connect();
@@ -120,7 +121,8 @@ public class Client {
 	 */
 	public void terminateMenu() {
 		view.terminateMenu();
-		disconnect();
+		//TODO
+		//disconnect();
 	}
 	
 	//<<---- Methods needed to do the setup --------------->
@@ -183,9 +185,9 @@ public class Client {
 			//Check the IP address
 			try {
 				socket = new Socket(addr, port);				
-				view.valid(1);
+				view.valid(MessageType.SOCKET_CREATED);
 			} catch (IOException e) {
-				view.errorMessage(5);
+				view.errorMessage(MessageType.SOCKET_FAILURE);
 				reset(); 
 			}
 			try {
@@ -201,7 +203,7 @@ public class Client {
 				}
 				
 			} catch (IOException e) {
-				view.errorMessage(8);
+				view.errorMessage(MessageType.STREAM_FAILURE);
 				reset(); 
 			} finally {
 				reset();
@@ -214,13 +216,13 @@ public class Client {
 	 * Disconnects from the server.
 	 */
 	//TODO see if this is needed.
-	private void disconnect() {
-		try {
-			socket.close();
-		} catch (IOException e) {
-			view.errorMessage(3);
-		}
-	}
+//	private void disconnect() {
+//		try {
+//			socket.close();
+//		} catch (IOException e) {
+//			view.errorMessage(MessageType.PROBLEM_DISCONNECTING);
+//		}
+//	}
 	
 // <<--------- Start/End of application ----------->>
 	/**
@@ -231,7 +233,7 @@ public class Client {
 	}
 	
 	public void reset() {
-		view.errorMessage(10); 
+		view.errorMessage(MessageType.RETURN_START); 
 		playerName = "Initial";
 		strategy = null;
 		socket = null;

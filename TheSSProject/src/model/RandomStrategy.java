@@ -12,7 +12,6 @@ public class RandomStrategy implements Strategy {
 		return "Randi";
 	}
 
-	//To do 
 	/**
 	 * Determining the next move by choosing a random valid field.
 	 * @param board Board the game is played on.
@@ -28,5 +27,5 @@ public class RandomStrategy implements Strategy {
 		Random random = new Random();
 		return availableTowers.get(random.nextInt(availableTowers.size()));
 	}
-
+ 
 }

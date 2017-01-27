@@ -43,6 +43,6 @@ public class ComputerPlayer extends Player {
 	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	public TowerCoordinates determineMove(Board board) {
 		return strategy.determineMove(board, this.playerID);
-	}
+	} 
 
 }

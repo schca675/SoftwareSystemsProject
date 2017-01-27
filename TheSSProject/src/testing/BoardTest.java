@@ -423,36 +423,37 @@ public class BoardTest {
 	//Test Y+Z-direction
 	@Test 
 	public void testHasWonYpZDir() {
+		//TODO
 	}
 	
 	//Test Y-Z-direction
 	@Test 
 	public void testHasWonYmZDir() {
-		
+		//TODO
 	}
 	
 	//test X+Y+Z-direction
 	@Test 
 	public void testHasWonXpYpZDir() {
-		
+		//TODO
 	}
 	
 	//Test X+Y-Z-direction
 	@Test 
 	public void testHasWonXpYmZDir() {
-		
+		//TODO
 	}
 	
 	//Test X-Y+Z-direction
 	@Test 
 	public void testHasWonXmYpZDir() {
-		
+		//TODO
 	}
 	
 	//Test X-Y-Z-direction
 	@Test 
 	public void testHasWonXmYmZDir() {
-		
+		//TODO
 	}
 	
 	/**
@@ -478,7 +479,6 @@ public class BoardTest {
 	/**
 	 * Test the getAvailableTowers method.
 	 */
-	//TODO
 	@Test
 	public void testgetAvailableTowers() {
 		List<TowerCoordinates> data = board.getAvailableTowers();
@@ -489,18 +489,35 @@ public class BoardTest {
 	
 	/**
 	 * Test the deep copy method of the board.
+	 * @throws IllegalCoordinatesException in case make Move gets invalid coordinates.
 	 */
 	@Test
-	public void testDeepCopy() {
-		//TODO
+	public void testDeepCopy() throws IllegalCoordinatesException {
+		board.makeMove(MIN, MIN, PLAYER1);
+		board.makeMove(MIN, MIN, PLAYER2);
+		board.makeMove(MIN, MIN, PLAYER1);
+		board.makeMove(MIN, MIN, PLAYER1);
+		board.makeMove(MIN, MAX, PLAYER1);
+		Board testBoard = board.deepCopy();
+		assertEquals(testBoard.getCellOwner(MIN, MIN, 1), PLAYER1);
+		assertEquals(testBoard.getCellOwner(MIN, MIN, 2), PLAYER2);
+		assertEquals(testBoard.getCellOwner(MIN, MIN, 3), PLAYER1);
+		assertEquals(testBoard.getCellOwner(MIN, MIN, 4), PLAYER1);
+		assertEquals(testBoard.getCellOwner(MIN, MAX, 1), PLAYER1);
+		testBoard.makeMove(BET, BET, PLAYER1);
+		assertEquals(testBoard.getCellOwner(BET, BET, 1), PLAYER1);
+		assertNotEquals(board.getCellOwner(BET, BET, 1), PLAYER1);
 	}
 	
 	/**
 	 * Test the deepdataCopy method of the board data.
+	 * @throws IllegalCoordinatesException in case make Move gets invalid coordinates.
 	 */
 	@Test
-	public void deepdataCopy() {
-		//TODO
+	public void deepdataCopy() throws IllegalCoordinatesException {
+		board.makeMove(MIN, MIN, PLAYER1);
+		List<List<Integer>> data = board.deepDataCopy();
+		assertEquals(data.get(0).get(0), PLAYER1);
 	}
 	
 	/**
@@ -510,6 +527,7 @@ public class BoardTest {
 	public void testGetCellOwner() {
 		try {
 			assertNull(board.getCellOwner(MIN, MIN, MIN));
+			assertNull(board.getCellOwner(MIN, MIN, 0));
 			board.makeMove(MIN, MIN, PLAYER2);
 			assertEquals(board.getCellOwner(MIN, MIN, MIN), PLAYER2);	
 		} catch (IllegalCoordinatesException e) {

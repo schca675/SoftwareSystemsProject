@@ -5,10 +5,12 @@ import java.util.Observable;
 import java.util.Scanner;
 
 import client.Client;
+import model.MessageType;
 import model.TowerCoordinates;
 
 
 public class ClientTUI extends Observable {
+	//TODO fix trennende Linien.
 	private Client client;
 	private Scanner scanny;
 	
@@ -54,7 +56,7 @@ public class ClientTUI extends Observable {
 						play = true; 
 						break;
 					default:
-						errorMessage(6);
+						errorMessage(MessageType.INVALID_INPUT);
 				}
 			}
 		}		
@@ -92,7 +94,6 @@ public class ClientTUI extends Observable {
 		return null;	
 	}
 	
-	//TODO Javadoc implement that it gets printed.
 	/**
 	 * Print the model of the board, whit the indices to be used.
 	 * @param xmax
@@ -248,7 +249,7 @@ public class ClientTUI extends Observable {
 					case "Com":
 						return false;
 					default:
-						errorMessage(6);
+						errorMessage(MessageType.INVALID_INPUT);
 				}
 			}
 		}
@@ -270,7 +271,7 @@ public class ClientTUI extends Observable {
 					case "Own":
 						return false;
 					default:
-						errorMessage(6);
+						errorMessage(MessageType.INVALID_INPUT);
 				}
 			}
 		}
@@ -326,7 +327,7 @@ public class ClientTUI extends Observable {
 					case  "Randi":
 						return "Randi";
 					default:
-						errorMessage(7);
+						errorMessage(MessageType.INVALID_STRATEGY);
 						break; 
 				}
 			}
@@ -400,9 +401,9 @@ public class ClientTUI extends Observable {
 	 * Successfull messages.
 	 * @param type Type of successfull message.
 	 */
-	public void valid(int type) {
+	public void valid(MessageType type) {
 		switch (type) {
-			case 1:
+			case SOCKET_CREATED:
 				System.out.println("Socket created\n");
 				break;
 			default:
@@ -414,47 +415,46 @@ public class ClientTUI extends Observable {
 	 * Prints the error message.
 	 * @param type what kind of message should be printed.
 	 */
-	//TODO work with enum.
-	public void errorMessage(int type) { 
+	public void errorMessage(MessageType type) { 
 		switch (type) {
-			case 1:
+			case INVALID_ADDRESS:
 				System.out.println("Invalid address name.\n");
 				break;
-			case 2:
+			case INVALID_PORT:
 				System.out.println("Invalid Port number.\n");
 				break;
-			case 3: 
+			case PROBLEM_DISCONNECTING: 
 				System.out.println("Problem while disconnecting.\n");
 				break;
-			case 4:
+			case INVALID_COORDINATES:
 				System.out.println("Invalid coordinates.\n");
 				break;
-			case 5:
+			case SOCKET_FAILURE:
 				System.out.println("The socket connection failed. You return to the start menu.\n");
 				startMenu();
 				break;
-			case 6:
+			case INVALID_INPUT:
 				System.out.println("Invalid input\n");
 				break;
-			case 7:
+			case INVALID_STRATEGY:
 				System.out.println("Not a valid Strategy.\n");
 				break;	
-			case 8: 
+			case STREAM_FAILURE: 
 				System.out.println("The Stream connection failed.\n");
 				break;
-			case 9:
+			case WRITING_FAILURE:
 				System.out.println("Problems while writing to the server.\n");
 				break;
-			case 10: 
+			case RETURN_START: 
 				System.out.println("You return to the start menu.\n");
 				break;
-			case 11:
+			case SERVER_LISTENING:
 				System.out.println("Problems while listening to the server\n");
 				break;
-			case 12:
+			case PROTOCOL_IRREGULARITIES:
 				System.out.println("Protocol irregularities\n");
 				break;
-			case 13:
+			case SERVER_ILLEGAL_MOVE:
 				System.out.println("Server sent an illegal move.\n");
 				break;
 			default:

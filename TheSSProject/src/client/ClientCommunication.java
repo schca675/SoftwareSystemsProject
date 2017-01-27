@@ -16,6 +16,7 @@ import exc.IllegalCoordinatesException;
 import exc.InvalidSyntaxException;
 import model.Board;
 import model.ComputerPlayer;
+import model.MessageType;
 import model.Player;
 import model.Strategy;
 import model.TowerCoordinates;
@@ -137,7 +138,7 @@ public class ClientCommunication implements Observer, Runnable {
 							write(answer);
 						}
 					} catch (InvalidSyntaxException | NumberFormatException e) {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -149,7 +150,7 @@ public class ClientCommunication implements Observer, Runnable {
 							makeMe(name, strategy, id);
 						}
 					} catch (NumberFormatException e) {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -164,16 +165,16 @@ public class ClientCommunication implements Observer, Runnable {
 							if (me != null) {
 								playing = true;
 							} else {
-								view.errorMessage(12);
+								view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 								disconnect();
 							}
 						} catch (InvalidSyntaxException | IllegalBoardConstructorArgumentsException 
 								| NumberFormatException e) {
-							view.errorMessage(12);
+							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 							disconnect();
 						}	
 					} else {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -190,17 +191,17 @@ public class ClientCommunication implements Observer, Runnable {
 								} else {
 									// either the board or the "me" player is not initialized. 
 									// Theoretically impossible.
-									view.errorMessage(12);
+									view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 									disconnect();
 								}
 							}
 							// else do nothing and listen until server sends NotifyMove.
 						} catch (NumberFormatException e) {
-							view.errorMessage(12);
+							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 							disconnect();
 						}
 					} else {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -213,11 +214,11 @@ public class ClientCommunication implements Observer, Runnable {
 							int y = Integer.parseInt(message[3]);
 							makeMove(x, y, id);
 						} catch (NumberFormatException e) {
-							view.errorMessage(12);
+							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 							disconnect();
 						}
 					} else {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -233,14 +234,16 @@ public class ClientCommunication implements Observer, Runnable {
 								result = determineEnd(reason, id);
 							} else {
 								result = determineEnd(reason);
-							}
+							} 
 							view.print(result);
+							//End of game.
+							disconnect();
 						} catch (NumberFormatException e) {
-							view.errorMessage(12);
+							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 							disconnect();
 						}
 					} else {
-						view.errorMessage(12);
+						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 						disconnect();
 					}
 					break;
@@ -256,8 +259,7 @@ public class ClientCommunication implements Observer, Runnable {
 			}
 			listen();
 		} else {
-			//TODO
-			view.errorMessage(12);
+			view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 			disconnect();
 		}		
 	}
@@ -269,8 +271,10 @@ public class ClientCommunication implements Observer, Runnable {
 	public void write(String message) {
 		try {
 			out.write(message);
+			out.newLine();
+			out.flush();
 		} catch (IOException e) {
-			view.errorMessage(9);
+			view.errorMessage(MessageType.WRITING_FAILURE);
 			disconnect();
 		}
 	}
@@ -285,7 +289,7 @@ public class ClientCommunication implements Observer, Runnable {
 			in.close();
 			socket.close();
 		} catch (IOException | NullPointerException e) {
-			view.errorMessage(3);
+			view.errorMessage(MessageType.PROBLEM_DISCONNECTING);
 		}
 	}
 	
@@ -473,7 +477,7 @@ public class ClientCommunication implements Observer, Runnable {
 					if (coord != null && board.isValidMove(coord.getX(), coord.getY())) {
 						valid = true;
 					} else {
-						view.errorMessage(4);
+						view.errorMessage(MessageType.INVALID_COORDINATES);
 					} 
 				}
 				return coord;
@@ -494,7 +498,7 @@ public class ClientCommunication implements Observer, Runnable {
 		try {
 			board.makeMove(newX, newY, newID);
 		} catch (IllegalCoordinatesException e) {
-			view.errorMessage(13);
+			view.errorMessage(MessageType.SERVER_ILLEGAL_MOVE);
 			disconnect();
 		}
 	}
@@ -507,7 +511,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public String determineEnd(int reason, int id) {
 		switch (reason) {
-			case 1:
+			case Protocol.EndID.WIN:
 				return "Player " + id + " won the game";
 			default:
 				return determineEnd(reason);		
@@ -521,13 +525,13 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public String determineEnd(int reason) {
 		switch (reason) {
-			case 1:
+			case Protocol.EndID.WIN:
 				return "There is a winner.";
-			case 2:
+			case Protocol.EndID.DRAW:
 				return "Board is full: Draw.";
-			case 3:
+			case Protocol.EndID.DISCONNECT:
 				return "A player disconnected, the game stops. No winner.";
-			case 4:
+			case Protocol.EndID.DISCONNECT_THIS:
 				return "Current player did not respond within the "
 						+ "timeout, so the game stops. No winner";
 			default:
