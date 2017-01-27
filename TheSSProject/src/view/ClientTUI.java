@@ -319,13 +319,17 @@ public class ClientTUI extends Observable {
 		String strategy;
 		System.out.println("Please name the Computer should play with:\n"
 				+ "The following are implemented:\n"
-				+ " - Randi for a player with Random strategy\n");
+				+ " - Randi for a player with Random strategy\n"
+				+ " - Trams for a player with Smart strategy (takes winning move if "
+				+ "possible, else a random move)\n");
 		while (true) {
 			if (scanny.hasNextLine()) {
 				strategy = scanny.nextLine();
 				switch (strategy) {
 					case  "Randi":
 						return "Randi";
+					case "Trams":
+						return "Trams";
 					default:
 						errorMessage(MessageType.INVALID_STRATEGY);
 						break; 

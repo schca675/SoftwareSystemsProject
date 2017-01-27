@@ -9,6 +9,7 @@ import exc.InvalidPortException;
 import model.Board;
 import model.MessageType;
 import model.RandomStrategy;
+import model.SmartStrategy;
 import model.Strategy;
 import view.ClientTUI;
 
@@ -168,6 +169,9 @@ public class Client {
 		switch (name) {
 			case "Randi":
 				strategy = new RandomStrategy();
+				break;
+			case "Trams":
+				strategy = new SmartStrategy();
 				break;
 			default:
 				strategy = new RandomStrategy();

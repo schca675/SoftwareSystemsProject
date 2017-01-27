@@ -18,6 +18,7 @@ import model.Board;
 import model.ComputerPlayer;
 import model.MessageType;
 import model.Player;
+import model.SmartStrategy;
 import model.Strategy;
 import model.TowerCoordinates;
 import server.Protocol;
@@ -555,7 +556,8 @@ public class ClientCommunication implements Observer, Runnable {
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
 		} else if (observable instanceof ClientTUI && type.equals("Hint")) {
-			hintGiver = new ComputerPlayer(me.playerID);
+			Strategy hintStrategy = new SmartStrategy();
+			hintGiver = new ComputerPlayer(hintStrategy, me.playerID);
 			TowerCoordinates coord = hintGiver.determineMove(board);
 			view.print("This move is proposed: " + coord.toString());
 		}

@@ -7,6 +7,7 @@ import client.Client;
 import client.ClientCommunication;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.InvalidSyntaxException;
+import model.MessageType;
 import model.TowerCoordinates;
 import view.ClientTUI;
 
@@ -14,6 +15,7 @@ public class ClientTUITest {
 
 	
 	public static void main(String[] args) {
+		//TODO Exit?
 		Client client = new Client();
 		ClientTUI view = new ClientTUI(client);
 		ClientCommunication comu = new ClientCommunication(view, "Test");
@@ -90,29 +92,26 @@ public class ClientTUITest {
 		
 		//Test print methods
 		System.out.println("\nTesting the print methods\n");
-		view.valid(1);
-		// 2 is unknown.
-		view.valid(2);
-		view.errorMessage(1);
-		view.errorMessage(2);
-		view.errorMessage(3);
-		view.errorMessage(4);
-		view.errorMessage(6);
-		view.errorMessage(7);
-		view.errorMessage(8);
-		view.errorMessage(9);
-		view.errorMessage(10);
-		view.errorMessage(11);
-		view.errorMessage(12);
-		view.errorMessage(13);
-		// 14 is unknown.
-		view.errorMessage(14);
+		view.valid(MessageType.SOCKET_CREATED);
+		view.errorMessage(MessageType.INVALID_ADDRESS);
+		view.errorMessage(MessageType.INVALID_PORT);
+		view.errorMessage(MessageType.PROBLEM_DISCONNECTING);
+		view.errorMessage(MessageType.INVALID_COORDINATES);
+		view.errorMessage(MessageType.SOCKET_FAILURE);
+		view.errorMessage(MessageType.INVALID_INPUT);
+		view.errorMessage(MessageType.INVALID_STRATEGY);
+		view.errorMessage(MessageType.STREAM_FAILURE);
+		view.errorMessage(MessageType.WRITING_FAILURE);
+		view.errorMessage(MessageType.RETURN_START);
+		view.errorMessage(MessageType.SERVER_LISTENING);
+		view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
+		view.errorMessage(MessageType.SERVER_ILLEGAL_MOVE);
 		
 		//Test start: StartMenu should show up and answer questions until the socket connection.
 		// So to test: Help menu, Exit, Play: Com and Human, Def and Own.
 		System.out.println("\nTesting the startup:\n");
 		//returns to start menu
-		view.errorMessage(5);
+		view.errorMessage(MessageType.RETURN_START);
 		try {
 			view.start();
 		} catch (NullPointerException e) {
