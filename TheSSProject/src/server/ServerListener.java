@@ -31,6 +31,7 @@ public class ServerListener extends Observable implements Runnable {
 				notifyObservers(socket);
 			} catch (IOException e) {
 				notifyObservers(LISTEN_ERROR);
+				exit = true;
 			}
 		}
 	}

@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import model.Player;
-import server.Protocol.EndID;
-import server.Protocol.ErrorID;
-import server.Protocol.Server;
 
 public class ServerMessages {
 	private static final String SPACE = " ";
@@ -18,6 +15,10 @@ public class ServerMessages {
 		return Protocol.Server.SERVERCAPABILITIES + SPACE + numPlayers + SPACE + 
 				boolToInt(roomSupport) + SPACE + maxXDim + SPACE + maxYDim + SPACE + 
 				maxZDim + SPACE + boolToInt(chatSupport);
+	}
+	
+	public static String genAssignIDString(int id) {
+		return Protocol.Server.ASSIGNID + SPACE + id;
 	}
 	
 	public static String genStartGameString(int xDim, int yDim, int zDim, int winLength, 

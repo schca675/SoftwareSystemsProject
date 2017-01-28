@@ -2,39 +2,44 @@ package server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Set;
 
 import client.ClientCapabilities;
 import model.Player;
 
 public class Server implements Observer {
-	public class PlayerIDProvider implements Observer {
-		private List<Integer> usedIDs;
+	public class PlayerIDProvider {
+		private Set<Integer> usedIDs;
 		
 		public PlayerIDProvider() {
-			
+			usedIDs = new HashSet<Integer>();
 		}
 		
 		/**
 		 * Returns the lowest unused integer ID.
 		 * @return Unused player ID
 		 */
-		public int getNewID() {
-			return 0;
+		public int obtainID() {
+			int id = 0;
+			while (true) {
+				if (!usedIDs.contains(id)) {
+					usedIDs.add(id);
+					return id;
+				} else {
+					id++;
+				}
+			}
 		}
 		
-		/** 
-		 * Gets notified when an ID of a player can be removed.
-		 */
-		@Override
-		public void update(Observable thingy, Object id) {
-			
+		public void releaseID(int id) {
+			usedIDs.remove(id);
 		}
 	}
 	
@@ -47,21 +52,11 @@ public class Server implements Observer {
 	private int port;
 	private boolean enableExtensions;
 	private List<Player> lobbyPlayerList;
-	private Map<Player, Socket> socketMap;
+	private Map<Player, ClientHandler> handlerMap;
 	private Map<Player, ClientCapabilities> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
 	private static final String USAGE = "";
-	private server.ServerTUI view;
-	private Lock mainLock = new ReentrantLock();
-	private Condition noMessages = mainLock.newCondition();
-	
-	public Server(int port, boolean enableExtensions, server.ServerTUI view) throws IOException {
-		this.port = port;
-		this.enableExtensions = enableExtensions;
-		ServerListener listener = new ServerListener(port, view);
-		listener.addObserver(this);
-		new Thread(listener).start();
-	}
+	private ServerTUI view;
 	
 	/** 
 	 * Main method to launch the server.
@@ -83,42 +78,107 @@ public class Server implements Observer {
 			}
 		} catch (NumberFormatException e) {
 			System.out.println(USAGE);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
 		}
 	}
 	
+	/**
+	 * Server constructor.
+	 * @param port Port to bind the connection listener to
+	 * @param enableExtensions Whether to enable extensions (currently larger board, 
+	 * winning length supported)
+	 * @param view View to use;
+	 */
+	public Server(int port, boolean enableExtensions, ServerTUI view) {
+		this.port = port;
+		this.enableExtensions = enableExtensions;
+		this.playerIDProvider = new PlayerIDProvider();
+		lobbyPlayerList = new ArrayList<Player>(10);
+		handlerMap = new HashMap<Player, ClientHandler>(10);
+		capabilitiesMap = new HashMap<Player, ClientCapabilities>(10);
+		listenForConnections();
+	}
+	
+	/**
+	 * Method that initiates listening for incoming connections.
+	 */
+	public void listenForConnections() {
+		ServerListener listener = new ServerListener(port, view);
+		listener.addObserver(this);
+		new Thread(listener).start();
+	}
+
+	/**
+	 * Update method, used for handling commands to be executed after a ClientHandler receives a 
+	 * valid communication message while in the initial connection stage.
+	 * @param o Caller
+	 * @param arg Object that was created after receiving a valid message
+	 */
 	@Override
-	public void update(Observable o, Object arg) {
+	public synchronized void update(Observable o, Object arg) {
 		// Client connects
 		if (arg instanceof Socket) {
 			System.out.println("Client with IP " + ((Socket) arg).getInetAddress() + 
 					" connected at port " + ((Socket) arg).getPort());
 			initConnection((Socket) arg);
-		// Message, atm just errors
+		} else if (arg instanceof ClientCapabilities && o instanceof ClientHandler) {
+			initPlayer((ClientHandler) o, (ClientCapabilities) arg);
 		} else if (arg instanceof String) {
+			// Message, atm just errors
 			System.err.println(o.toString() + arg);
-		}
-	}
-	
-	public void initConnection(Socket socket) {
-		ServerPeer peer = null;
-		try {
-			peer = new ServerPeer(socket, view);
-			peer.changeLock(mainLock, noMessages);
-			new Thread(peer).start();
-			// Go wait for messages
-		} catch (IOException e) { }
-		if (enableExtensions) {
-			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, EXT_DIM, 
-					EXT_DIM, EXT_DIM, EXT_WINLENGTH, EXT_CHAT));
 		} else {
-			peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
+			System.out.println("Invalid call to main server update");
 		}
 	}
 	
-	public List<Player> matchPlayers() {
-		
+	/**
+	 * Initiates a connection to the given socket, e.g. starts a handler for this socket and sends 
+	 * the initial server message. Starts timeout in handler for handshake from client.
+	 * @param socket A socket
+	 */
+	public void initConnection(Socket socket) {
+		//TODO: look at exceptions
+		ClientHandler peer = null;
+		try {
+			peer = new ClientHandler(socket, view);
+			new Thread(peer).start();
+			if (enableExtensions) {
+				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
+						EXT_DIM, EXT_DIM, EXT_DIM, EXT_WINLENGTH, EXT_CHAT));
+			} else {
+				peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
+			}
+			peer.startTimeout();
+		} catch (IOException e) { }
+	}
+	
+	/**
+	 * Creates a player and stores relevant data (player, handler and capabilities). Calls 
+	 * matchplayer to see if the new player would allow a game to be started according to its 
+	 * criteria.
+	 * @param handler ClientHandler for this player/client
+	 * @param caps Capabilities of this player/client
+	 */
+	public void initPlayer(ClientHandler handler, ClientCapabilities caps) {
+		int id = playerIDProvider.obtainID();
+		Player player = new Player(caps.playerName, id);
+		handler.sendMessage(ServerMessages.genAssignIDString(id));
+		lobbyPlayerList.add(player);
+		handlerMap.put(player, handler);
+		capabilitiesMap.put(player, caps);
+		matchPlayers(player);
+	}
+	
+	/**
+	 * Checks if the given player would allow a game to be started. Current implementation is very 
+	 * basic, just starts a game between the first to players connected.
+	 * @param player Player to match
+	 */
+	public void matchPlayers(Player player) {
+		//TODO: implement more sophisticated matching, for the moment just first players.
+		List<Player> players = new ArrayList<Player>(2);
+		players.add(lobbyPlayerList.get(0));
+		players.add(lobbyPlayerList.get(1));
+		startGame(players);
 	}
 	
 	/**
@@ -129,14 +189,4 @@ public class Server implements Observer {
 	public void startGame(List<Player> players) {
 		
 	}
-	
-	/**
-	 * Starts a new game thread with specified rules for the given players.
-	 * First (two) players in the playerList given to game, socket can be retrieved from the map.
-	 */
-	public void startGame(List<Player> players, int xDim, int yDim, int zDim, int winLength) {
-		
-	}
-	
-	// MAKING CONNECTIONS!!!!!
 }
