@@ -1,4 +1,4 @@
-package model;
+package view;
 
 public enum MessageType {
 	INVALID_ADDRESS, 

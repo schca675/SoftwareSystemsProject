@@ -7,11 +7,11 @@ import java.net.UnknownHostException;
 
 import exc.InvalidPortException;
 import model.Board;
-import model.MessageType;
 import model.RandomStrategy;
 import model.SmartStrategy;
 import model.Strategy;
 import view.ClientTUI;
+import view.MessageType;
 
 public class Client {
 	private ClientTUI view;

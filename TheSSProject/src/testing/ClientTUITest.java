@@ -7,9 +7,9 @@ import client.Client;
 import client.ClientCommunication;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.InvalidSyntaxException;
-import model.MessageType;
 import model.TowerCoordinates;
 import view.ClientTUI;
+import view.MessageType;
 
 public class ClientTUITest {
 

@@ -5,7 +5,6 @@ import java.util.Observable;
 import java.util.Scanner;
 
 import client.Client;
-import model.MessageType;
 import model.TowerCoordinates;
 
 

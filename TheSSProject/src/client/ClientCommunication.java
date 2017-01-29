@@ -16,13 +16,13 @@ import exc.IllegalCoordinatesException;
 import exc.InvalidSyntaxException;
 import model.Board;
 import model.ComputerPlayer;
-import model.MessageType;
 import model.Player;
 import model.SmartStrategy;
 import model.Strategy;
 import model.TowerCoordinates;
 import server.Protocol;
 import view.ClientTUI;
+import view.MessageType;
 
 public class ClientCommunication implements Observer, Runnable {
 	//<<------- Variables needed for a play -------->>
