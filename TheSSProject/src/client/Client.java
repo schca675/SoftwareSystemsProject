@@ -213,8 +213,8 @@ public class Client {
 					ClientCommunication thisClient = new ClientCommunication(socket, view, 
 							playerName, strategy, this, x, y, z, win);
 					view.addObserver(thisClient);
-					thisClient.run();
 					view.print("New communication thread with server started.");
+					thisClient.run();
 //					// We do not need concurrency for our project but if one wants to include that
 //					// a client can connect to multiple servers, this could be used.
 //					client = new Thread(thisClient);

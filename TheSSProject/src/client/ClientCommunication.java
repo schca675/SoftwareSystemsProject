@@ -123,6 +123,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public void listen() {
 		String message;
 		try { 
+			view.print("Listening");
 			message = in.readLine();
 			react(message);
 		} catch (IOException | NullPointerException e) {
@@ -135,10 +136,11 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public void react(String input)  {
 		String[] message = input.split(" ");
+		view.print("reacting");
 //		 to be deleted.
-//		for (int i = 0; i < message.length; i++){
-//			System.out.println(i + " : " + message[i]);
-//		}
+		for (int i = 0; i < message.length; i++){
+			System.out.println(i + " : " + message[i]);
+		}
 		if (message.length >= 1) {
 			switch (message[0]) {
 				case SERVERCAPABILITIES:
@@ -432,13 +434,14 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public Board makeBoard(String dimensions) throws InvalidSyntaxException, 
 		IllegalBoardConstructorArgumentsException, NumberFormatException {
-		String[] dims = dimensions.split("|");
-		if (dims.length == 7) {
-			int x = Integer.parseInt(dims[0]);
-			int y = Integer.parseInt(dims[2]);
-			int z = Integer.parseInt(dims[4]);
-			int win = Integer.parseInt(dims[6]);
-			board = new Board(x, y, z, win);
+		String[] dims = dimensions.split("\\|");
+		//TODO test this
+		if (dims.length >= 4) {
+			int xs = Integer.parseInt(dims[0]);
+			int ys = Integer.parseInt(dims[1]);
+			int zs = Integer.parseInt(dims[2]);
+			int wins = Integer.parseInt(dims[3]);
+			board = new Board(xs, ys, zs, wins);
 			// This is the observer in case the board makes a move
 			board.addObserver(this);
 			return board.deepCopy();
