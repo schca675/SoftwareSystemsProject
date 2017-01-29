@@ -410,6 +410,21 @@ public class ClientTUI extends Observable {
 			case SOCKET_CREATED:
 				System.out.println("Socket created\n");
 				break;
+			case GOT_SERVER_CAP:
+				System.out.println("The server capabilities are received.\n");
+				break;
+			case SENT_CLIENT_CAP:
+				System.out.println("The client capabilities are sent.\n");
+				break;
+			case GOT_ID:
+				System.out.println("The client ID is received.\n");
+				break;
+			case GAME_START: 
+				System.out.println("The game starts.\n");
+				break;
+			case MOVE_MADE:
+				System.out.println("A move is made.\n");
+				break;
 			default:
 				break;
 		}
