@@ -20,7 +20,8 @@ public class Client {
 	private InetAddress addr;
 	private Socket socket;
 	private int port;
-	private Thread client;
+	//private Thread client;
+	//TODO
 	
 	// needed in case the user wants to play as human player.
 	private String playerName;
@@ -37,7 +38,7 @@ public class Client {
 	 * Creates a new client.
 	 */
 	public Client() { 
-		view = new ClientTUI(this); 
+		view = new ClientTUI(); 
 		playerName = "Initial";
 		strategy = null;
 		socket = null;
@@ -50,6 +51,29 @@ public class Client {
 	}
 	
 	//<<--------- Methods to communicate with TUI -------->>
+	
+	public void startMenu() {
+		boolean play = false;
+		do {
+			String input = view.startMenu();
+			switch (input) {
+				case "Help":
+					view.helpMenu();
+					break;
+				case "Play":
+					playMenu();
+					play = true;
+					break;
+				case "Exit":
+					play = true;
+					terminateMenu();
+					break;
+				default:
+					view.errorMessage(MessageType.INVALID_INPUT);
+					break;
+			}
+		} while (!play);
+	}	
 	
 	/**
 	 * Initialises a game.
@@ -185,29 +209,33 @@ public class Client {
 			try {
 				socket = new Socket(addr, port);				
 				view.valid(MessageType.SOCKET_CREATED);
+				try {
+					ClientCommunication thisClient = new ClientCommunication(socket, view, 
+							playerName, strategy, this, x, y, z, win);
+					view.addObserver(thisClient);
+					thisClient.run();
+					view.print("New communication thread with server started.");
+//					// We do not need concurrency for our project but if one wants to include that
+//					// a client can connect to multiple servers, this could be used.
+//					client = new Thread(thisClient);
+//					client.run();
+					//TODO
+//					try {
+//						client.join();
+//					} catch (InterruptedException e) {
+//						//do nothing
+//					}
+					
+				} catch (IOException e) {
+					view.errorMessage(MessageType.STREAM_FAILURE);
+					reset(); 
+				} finally {
+					reset();
+				}	
 			} catch (IOException e) {
 				view.errorMessage(MessageType.SOCKET_FAILURE);
 				reset(); 
 			}
-			try {
-				ClientCommunication thisClient = new ClientCommunication(socket, view, 
-						playerName, strategy, this);
-				view.addObserver(thisClient);
-				client = new Thread(thisClient);
-				client.start();
-				view.print("New communication thread with server started.");
-				try {
-					client.join();
-				} catch (InterruptedException e) {
-					//do nothing
-				}
-				
-			} catch (IOException e) {
-				view.errorMessage(MessageType.STREAM_FAILURE);
-				reset(); 
-			} finally {
-				reset();
-			}		
 		}
 		
 	}
@@ -230,6 +258,7 @@ public class Client {
 	 */
 	public void start() {
 		view.start();
+		this.startMenu();
 	}
 	
 	public void reset() {
@@ -243,7 +272,7 @@ public class Client {
 		y = Board.DEFAULT_DIM;
 		z = Board.DEFAULT_DIM;
 		win = Board.DEFAULT_WIN;
-		view.startMenu();
+		startMenu();
 	}
 
 	/**

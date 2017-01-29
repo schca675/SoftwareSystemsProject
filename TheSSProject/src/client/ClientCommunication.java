@@ -33,6 +33,11 @@ public class ClientCommunication implements Observer, Runnable {
 	private Board board;
 	private boolean playing;
 	private ComputerPlayer hintGiver;
+	private int x;
+	private int y;
+	private int z;
+	private int win;
+	
 	
 	private ClientTUI view;
 	
@@ -77,7 +82,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @throws IOException in case the streams can not be initialized.
 	 */
 	public ClientCommunication(Socket socket, ClientTUI view, String name, Strategy strategy,
-			Client client) throws IOException {
+			Client client, int xmax, int ymax, int zmax, int win) throws IOException {
 		this.view = view;
 		this.socket = socket;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -88,6 +93,10 @@ public class ClientCommunication implements Observer, Runnable {
 		playing = false;
 		board = null;
 		players = new ArrayList<Player>();
+		x = xmax;
+		y = ymax;
+		z = zmax;
+		this.win = win;
 	}
 	
 	/**
@@ -218,9 +227,9 @@ public class ClientCommunication implements Observer, Runnable {
 					if (playing && message.length == 4) {
 						try {
 							int id = Integer.parseInt(message[1]);
-							int x = Integer.parseInt(message[2]);
-							int y = Integer.parseInt(message[3]);
-							makeMove(x, y, id);
+							int xc = Integer.parseInt(message[2]);
+							int yc = Integer.parseInt(message[3]);
+							makeMove(xc, yc, id);
 							view.valid(MessageType.MOVE_MADE);
 						} catch (NumberFormatException e) {
 							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -355,14 +364,31 @@ public class ClientCommunication implements Observer, Runnable {
 		result.append(FALSE);
 		result.append(" ");
 		// add the dimensions x, y, z and the winning length.
-		// since our program can handle illimitated dimensions, we return the same as the server.
-		result.append(maxX);
+		// we return the smaller dimension: 
+		// either the dimension received by the server or by the client.
+		if (x > maxX || x == -1) {
+			result.append(maxX);
+		} else {
+			result.append(x);
+		}
 		result.append(" ");
-		result.append(maxY);
+		if (y > maxY || y == -1) {
+			result.append(maxY);
+		} else {
+			result.append(y);
+		}
 		result.append(" ");
-		result.append(maxZ);
+		if (z > maxZ || z == -1) {
+			result.append(maxZ);
+		} else {
+			result.append(z);
+		}
 		result.append(" ");
-		result.append(maxWin);
+		if (win > maxWin || win == -1) {
+			result.append(maxWin);
+		} else {
+			result.append(win);
+		}
 		result.append(" ");
 		// add chat Support, which is not enabled on this client
 		result.append(FALSE);

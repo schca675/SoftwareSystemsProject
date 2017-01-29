@@ -1,6 +1,8 @@
 package model;
 
 public interface Strategy {
+	
+	// <------ Queries ------>
 	/**
 	 * Get the name of the strategy.
 	 * @return name of the strategy

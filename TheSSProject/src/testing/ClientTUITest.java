@@ -17,7 +17,7 @@ public class ClientTUITest {
 	public static void main(String[] args) {
 		//TODO Exit?
 		Client client = new Client();
-		ClientTUI view = new ClientTUI(client);
+		ClientTUI view = new ClientTUI();
 		ClientCommunication comu = new ClientCommunication(view, "Test");
 		view.addObserver(comu); 
 		comu.makeMe("Test", null, 1);
@@ -108,10 +108,9 @@ public class ClientTUITest {
 		view.errorMessage(MessageType.SOCKET_FAILURE);
 
 		
-		//Test start: StartMenu should show up and answer questions until the socket connection.
-		// So to test: Help menu, Exit, Play: Com and Human, Def and Own.		
-		// When asking Exit: throws an exception, because the client does
-		// not have a socket to close.
+		//To test the start menu of the Client we invoke the Client's start menu.
+		System.out.println("Test the interaction with the Client controller Class:\n");
+		client.start();
 	}
 	
 	/**

@@ -19,6 +19,7 @@ public class TowerCoordinates {
 		this.y = y;
 	}
 
+	// <------ Queries ------>
 	/**
 	 * Returns the x coordinate.
 	 * @return the x coordinate.

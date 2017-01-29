@@ -4,20 +4,18 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Scanner;
 
-import client.Client;
+//import client.Client;
 import model.TowerCoordinates;
 
 
 public class ClientTUI extends Observable {
-	private Client client;
 	private Scanner scanny;
 	
 	/**
 	 * Constructs a new TUI for a client.
 	 * @param client Client the TUI belongs to.
 	 */
-	public ClientTUI(Client client) { 
-		this.client = client;
+	public ClientTUI() { 
 		scanny = new Scanner(System.in);
 	} 
 	
@@ -26,36 +24,19 @@ public class ClientTUI extends Observable {
 	 */
 	public void start() {
 		System.out.println("Hello");
-		startMenu();
 	}
 	
 	/**
 	 * Start Menu which is called at the beginning and at after a game finished.
 	 */
-	public void startMenu() {
-		System.out.println("Please enter you input: \n"
+	public String startMenu() {
+		System.out.println("\nPlease enter you input: \n"
 				+ " - Play for Play a 4-wins game. \n"
 				+ " - Help for additionnal information\n"
 				+ " - Exit for terminating the application");
-		boolean play = false;
-		while (!play) {
+		while (true) {
 			if (scanny.hasNext()) {
-				String input = scanny.next();
-				switch (input) {
-					case "Help":
-						helpMenu();
-						break;
-					case "Play":
-						client.playMenu();
-						play = true;
-						break;
-					case "Exit":
-						client.terminateMenu();
-						play = true; 
-						break;
-					default:
-						errorMessage(MessageType.INVALID_INPUT);
-				}
+				return scanny.next();
 			}
 		}		
 	}
@@ -215,6 +196,7 @@ public class ClientTUI extends Observable {
 	 * Terminates the TUI.
 	 */
 	public void terminateMenu() {
+		System.out.println("Goodbye!");
 		scanny.close();
 	}
 	
@@ -440,7 +422,6 @@ public class ClientTUI extends Observable {
 				break;
 			case SOCKET_FAILURE:
 				System.out.println("The socket connection failed. You return to the start menu.\n");
-				startMenu();
 				break;
 			case INVALID_INPUT:
 				System.out.println("Invalid input\n");
@@ -504,18 +485,20 @@ public class ClientTUI extends Observable {
 	}
 	
 	/**
-	 * The method asks the client for a valid integer (positive integer).
+	 * The method asks the client for a valid integer:
+	 * positive integer or -1 for unlimited dimension.
 	 * @return entered dimension.
 	 */
-	//@ensures \result >=1;
+	//@ensures \result >=1 || \result == -1;
 	public int getInt(String message) {
 		System.out.println(message);
-		int x = -1;
-		while (x < 1) {
+		int x = -2;
+		while (x < 1 && x != -1) {
 			if (scanny.hasNextInt()) {
 				x = scanny.nextInt();
-				if (x < 1) {
-					System.out.println("Please enter a positive integer: ");
+				if (x < 1 && x != -1) {
+					System.out.println("Please enter a positive integer or -1 "
+							+ "for unlimited size: ");
 				}
 			} else if (scanny.hasNext()) {
 				scanny.next();
