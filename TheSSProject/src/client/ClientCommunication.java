@@ -16,13 +16,13 @@ import exc.IllegalCoordinatesException;
 import exc.InvalidSyntaxException;
 import model.Board;
 import model.ComputerPlayer;
-import model.MessageType;
 import model.Player;
 import model.SmartStrategy;
 import model.Strategy;
 import model.TowerCoordinates;
 import server.Protocol;
 import view.ClientTUI;
+import view.MessageType;
 
 public class ClientCommunication implements Observer, Runnable {
 	//<<------- Variables needed for a play -------->>
@@ -135,8 +135,10 @@ public class ClientCommunication implements Observer, Runnable {
 				case SERVERCAPABILITIES:
 					try {
 						if (message.length == 8) {
+							view.valid(MessageType.GOT_SERVER_CAP);
 							String answer = serverCapabilities(message);
 							write(answer);
+							view.valid(MessageType.SENT_CLIENT_CAP);
 						}
 					} catch (InvalidSyntaxException | NumberFormatException e) {
 						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -146,9 +148,10 @@ public class ClientCommunication implements Observer, Runnable {
 				case ASSIGNID:
 					try {
 						if (message.length == 2) {
-							
 							int id = Integer.parseInt(message[1]);
 							makeMe(name, strategy, id);
+							view.valid(MessageType.GOT_ID);
+							view.print("Your ID is: " + id);
 						}
 					} catch (NumberFormatException e) {
 						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -169,6 +172,7 @@ public class ClientCommunication implements Observer, Runnable {
 								view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 								disconnect();
 							}
+							view.valid(MessageType.GAME_START);
 						} catch (InvalidSyntaxException | IllegalBoardConstructorArgumentsException 
 								| NumberFormatException e) {
 							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -195,11 +199,14 @@ public class ClientCommunication implements Observer, Runnable {
 									view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 									disconnect();
 								}
+								view.valid(MessageType.YOUR_TURN);
+							} else {
+								view.print("It is the turn of the player with "
+										+ "player ID " + current);
 							}
-							// else do nothing and listen until server sends NotifyMove.
 						} catch (NumberFormatException e) {
 							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
-							disconnect();
+							disconnect();  
 						}
 					} else {
 						view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -214,6 +221,7 @@ public class ClientCommunication implements Observer, Runnable {
 							int x = Integer.parseInt(message[2]);
 							int y = Integer.parseInt(message[3]);
 							makeMove(x, y, id);
+							view.valid(MessageType.MOVE_MADE);
 						} catch (NumberFormatException e) {
 							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 							disconnect();
@@ -549,10 +557,11 @@ public class ClientCommunication implements Observer, Runnable {
 		 */
 	@Override
 	public void update(Observable observable, Object type) {
-		if (observable instanceof Board && type instanceof Integer) {
+		if (observable instanceof Board && type instanceof TowerCoordinates) {
 			Board playboard = (Board) observable;
 			int id = 1;
 			id = players.size();
+			view.print("This move was made: " + ((TowerCoordinates) type).toString());
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
 		} else if (observable instanceof ClientTUI && type.equals("Hint")) {

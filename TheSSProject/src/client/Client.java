@@ -7,11 +7,11 @@ import java.net.UnknownHostException;
 
 import exc.InvalidPortException;
 import model.Board;
-import model.MessageType;
 import model.RandomStrategy;
 import model.SmartStrategy;
 import model.Strategy;
 import view.ClientTUI;
+import view.MessageType;
 
 public class Client {
 	private ClientTUI view;
@@ -58,16 +58,10 @@ public class Client {
 		//Determine if user is a computer or a human player 
 		boolean human = view.determinePlayer();
 		if (human) { 
-			playerName = view.determinePlayerName();
+			setPlayerName(view.determinePlayerName());
 		} else {
 			String typeStrategy = view.determineStrategy();
-			switch (typeStrategy) {
-				case "Randi":
-					strategy = new RandomStrategy();
-					break;
-				default:
-					strategy = new RandomStrategy();
-			}
+			setStrategy(typeStrategy);
 		}
 		
 		//Determine if user wants to play with default or own dimensions 
@@ -174,6 +168,7 @@ public class Client {
 				strategy = new SmartStrategy();
 				break;
 			default:
+				//theoretically never called.
 				strategy = new RandomStrategy();
 		}
 	}
@@ -200,6 +195,7 @@ public class Client {
 				view.addObserver(thisClient);
 				client = new Thread(thisClient);
 				client.start();
+				view.print("New communication thread with server started.");
 				try {
 					client.join();
 				} catch (InterruptedException e) {

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import model.RandomStrategy;
 import model.TowerCoordinates;
 
 public class TestTowerCoordinates {
@@ -14,12 +15,18 @@ public class TestTowerCoordinates {
 	private TowerCoordinates coordA;
 	private TowerCoordinates coordB;
 	private TowerCoordinates coordC;
+	private TowerCoordinates coordD;
+	private Object coordE;
+	private Object other;
 	
 	@Before
 	public void setup() {
 		coordA = new TowerCoordinates(1, 2);
 		coordB = new TowerCoordinates(1, 2);
 		coordC = new TowerCoordinates(2, 1);
+		coordD = new TowerCoordinates(1, 3);
+		coordE = new TowerCoordinates(1, 2);
+		other = new RandomStrategy();
 	}
 	
 	/**
@@ -45,6 +52,17 @@ public class TestTowerCoordinates {
 	public void testEquals() {
 		assertTrue(coordA.equals(coordB));
 		assertTrue(coordB.equals(coordA));
+		assertTrue(coordA.equals(coordE));
 		assertFalse(coordA.equals(coordC));
+		assertFalse(coordA.equals(coordD));
+		assertFalse(coordA.equals(other));
+	}
+	
+	/**
+	 * Test the representation, should print the x and y coordinates on the console.
+	 */
+	@Test
+	public void testToString() {
+		System.out.println(coordA.toString());
 	}
 }
