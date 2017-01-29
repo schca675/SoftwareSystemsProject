@@ -44,7 +44,8 @@ public class Server implements Observer {
 	}
 	
 	public static final int EXT_PLAYERS = 2;
-	public static final int EXT_DIM = 0;
+	public static final int EXT_XYDIM = 10;
+	public static final int EXT_ZDIM = 0;
 	public static final int EXT_WINLENGTH = 0;
 	public static final boolean EXT_ROOMS = false;
 	public static final boolean EXT_CHAT = false;
@@ -143,7 +144,7 @@ public class Server implements Observer {
 			new Thread(peer).start();
 			if (enableExtensions) {
 				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
-						EXT_DIM, EXT_DIM, EXT_DIM, EXT_WINLENGTH, EXT_CHAT));
+						EXT_XYDIM, EXT_XYDIM, EXT_ZDIM, EXT_WINLENGTH, EXT_CHAT));
 			} else {
 				peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
 			}
@@ -178,15 +179,66 @@ public class Server implements Observer {
 		List<Player> players = new ArrayList<Player>(2);
 		players.add(lobbyPlayerList.get(0));
 		players.add(lobbyPlayerList.get(1));
-		startGame(players);
+		startGame(players, determineRules(players));
 	}
 	
 	/**
-	 * Starts a new game thread with default rules for the given players. 
-	 * First two players in the playerList given to game, socket can be retrieved from the map.
-	 * @param players
+	 * Determines the lowest common divisor of rules between players and the server.
+	 * @param players List of players
+	 * @return Most extended rule set supported by all players, server
 	 */
-	public void startGame(List<Player> players) {
-		
+	public GameRules determineRules(List<Player> players) {
+		if (enableExtensions) {
+			int xDim = Server.EXT_XYDIM;
+			int yDim = Server.EXT_XYDIM;
+			int zDim = Server.EXT_ZDIM;
+			int winLength = Server.EXT_WINLENGTH;
+			for (Player player : players) {
+				xDim = compareDims(xDim, capabilitiesMap.get(player).maxXDim);
+				yDim = compareDims(yDim, capabilitiesMap.get(player).maxYDim);
+				zDim = compareDims(zDim, capabilitiesMap.get(player).maxZDim);
+				winLength = java.lang.Math.min(winLength, capabilitiesMap.get(player).winLength);
+			}
+			return new GameRules(xDim, yDim, zDim, winLength);
+		} else {
+			return new GameRules(4, 4, 4, 4);
+		}
+	}
+	
+	/**
+	 * Compares two dimensions, according to the protocol dim==0 stands for infinity.
+	 * @param dim1 First dimension
+	 * @param dim2 Second dimension
+	 * @return 'Greatest' dimension
+	 */
+	private int compareDims(int dim1, int dim2) {
+		if (dim1 == 0 || dim2 == 0) {
+			return java.lang.Math.max(dim1, dim2);
+		} else {
+			return java.lang.Math.min(dim1, dim2);
+		}
+	}
+	
+	/**
+	 * Starts a new game thread with given rules for the given players. Removes all relevant 
+	 * player data from the server and hands it to the GameThread. Updates observers for the 
+	 * ClientHandlers.
+	 * @param players List of players
+	 * @param rules Rules for given players, server
+	 */
+	public void startGame(List<Player> players, GameRules rules) {
+		Map<Player, ClientHandler> handlers = new HashMap<Player, ClientHandler>(players.size());
+		for (Player player : players) {
+			handlers.put(player, handlerMap.get(player));
+			lobbyPlayerList.remove(player);
+			handlerMap.remove(player);
+			capabilitiesMap.remove(player);
+			playerIDProvider.releaseID(player.playerID);
+		}
+		GameThread game = new GameThread(players, handlers, rules);
+		for (ClientHandler handler : handlerMap.values()) {
+			handler.changeParent(game);
+		}
+		new Thread(game).start();
 	}
 }

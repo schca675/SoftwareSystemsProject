@@ -12,9 +12,11 @@ public class ServerListener extends Observable implements Runnable {
 	private int port;
 	private ServerSocket listener;
 	boolean exit = false;
+	ServerTUI view;
 	
-	public ServerListener(int port, server.ServerTUI view) {
+	public ServerListener(int port, ServerTUI view) {
 		this.port = port;
+		this.view = view;
 	}
 	
 	public void run() {

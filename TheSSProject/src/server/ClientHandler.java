@@ -26,6 +26,8 @@ public class ClientHandler extends Observable implements Runnable {
 	private boolean wantResponse = false;
 	private LocalDateTime timeoutStart;
 	private int TIMEOUT_THRESHOLD_SEC = 120;
+	private Server server;
+	private GameThread game;
 	
 	public ClientHandler(Socket socket, ServerTUI view) throws IOException {
 		this.socket = socket;
@@ -34,7 +36,12 @@ public class ClientHandler extends Observable implements Runnable {
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
 	
-	// Gets called by both listener thread (run -> handleMessage -> sendMessage and
+	public void changeParent(GameThread startingGame) {
+		server = null;
+		game = startingGame;
+	}
+	
+	// Gets called by both listener thread (run -> handleMessage -> sendMessage) and
 	// from observer.update;
 	public synchronized void sendMessage(String message) {
 		try {
@@ -60,19 +67,19 @@ public class ClientHandler extends Observable implements Runnable {
 				}
 			} catch (IOException e) {
 				//TODO: Exception forwarding
-				exit = true;
+				shutdown();
 			}
 		}
 	}
 	
 	//@ requires message != null;
-	public void handleMessage(String message) {
+	private void handleMessage(String message) {
 		String[] messageParts = message.split(" ");
 		if (messageParts.length > 0) {
 			String command = messageParts[0];
 			switch (command) {
 				case Protocol.Client.SENDCAPABILITIES:
-					if (messageParts.length == 10 && 
+					if (messageParts.length == 10 && server != null &&
 						(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
 						(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
 						(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
@@ -89,28 +96,33 @@ public class ClientHandler extends Observable implements Runnable {
 							ClientCapabilities caps = new ClientCapabilities(numPlayers, 
 									playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
 									winLength, chatSupport, autoRefresh);
-							setChanged();
-							notifyObservers(caps);
+							server.initPlayer(this, caps);
 						} catch (NumberFormatException e) {
 							bullshitReceived();
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
+					} else if (server == null) {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorInvalidCommandString());
 					} else {
 						bullshitReceived();
 						sendMessage(ServerMessages.genErrorIllegalStringString());
 					}
 					break;
 				case Protocol.Client.MAKEMOVE:
-					if (messageParts.length == 3) {
+					if (messageParts.length == 3 && game != null && 
+						game.expectsHandlerInput(this)) {
 						try {
 							int x = Integer.parseInt(messageParts[1]);
 							int y = Integer.parseInt(messageParts[2]);
 							TowerCoordinates coords = new TowerCoordinates(x, y);
-							setChanged();
-							notifyObservers(coords);
+							game.processMove(this, coords);
 						} catch (NumberFormatException e) {
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
+					} else if (game == null || !game.expectsHandlerInput(this)) {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorInvalidCommandString());
 					} else {
 						bullshitReceived();
 						sendMessage(ServerMessages.genErrorIllegalStringString());
@@ -127,7 +139,7 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 	}
 	
-	private void bullshitReceived() {
+	public void bullshitReceived() {
 		bullshit++;
 		if (bullshit >= BULLSHIT_THRESHOLD) {
 			shutdown();
@@ -139,7 +151,7 @@ public class ClientHandler extends Observable implements Runnable {
 		timeoutStart = LocalDateTime.now();
 	}
 	
-	public void stopTimeout() {
+	private void stopTimeout() {
 		wantResponse = false;
 		timeoutStart = null;
 	}
@@ -150,6 +162,11 @@ public class ClientHandler extends Observable implements Runnable {
 			out.close();
 			in.close();
 			socket.close();
+			if (server != null) {
+				server.dropConnection(this);
+			} else if (game != null) {
+				game.replacePlayer(player);
+			}
 		} catch (IOException e) {
 			setChanged();
 			notifyObservers(SHUTDOWN_ERROR + socket.getInetAddress());
