@@ -489,15 +489,15 @@ public class ClientTUI extends Observable {
 	 * positive integer or -1 for unlimited dimension.
 	 * @return entered dimension.
 	 */
-	//@ensures \result >=1 || \result == -1;
+	//@ensures \result >=0;
 	public int getInt(String message) {
 		System.out.println(message);
 		int x = -2;
-		while (x < 1 && x != -1) {
+		while (x < 0) {
 			if (scanny.hasNextInt()) {
 				x = scanny.nextInt();
-				if (x < 1 && x != -1) {
-					System.out.println("Please enter a positive integer or -1 "
+				if (x < 0) {
+					System.out.println("Please enter a positive integer  (0 "
 							+ "for unlimited size: ");
 				}
 			} else if (scanny.hasNext()) {

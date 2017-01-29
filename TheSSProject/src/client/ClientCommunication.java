@@ -51,6 +51,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public static final int DEFAULTPLAYERSIZE = 2;
 	public static final int UNLIMITEDSIZE = 20;
 	public static final int UNLIMITEDPLAYERS = 4;
+	public static final int UNLIMITED = 0; 
 	public static final int FALSE = 0;
 	public static final int TRUE = 1;
 	
@@ -368,25 +369,25 @@ public class ClientCommunication implements Observer, Runnable {
 		// add the dimensions x, y, z and the winning length.
 		// we return the smaller dimension: 
 		// either the dimension received by the server or by the client.
-		if (x > maxX || x == -1) {
+		if (x > maxX || x == UNLIMITED) {
 			result.append(maxX);
 		} else {
 			result.append(x);
 		}
 		result.append(" ");
-		if (y > maxY || y == -1) {
+		if (y > maxY || y == UNLIMITED) {
 			result.append(maxY);
 		} else {
 			result.append(y);
 		}
 		result.append(" ");
-		if (z > maxZ || z == -1) {
+		if (z > maxZ || z == UNLIMITED) {
 			result.append(maxZ);
 		} else {
 			result.append(z);
 		}
 		result.append(" ");
-		if (win > maxWin || win == -1) {
+		if (win > maxWin || win == UNLIMITED) {
 			result.append(maxWin);
 		} else {
 			result.append(win);
