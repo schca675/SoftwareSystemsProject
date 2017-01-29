@@ -18,7 +18,7 @@ public class Board extends Observable {
 	
 	public static final int DEFAULT_DIM = 4;
 	public static final int DEFAULT_WIN = 4;
-	public static final int UNLIMITED_Z = -1;
+	public static final int UNLIMITED_Z = 0;
 	
 	// <------ INSTANCE VARIABLES ------>
 	

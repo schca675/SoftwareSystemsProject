@@ -3,8 +3,8 @@ package model;
 public class TowerCoordinates {
 	
 	// <------ Instance variables ------>	
-	private int x;
-	private int y;
+	public final int x;
+	public final int y;
 	
 	// <------ Constructor ------>
 	

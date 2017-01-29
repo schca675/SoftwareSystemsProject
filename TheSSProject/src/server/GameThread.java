@@ -1,84 +1,59 @@
 package server;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Observable;
 import java.util.Random;
-import java.util.Scanner;
 
-import exc.CoordinatesOutOfBoundsException;
+import exc.IllegalBoardConstructorArgumentsException;
 import exc.IllegalCoordinatesException;
 import model.Board;
 import model.ComputerPlayer;
 import model.Player;
+import model.SmartStrategy;
 import model.TowerCoordinates;
 
-public class GameThread extends Thread {
+public class GameThread extends Observable implements Runnable {
 	
 	// <------ Instance variables ------>
 	
-	//@ private invariant board != null;
-	//@ private invariant players != null && (players.size() == numberOfPlayers);
 	// The line below is the one the JML compiler complains about, specifically the last part. 
 	// For JML, isn't this assumed by default?
 	// private invariant (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i) != null);
-	//@ private invariant currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
-	private Board board;
+	// private invariant currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
 	private List<Player> players;
+	private Map<Player, ClientHandler> handlerMap;
+	private Board board;
+	private Player currentPlayer;
 	private int currentPlayerIndex;
-	public final int numberOfPlayers;
+	private boolean exit = false;
 	
 	// <------ Constructors ------>
 	
 	/**
-	 * Create a game with default setting and rules and a random starter.
-	 * 
-	 * @param player1 Player 1 
-	 * @param player2 Player 2
-	 */
-	/*@ requires players != null && 
-	  @ (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
-	*/
-	public GameThread(List<Player> players) {
-		board = new Board();
-		this.players = new ArrayList<Player>(players.size()); 
-		this.players.addAll(players);
-		currentPlayerIndex = randomStarter();
-		numberOfPlayers = players.size();
-	}
-	
-	/**
 	 * Creates a game with specified dimensions of the board, winning length and random starter.
-	 * @param player1 Player 1
-	 * @param player2 Player 2
-	 * @param xDim X dimension of the board
-	 * @param yDim Y dimension of the board
-	 * @param zDim Z dimension of the board, -1 specifies unlimited
-	 * @param winningLength Connected pieces required to win the game
+	 * @param players List of players
+	 * @param handlerMap Map of players and their handlers
+	 * @param rules Rules of the game
 	 */
-	/*@ requires players != null && 
-	  @ (\forall int i; i >= 0 && i < numberOfPlayers; players.get(i)!= null);
-	  @ requires winningLength <= xDim || winningLength <= yDim 
-	  @ || (zDim > 0 && winningLength <= zDim) || (zDim == Board.UNLIMITED_Z);
-	  @ requires xDim > 0 && yDim > 0 && (zDim > 0 || zDim == -1) && winningLength > 0;
+	/*@ requires players.size() >= 2;
+	  @ requires handlerMap.size() == players.size();
+	  @ requires \forall Player player; players.contains(player); handlerMap.containsKey(player);
+	  @ requires rules.xDim >= 0 && rules.yDim >= 0 && rules.zDim >= 0 && rules.winLength > 0 && 
+	  @ (rules.winLength <= rules.xDim || rules.winLength <= rules.yDim || rules.winLength <= 
+	  @ rules.zDim || rules.zDim == 0);
 	*/
-	public GameThread(List<Player> players, int xDim, int yDim, int zDim, int winningLength) {
-		board = new Board(xDim, yDim, zDim, winningLength);
-		this.players = new ArrayList<Player>(players.size()); 
-		this.players.addAll(players);
-		currentPlayerIndex = randomStarter();
-		numberOfPlayers = players.size();
-	}
-	
-	// <------ Queries ------>
-	
-	/**
-	 * Determines a random starter of the game.
-	 * @return the index of the starting player
-	 */
-	//@ ensures \result >= 0 && \result < numberOfPlayers;
-	public int randomStarter() {
-		Random random = new Random();
-		return random.nextInt(numberOfPlayers);	
+	public GameThread(List<Player> players, Map<Player, ClientHandler> handlerMap, GameRules 
+			rules) {
+		try {
+			this.players = players;
+			this.handlerMap = handlerMap;
+			board = new Board(rules.xDim, rules.yDim, rules.zDim, rules.winLength);
+		} catch (IllegalBoardConstructorArgumentsException e) {
+			//Something went awfully wrong
+			//TODO: notification
+			shutdown();
+		}
 	}
 	
 	// <------ Commands ------>
@@ -86,132 +61,139 @@ public class GameThread extends Thread {
 	/**
 	 * Starts the game.
 	 */
-	public void start() {
+	public void run() {
 		play();
 	}
+
+	/**
+	 * Sets current player to a random player.
+	 */
+	private void randomPlayer() {
+		Random random = new Random();
+		currentPlayerIndex = random.nextInt(players.size());
+		currentPlayer = players.get(currentPlayerIndex);
+	}
 	
 	/**
-	 * Runs the game.
-	 * Game starts with an empty board and 
-	 * finishes when there is a winner or a draw (board is full).
-	 * If one of the clients is making an invalid move, 
-	 * he is replaced by a Computer player with random strategy.
-	 * If a computer player tries an invalid move //TODO
+	 * Sets currentPlayer to the next player.
 	 */
-	// TODO include the communication here.
-	public void play() {
-		boolean winning = false;
-		Player currentplayer = players.get(currentPlayerIndex);
-		while (!winning && !board.isFull()) {
-			TowerCoordinates coord = getMove(currentplayer);
+	private void nextPlayer() {
+		currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+		currentPlayer = players.get(currentPlayerIndex);
+	}
+	
+	/**
+	 * Notifies the players of game start, select a random player and requests the first move.
+	 */
+	private void play() {
+		broadcastMessage(ServerMessages.genStartGameString(board.xDim, board.yDim, board.zDim, 
+				board.winningLength, players));
+		randomPlayer();
+		requestMove(currentPlayer);
+	}
+	
+	/**
+	 * Requests a move from given player. Notifies all players of a new turn. Normally, starts the 
+	 * client handler timeout. If a player has been replaced by a ComputerPlayer, its 
+	 * determineMove method is called and processMove with the result.
+	 * @param player Player whose turn it is
+	 */
+	private void requestMove(Player player) {
+		broadcastMessage(ServerMessages.genTurnOfPlayerString(player.playerID));
+		if (player instanceof ComputerPlayer) {
+			processMove(null, ((ComputerPlayer) player).determineMove(board));
+		} else {
+			getHandler(player).startTimeout();
+		}
+	}
+	
+	/**
+	 * Processes a move determined by the given coordinates. Notifies players of game endings. 
+	 * Handles invalid moves.
+	 * @param handler ClientHandler caller, null for a move by a ComputerPlayer
+	 * @param coords Coordinates of the move
+	 */
+	public void processMove(ClientHandler handler, TowerCoordinates coords) {
+		if ((handler == null || getHandler(currentPlayer) == handler) && 
+				board.isValidMove(coords.x, coords.y)) {
+			//Caller is a ComputerPlayer or the correct human player, move is valid
 			try {
-				board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-			} catch (IllegalCoordinatesException e) {
-				currentplayer = new ComputerPlayer(currentplayer.playerID);
-				coord = ((ComputerPlayer) currentplayer).determineMove(board);
-				try {
-					board.makeMove(coord.getX(), coord.getY(), currentplayer.playerID);
-				} catch (IllegalCoordinatesException ex) {
-					//TODO
-				}				
-			}
-			informClients(coord, currentplayer.playerID);
-			try {
-				winning = board.hasWon(coord.getX(), coord.getY());
-			} catch (CoordinatesOutOfBoundsException e) {
-				winning = false;
-			}
-			if (!winning) {
-				if (numberOfPlayers == 2) {
-					currentPlayerIndex = 1 - currentPlayerIndex;
+				board.makeMove(coords.x, coords.y, currentPlayer.playerID);
+				broadcastMessage(ServerMessages.genNotifyMoveString(currentPlayer.playerID, 
+						coords.x, coords.y));
+				if (board.isFull()) {
+					broadcastMessage(ServerMessages.genNotifyDrawString());
+					shutdown();
+				} else if (board.hasWon(coords.x, coords.y)) {
+					broadcastMessage(ServerMessages.genNotifyWinString(currentPlayer.playerID));
+					shutdown();
 				} else {
-					currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+					nextPlayer();
+					requestMove(currentPlayer);
 				}
-				currentplayer = players.get(currentPlayerIndex);	
+			} catch (IllegalCoordinatesException e) {
+				//Something goes awfully wrong
+				shutdown();
 			}
-		}
-		if (winning) {
-			//  The currentplayer is the winner.
-			//TODO
+		} else if (currentPlayer instanceof ComputerPlayer) {
+			//Caller is a ComputerPlayer and sends an illegal move
+			broadcastMessage(ServerMessages.genNotifyDisconnectString(currentPlayer.playerID));
+			shutdown();
+		} else if (handler != null && getHandler(currentPlayer) != handler) {
+			//Caller is not a ComputerPlayer and sends data while it shouldn't
+			handler.bullshitReceived();
+			handler.sendMessage(ServerMessages.genErrorInvalidCommandString());
 		} else {
-			// The board is full, so there is a draw.
-			//TODO
+			//Caller is current player and sends an illegal move
+			handler.bullshitReceived();
+			handler.sendMessage(ServerMessages.genErrorInvalidMoveString());
+			handler.startTimeout();
 		}
 	}
 	
 	/**
-	 * Requests the next move from the currentplayer via the communication of the socket.
-	 * @param current current player
-	 * @return the coordinates, the current player wants to play.
+	 * Drops the given player and replaces it with a ComputerPlayer with smart strategy with the 
+	 * same ID. Anti-cheat measure for rage quits.
+	 * @param player Player to replace
 	 */
-	//TODO
-	private TowerCoordinates getMove(Player current) {
-		return null;
+	public void replacePlayer(Player player) {
+		ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), player.playerID);
+		players.add(players.indexOf(player), compPlayer);
+		players.remove(player);
+		handlerMap.remove(player);
+		currentPlayer = compPlayer;
+		processMove(null, compPlayer.determineMove(board));
+	}
+	
+	public boolean expectsHandlerInput(ClientHandler handler) {
+		//TODO: check safety of this
+		return handlerMap.get(currentPlayer) == handler;
 	}
 	
 	/**
-	 * Communicates the next moves to all its clients.
-	 * @param coord Coordinates for the next move.
-	 * @param id ID of player that executes the move.
+	 * Gets the handler belonging to a player.
+	 * @param player A player
+	 * @return Its handler, null if ComputerPlayer
 	 */
-	private void informClients(TowerCoordinates coord, int id) {
-		
+	private ClientHandler getHandler(Player player) {
+		return handlerMap.get(player);
 	}
 	
 	/**
-	 * Terminates the game.
-	 * The final situation is communicated to the players (Win or Draw)
-	 * and the Server disconnects from the clients.
-	 * @param winning
+	 * Sends a message through all ClientHandlers.
+	 * @param message A message
 	 */
-	private void finalSituation(boolean winning) {
-		if (winning) {
-			//  The currentplayer is the winner.
-			//TODO
-		} else {
-			// The board is full, so there is a draw.
-			//TODO
+	private void broadcastMessage(String message) {
+		for (ClientHandler handler : handlerMap.values()) {
+			handler.sendMessage(message);
 		}
-		//TODO
-		// Disconnecting
-	}
-	/**
-	 * Determines whether the user enters Yes or No.
-	 * @param message Message to print on the screen.
-	 * @param yes String that should be interpreted as "yes".
-	 * @param no String that should be interpreted as "no".
-	 * @return true or false, depending on the input of the user.
-	 */
-	public Boolean readBoolean(String message, String yes, String no) {
-		Boolean compared = false;
-		Boolean result = null;
-		String scanned = "";
-		Scanner scanny = new Scanner(System.in);
-		System.out.println(message);
-		while (!compared) {
-			System.out.println("Please answer in the format (" + yes + "/" + no + ") : " 
-					+ yes + " for yes or " + no + " for no");
-			if (scanny.hasNext()) {
-				scanned = scanny.next();
-				if (scanned.equals(yes)) {
-					result = true;
-				} else if (scanned.equals(no)) {
-					result = false;
-				}
-			}
-			if (result != null) {
-				compared = true;
-			}
-		}
-		return result;
 	}
 	
-	//To do: board.ToString does not really exist yet
-	/**
-	 * Prints the current Situation of the game.
-	 */
-	public void currentSituation() {
-		System.out.println("Current game situation: ");
-		System.out.println(board.toString());
+	public void shutdown() {
+		//TODO: notification?
+		exit = true;
+		for (ClientHandler handler : handlerMap.values()) {
+			handler.shutdown();
+		}
 	}
 }
