@@ -9,7 +9,6 @@ import model.TowerCoordinates;
 
 
 public class ClientTUI extends Observable {
-	//TODO fix trennende Linien.
 	private Client client;
 	private Scanner scanny;
 	
@@ -59,14 +58,6 @@ public class ClientTUI extends Observable {
 				}
 			}
 		}		
-	}
-	
-	/**
-	 * Prints the given message on the Terminal.
-	 * @param message Message to print.
-	 */
-	public void printMessage(String message) {
-		System.out.println(message);
 	}
 	
 	/**

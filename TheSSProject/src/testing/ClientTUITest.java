@@ -31,16 +31,16 @@ public class ClientTUITest {
 		// Representation tests (printBoard), also tests drawLine and dashedLine methods
 		System.out.println("Testing the representation:\n");
 		System.out.println("First test:\n");
-		List<List<Integer>> display1 = createBoardData(4, 4, 4, 4);
+		List<List<Integer>> display1 = createFullBoardData(4, 4, 4, 4);
 		view.printBoard(display1, 4, 4, 4, 4);
 		System.out.println("\n\nSecond test:\n");
-		List<List<Integer>> display2 = createBoardData(3, 4, 4, 2456);
+		List<List<Integer>> display2 = createNotFullBoardData(3, 4, 4, 2456);
 		view.printBoard(display2, 3, 4, 4, 2456);
 		System.out.println("\n\nThird test:\n");
-		List<List<Integer>> display3 = createBoardData(5, 7, 10, 4);
+		List<List<Integer>> display3 = createNotFullBoardData(5, 7, 10, 4);
 		view.printBoard(display3, 5, 7, 10, 4);
 		System.out.println("\n\nFourth test:\n");
-		List<List<Integer>> display4 = createBoardData(1, 1, 1, 4);
+		List<List<Integer>> display4 = createFullBoardData(1, 1, 1, 4);
 		view.printBoard(display4, 1, 1, 1, 4);
 		
 		//Representation of the board model
@@ -62,24 +62,18 @@ public class ClientTUITest {
 		view.print("Hello");
 		
 		//Test determine Move
-		System.out.println("\nTesting determine move four times\n(without testing "
-				+ "if it is valid input on a board):\n1) input is correct (Integer Integer)");
+		System.out.println("\nTesting determine move\n(without testing "
+				+ "if it is valid input on a board):\nTest with:"
+				+ " calling Hint, giving invalid input, then valid input\n");
 		TowerCoordinates coord = view.determineMove();
 		System.out.println("These coordinates are chosen: " + coord.toString());
-		System.out.println("\n2) with Hint chosen"); 
 		coord = view.determineMove();
 		System.out.println("These coordinates are chosen: " + coord.toString());
-		System.out.println("\n3) with Hint not chosen and regular input"); 
-		coord = view.determineMove();
-		System.out.println("These coordinates are chosen: " + coord.toString());
-		System.out.println("\n4) with giving a invalid input"); 
-		coord = view.determineMove();
-		System.out.println("These coordinates are chosen: " + coord.toString());
-	
-		//Test getString method
-		String input = view.getString("\nTesting the getString method, "
+
+		//Test getString and the print method
+		String input = view.getString("\nTesting the getString and print method, "
 				+ "should print your input again");
-		System.out.println(input);
+		view.print(input);
 		
 		//Test readBoolean method
 		System.out.println("\nTesting reading boolean method three times");
@@ -93,11 +87,15 @@ public class ClientTUITest {
 		//Test print methods
 		System.out.println("\nTesting the print methods\n");
 		view.valid(MessageType.SOCKET_CREATED);
+		view.valid(MessageType.GOT_SERVER_CAP);
+		view.valid(MessageType.SENT_CLIENT_CAP);
+		view.valid(MessageType.GOT_ID);
+		view.valid(MessageType.GAME_START);
+		view.valid(MessageType.MOVE_MADE);
 		view.errorMessage(MessageType.INVALID_ADDRESS);
 		view.errorMessage(MessageType.INVALID_PORT);
 		view.errorMessage(MessageType.PROBLEM_DISCONNECTING);
 		view.errorMessage(MessageType.INVALID_COORDINATES);
-		view.errorMessage(MessageType.SOCKET_FAILURE);
 		view.errorMessage(MessageType.INVALID_INPUT);
 		view.errorMessage(MessageType.INVALID_STRATEGY);
 		view.errorMessage(MessageType.STREAM_FAILURE);
@@ -106,25 +104,50 @@ public class ClientTUITest {
 		view.errorMessage(MessageType.SERVER_LISTENING);
 		view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
 		view.errorMessage(MessageType.SERVER_ILLEGAL_MOVE);
+		view.errorMessage(MessageType.RETURN_START);
+		view.errorMessage(MessageType.SOCKET_FAILURE);
+
 		
 		//Test start: StartMenu should show up and answer questions until the socket connection.
-		// So to test: Help menu, Exit, Play: Com and Human, Def and Own.
-		System.out.println("\nTesting the startup:\n");
-		//returns to start menu
-		view.errorMessage(MessageType.RETURN_START);
-		try {
-			view.start();
-		} catch (NullPointerException e) {
-			System.out.println("throws an exception, because the client does "
-					+ "not have a socket to close.");
-		}
+		// So to test: Help menu, Exit, Play: Com and Human, Def and Own.		
+		// When asking Exit: throws an exception, because the client does
+		// not have a socket to close.
 	}
 	
-	public static List<List<Integer>> createBoardData(int x, int y, int z, int id) {
+	/**
+	 * Creates board data to test the representation. All the places on the board are occupied.
+	 * @param x X dimension
+	 * @param y Y dimension
+	 * @param z Z dimension
+	 * @param id ID the data should be filled with
+	 * @return a list of new Board data.
+	 */
+	public static List<List<Integer>> createFullBoardData(int x, int y, int z, int id) {
 		List<List<Integer>> display = new ArrayList<List<Integer>>(16);
 		for (int i = 0; i < (x * y); i++) {
 			List<Integer> tower = new ArrayList<Integer>();
 			for (int j = 0; j < z; j++) {
+				tower.add(id);
+			}
+			display.add(tower);
+		}
+		return display;
+	}
+	
+	/**
+	 * Creates board data to test the representation. Not all the places on the board are occupied.
+	 * For every tower there is still one place left.
+	 * @param x X dimension
+	 * @param y Y dimension
+	 * @param z Z dimension
+	 * @param id ID the data should be filled with
+	 * @return a list of new Board data.
+	 */
+	public static List<List<Integer>> createNotFullBoardData(int x, int y, int z, int id) {
+		List<List<Integer>> display = new ArrayList<List<Integer>>(16);
+		for (int i = 0; i < (x * y); i++) {
+			List<Integer> tower = new ArrayList<Integer>();
+			for (int j = 0; j < z - 1; j++) {
 				tower.add(id);
 			}
 			display.add(tower);
