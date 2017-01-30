@@ -3,27 +3,18 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Observable;
-import java.util.Observer;
 
-public class ServerTUI implements Observer {
+public class ServerTUI {
 	BufferedReader inputReader;
 
 	public ServerTUI() {
 		inputReader = new BufferedReader(new InputStreamReader(System.in));
 	}
 	
-	/**
-	 * Prints a given message on the Terminal screen.
-	 * @param message Message to print on the screen.
-	 */
-	@Override
-	public synchronized void update(Observable o, Object arg) {
-		printMessage(((ClientHandler) o).toString() + (String) arg);
-	}
-	
 	public synchronized void printMessage(String message) {
-		System.out.println(message);
+		synchronized (System.out) {
+			System.out.println(message);
+		}
 	}
 	
 	//@ ensures \result >= 0 && \result <= 65535;

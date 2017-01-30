@@ -3,19 +3,23 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Observable;
 
-public class ServerListener extends Observable implements Runnable {
-	public static final String INIT_ERROR = "Connection listener can not be created";
-	public static final String LISTEN_ERROR = "Error while waiting for connection";
+public class ServerListener  implements Runnable {
+	public static final String INIT_ERROR = "Connection listener cannot be created, "
+			+ "shutting down...";
+	public static final String LISTEN_ERROR = "Error while waiting for connection, "
+			+ "shutting down...";
 	public static final String SHUTDOWN_ERROR = "Error while shutting down connection listener";
+	
 	private int port;
 	private ServerSocket listener;
+	private Server server;
+	private ServerTUI view;
 	boolean exit = false;
-	ServerTUI view;
 	
-	public ServerListener(int port, ServerTUI view) {
+	public ServerListener(int port, ServerTUI view, Server server) {
 		this.port = port;
+		this.server = server;
 		this.view = view;
 	}
 	
@@ -23,17 +27,18 @@ public class ServerListener extends Observable implements Runnable {
 		try {
 			listener = new ServerSocket(port);
 		} catch (IOException e) {
-			exit = true;
-			notifyObservers(INIT_ERROR);
+			view.printMessage(INIT_ERROR);
+			shutdown();
 		}
 		while (!exit) {
 			try {
 				Socket socket = listener.accept();
-				setChanged();
-				notifyObservers(socket);
+				view.printMessage("Client connected from " + 
+						socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+				server.initConnection(socket);
 			} catch (IOException e) {
-				notifyObservers(LISTEN_ERROR);
-				exit = true;
+				view.printMessage(LISTEN_ERROR);
+				shutdown();
 			}
 		}
 	}
@@ -42,8 +47,9 @@ public class ServerListener extends Observable implements Runnable {
 		try {
 			exit = true;
 			listener.close();
+			server.shutdown();
 		} catch (IOException e) {
-			notifyObservers(SHUTDOWN_ERROR);
+			view.printMessage(SHUTDOWN_ERROR);
 		}
 	}
 }

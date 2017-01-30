@@ -66,6 +66,8 @@ public class Server implements Observer {
 		ServerTUI ui = new ServerTUI();
 		int port = ui.requestPortNumber();
 		boolean enableExtensions = ui.requestExtensions();
+		ui.printMessage("Starting server bound at port " + port + 
+				(enableExtensions ? " with " : " without ") + "extensions");
 		new Server(port, enableExtensions, ui);
 	}
 	
@@ -80,6 +82,7 @@ public class Server implements Observer {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		this.playerIDProvider = new PlayerIDProvider();
+		this.view = view;
 		lobbyPlayerList = new ArrayList<Player>(10);
 		handlerMap = new HashMap<Player, ClientHandler>(10);
 		capabilitiesMap = new HashMap<Player, ClientCapabilities>(10);
@@ -90,8 +93,7 @@ public class Server implements Observer {
 	 * Method that initiates listening for incoming connections.
 	 */
 	public void listenForConnections() {
-		ServerListener listener = new ServerListener(port, view);
-		listener.addObserver(this);
+		ServerListener listener = new ServerListener(port, view, this);
 		new Thread(listener).start();
 	}
 
@@ -127,7 +129,7 @@ public class Server implements Observer {
 		//TODO: look at exceptions
 		ClientHandler peer = null;
 		try {
-			peer = new ClientHandler(socket);
+			peer = new ClientHandler(socket, view);
 			new Thread(peer).start();
 			if (enableExtensions) {
 				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
@@ -227,5 +229,9 @@ public class Server implements Observer {
 			handler.changeParent(game);
 		}
 		new Thread(game).start();
+	}
+	
+	public void shutdown() {
+		
 	}
 }

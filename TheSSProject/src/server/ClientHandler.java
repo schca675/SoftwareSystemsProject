@@ -27,9 +27,11 @@ public class ClientHandler extends Observable implements Runnable {
 	private int TIMEOUT_THRESHOLD_SEC = 120;
 	private Server server;
 	private GameThread game;
+	private ServerTUI view;
 	
-	public ClientHandler(Socket socket) throws IOException {
+	public ClientHandler(Socket socket, ServerTUI view) throws IOException {
 		this.socket = socket;
+		this.view = view;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
@@ -173,9 +175,13 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 	}
 	
-	public void printSentMessage(String message) {
-		String toPrint = socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
+	public void printReceivedMessage(String message) {
+		view.printMessage(java.time.LocalTime.now() + " " + toString() + " R " + message);
 		
+	}
+	
+	public void printSentMessage(String message) {
+		view.printMessage(java.time.LocalTime.now() + " " + toString() + " S " + message);
 	}
 	
 	public String toString() {
