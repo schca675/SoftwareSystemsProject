@@ -27,6 +27,7 @@ public class GameThread extends Observable implements Runnable {
 	private Player currentPlayer;
 	private int currentPlayerIndex;
 	private boolean exit = false;
+	private ServerTUI view;
 	
 	// <------ Constructors ------>
 	
@@ -44,13 +45,15 @@ public class GameThread extends Observable implements Runnable {
 	  @ rules.zDim || rules.zDim == 0);
 	*/
 	public GameThread(List<Player> players, Map<Player, ClientHandler> handlerMap, GameRules 
-			rules) {
+			rules, ServerTUI view) {
 		try {
+			this.view = view;
 			this.players = players;
 			this.handlerMap = handlerMap;
 			board = new Board(rules.xDim, rules.yDim, rules.zDim, rules.winLength);
 		} catch (IllegalBoardConstructorArgumentsException e) {
 			//Something went awfully wrong
+			view.printMessage(e.getMessage());
 			//TODO: notification
 			shutdown();
 		}

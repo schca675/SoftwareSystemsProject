@@ -46,7 +46,7 @@ public class Server implements Observer {
 	public static final int EXT_PLAYERS = 2;
 	public static final int EXT_XYDIM = 10;
 	public static final int EXT_ZDIM = 0;
-	public static final int EXT_WINLENGTH = 0;
+	public static final int EXT_WINLENGTH = 10;
 	public static final boolean EXT_ROOMS = false;
 	public static final boolean EXT_CHAT = false;
 	
@@ -129,7 +129,7 @@ public class Server implements Observer {
 		//TODO: look at exceptions
 		ClientHandler peer = null;
 		try {
-			peer = new ClientHandler(socket, view);
+			peer = new ClientHandler(socket, this, view);
 			new Thread(peer).start();
 			if (enableExtensions) {
 				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
@@ -165,10 +165,12 @@ public class Server implements Observer {
 	 */
 	public void matchPlayers(Player player) {
 		//TODO: implement more sophisticated matching, for the moment just first players.
-		List<Player> players = new ArrayList<Player>(2);
-		players.add(lobbyPlayerList.get(0));
-		players.add(lobbyPlayerList.get(1));
-		startGame(players, determineRules(players));
+		if (lobbyPlayerList.size() >= 2) {
+			List<Player> players = new ArrayList<Player>(2);
+			players.add(lobbyPlayerList.get(0));
+			players.add(lobbyPlayerList.get(1));
+			startGame(players, determineRules(players));
+		}
 	}
 	
 	/**
@@ -224,7 +226,7 @@ public class Server implements Observer {
 			capabilitiesMap.remove(player);
 			playerIDProvider.releaseID(player.playerID);
 		}
-		GameThread game = new GameThread(players, handlers, rules);
+		GameThread game = new GameThread(players, handlers, rules, view);
 		for (ClientHandler handler : handlerMap.values()) {
 			handler.changeParent(game);
 		}

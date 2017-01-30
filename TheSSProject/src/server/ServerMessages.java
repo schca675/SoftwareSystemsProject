@@ -23,7 +23,8 @@ public class ServerMessages {
 	
 	public static String genStartGameString(int xDim, int yDim, int zDim, int winLength, 
 			List<Player> players) {
-		String s = Protocol.Server.STARTGAME + SPACE + xDim + SPACE + yDim + SPACE + zDim;
+		String s = Protocol.Server.STARTGAME + SPACE + xDim + PIPE + yDim + PIPE + zDim + PIPE 
+				+ winLength;
 		for (Player player : players) {
 			s = s + SPACE + player.playerID + PIPE + player.name + PIPE + COLOUR;
 			//This will give everyone the same colour #EVIL

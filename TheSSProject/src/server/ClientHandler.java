@@ -29,9 +29,10 @@ public class ClientHandler extends Observable implements Runnable {
 	private GameThread game;
 	private ServerTUI view;
 	
-	public ClientHandler(Socket socket, ServerTUI view) throws IOException {
+	public ClientHandler(Socket socket, Server server, ServerTUI view) throws IOException {
 		this.socket = socket;
 		this.view = view;
+		this.server = server;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
@@ -64,8 +65,8 @@ public class ClientHandler extends Observable implements Runnable {
 				//TODO: timeout when no response when it is desired?
 				String message = in.readLine();
 				if (message != null) {
-					handleMessage(message);
 					printReceivedMessage(message);
+					handleMessage(message);
 				}
 			} catch (IOException e) {
 				//TODO: Exception forwarding
