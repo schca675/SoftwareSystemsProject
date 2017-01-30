@@ -227,7 +227,7 @@ public class Server implements Observer {
 			playerIDProvider.releaseID(player.playerID);
 		}
 		GameThread game = new GameThread(players, handlers, rules, view);
-		for (ClientHandler handler : handlerMap.values()) {
+		for (ClientHandler handler : handlers.values()) {
 			handler.changeParent(game);
 		}
 		new Thread(game).start();
