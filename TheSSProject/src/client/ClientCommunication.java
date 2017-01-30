@@ -436,7 +436,6 @@ public class ClientCommunication implements Observer, Runnable {
 	public Board makeBoard(String dimensions) throws InvalidSyntaxException, 
 		IllegalBoardConstructorArgumentsException, NumberFormatException {
 		String[] dims = dimensions.split("\\|");
-		//TODO test this
 		if (dims.length >= 4) {
 			int xs = Integer.parseInt(dims[0]);
 			int ys = Integer.parseInt(dims[1]);
@@ -601,7 +600,7 @@ public class ClientCommunication implements Observer, Runnable {
 			view.print("This move is proposed: " + coord.toString());
 		}
 	}
-
+ 
 
 	// <<------ Function provided by the protocol interface ----->>
 	

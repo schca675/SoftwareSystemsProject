@@ -169,12 +169,12 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X.");
 		}
 	}
 	
 	/**
-	 * test X - dimension with different playerIDs.
+	 * Test X direction has not won if there are different IDs.
 	 */
 	@Test
 	public void testHasNotWonXDir() {
@@ -186,11 +186,13 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X.");
 		}
 	}
 	
-	// Test Y - dimension for every X and every Z layer;
+	/**
+	 *  Test Y - dimension for every X and every Z layer.
+	 */
 	@Test 
 	public void testHasWonYDir() {
 		try {
@@ -205,12 +207,12 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing Y.");
 		}
 	}
 	
 	/**
-	 * test Y - dimension with different player IDs.
+	 * Test Y direction has not won if there are different IDs.
 	 */
 	@Test
 	public void testHasNotWonYDim() {
@@ -222,11 +224,13 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing Y.");
 		}
 	}
 	
-	// Test Z - direction for every X and every Y layer
+	/**
+	 *  Test Z - dimension for every X and every Y layer.
+	 */
 	@Test 
 	public void testHasWonZDir() {
 		try {
@@ -241,10 +245,13 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing Z.");
 		}
 	}
 	
+	/**
+	 * Test Z direction has not won if there are different IDs.
+	 */
 	@Test 
 	public void testHasNotWonZDim() {
 		Integer playerID = PLAYER2;
@@ -255,7 +262,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing Z.");
 		}
 	}
 	
@@ -275,10 +282,13 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X+Y.");
 		}
 	}
 	
+	/**
+	 * Test X+Y direction has not won if there are different IDs.
+	 */
 	@Test
 	public void testHasNotWonXpYDir() {
 		Integer playerID = PLAYER2;
@@ -289,7 +299,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X+Y.");
 		}
 	}
 	
@@ -309,10 +319,13 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X-Y.");
 		}
 	}
 	
+	/**
+	 * Test X-Y direction has not won if there are different IDs.
+	 */
 	@Test
 	public void testHasNotWonXmYDir() {
 		try {
@@ -323,7 +336,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing XmY");
+			System.out.println("Exceptions while testing X-Y.");
 		}
 	}
 	
@@ -345,10 +358,13 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing XpZ");
+			System.out.println("Exceptions while testing X+Z.");
 		}
 	}
 	
+	/**
+	 * Test X+Z direction has not won if there are different IDs.
+	 */
 	@Test
 	public void testHasNotWonXpZDir() {
 		try {
@@ -361,7 +377,7 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X+Z.");
 		}
 	}
 	
@@ -371,20 +387,7 @@ public class BoardTest {
 	 */
 	@Test 
 	public void testHasWonXmZDir() {
-		//Short Test, not elaborated (to delete)
 		try {
-//			board.makeMove(4, 1, PLAYER2);
-//			board.makeMove(3, 1, PLAYER2);
-//			board.makeMove(3, 1, PLAYER2);
-//			board.makeMove(2, 1, PLAYER2);
-//			board.makeMove(2, 1, PLAYER2);
-//			board.makeMove(2, 1, PLAYER2);
-//			board.makeMove(1, 1, PLAYER2);
-//			board.makeMove(1, 1, PLAYER2);
-//			board.makeMove(1, 1, PLAYER2);
-//			board.makeMove(1, 1, PLAYER2);		
-//			assertTrue(board.hasWon(4, 1));
-			//board.reset();
 			for (int y = MIN; y <= MAX; y++) {
 				for (int x = MIN; x <= MAX; x++) {
 					for (int z = MAX; z >= x; z--) {
@@ -396,10 +399,13 @@ public class BoardTest {
 				}
 			}
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing X-Z.");
 		}
 	}
 	
+	/**
+	 * Test X-Z direction has not won if there are different IDs.
+	 */
 	@Test
 	public void testHasNotWonXmZDir() {
 		try {
@@ -416,44 +422,265 @@ public class BoardTest {
 			}
 			assertFalse(board.hasWon(MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing XmZ");
+			System.out.println("Exceptions while testing X-Z.");
 		}
 	}
 	
-	//Test Y+Z-direction
+	/**
+	 * Test Y+Z-direction for every X layer.
+	 */
 	@Test 
 	public void testHasWonYpZDir() {
-		//TODO
+		try {
+			for (int x = MIN; x <= MAX; x++) {
+				for (int y = MIN; y <= MAX; y++) {
+					for (int z = MIN; z <= y; z++) {
+						board.makeMove(x, y, PLAYER1);
+					}
+				}
+				for (int i = MIN; i <= MAX; i++) {
+					assertTrue(board.hasWon(x, i, i));
+				}
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing Y+Z.");
+		}
+			
 	}
 	
-	//Test Y-Z-direction
+	/**
+	 * Test Y+Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonYpZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int y = MIN; y <= MAX; y++) {
+				for (int z = MIN; z <= y; z++) {
+					board.makeMove(MIN, y, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, 1, 1));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing Y+Z.");
+		}
+	}
+	
+	/**
+	 * Test Y-Z-direction for every X layer.
+	 */
 	@Test 
 	public void testHasWonYmZDir() {
-		//TODO
+		try {
+			for (int x = MIN; x <= MAX; x++) {
+				for (int y = MIN; y <= MAX; y++) {
+					for (int z = MAX; z >= y; z--) {
+						board.makeMove(x, y, PLAYER1);
+					}
+				}
+				for (int i = MIN; i <= MAX; i++) {
+					assertTrue(board.hasWon(x, i, MAX + 1 - i));
+				}
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing Y-Z.");
+		}
 	}
 	
-	//test X+Y+Z-direction
+	/**
+	 * Test Y-Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonYmZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int y = MIN; y <= MAX; y++) {
+				for (int z = MAX; z >= y; z--) {
+					board.makeMove(MIN, y, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, MIN, MAX));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing Y-Z.");
+		}
+	}
+	
+	/**
+	 * Test X+Y+Z-direction.
+	 */
 	@Test 
 	public void testHasWonXpYpZDir() {
-		//TODO
+		try {
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MIN; z <= x; z++) {
+					board.makeMove(x, x, PLAYER1);
+				}
+			}
+			for (int i = MIN; i <= MAX; i++) {
+				assertTrue(board.hasWon(i, i, i));
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X+Y+Z.");
+		}	
 	}
 	
-	//Test X+Y-Z-direction
+	/**
+	 * Test X+Y+Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonXpYpZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MIN; z <= x; z++) {
+					board.makeMove(x, x, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, MIN, MIN));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X+Y+Z.");
+		}
+	}
+	
+	/**
+	 * Test X+Y-Z-direction.
+	 */
 	@Test 
 	public void testHasWonXpYmZDir() {
-		//TODO
+		try {
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MAX; z >= x; z--) {
+					board.makeMove(x, x, PLAYER1);
+				}
+			}
+			for (int i = MIN; i <= MAX; i++) {
+				assertTrue(board.hasWon(i, i, MAX + 1 - i));
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X+Y-Z.");
+		}	
 	}
 	
-	//Test X-Y+Z-direction
+	/**
+	 * Test X+Y-Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonXpYmZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MAX; z >= x; z--) {
+					board.makeMove(x, x, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, MIN, MAX));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X+Y-Z.");
+		}
+	}
+	
+	/**
+	 * Test X-Y+Z-direction.
+	 */
 	@Test 
 	public void testHasWonXmYpZDir() {
-		//TODO
+		try {
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MIN; z <= x; z++) {
+					board.makeMove(x, MAX + 1 - x, PLAYER1);
+				}
+			}
+			for (int i = MIN; i <= MAX; i++) {
+				assertTrue(board.hasWon(i, MAX + 1 - i, i));
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X-Y+Z.");
+		}
 	}
 	
-	//Test X-Y-Z-direction
+	/**
+	 * Test X-Y+Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonXmYpZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int x = MIN; x <= MAX; x++) {
+				for (int z = MIN; z <= x; z++) {
+					board.makeMove(x, MAX + 1 - x, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, MAX, MIN));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X-Y+Z.");
+		}
+	}
+	
+	/**
+	 * Test X-Y-Z-direction.
+	 */
 	@Test 
 	public void testHasWonXmYmZDir() {
-		//TODO
+		try {
+			for (int y = MIN; y <= MAX; y++) {
+				for (int z = MIN; z <= y; z++) {
+					board.makeMove(MAX + 1 - y, y, PLAYER1);
+				}
+			}
+			for (int i = MIN; i <= MAX; i++) {
+				assertTrue(board.hasWon(MAX + 1 - i, i, i));
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X-Y-Z.");
+		}
+	}
+	
+	/**
+	 * Test X-Y-Z direction has not won if there are different IDs.
+	 */
+	@Test
+	public void testHasNotWonXmYmZDir() {
+		try {
+			Integer playerID = PLAYER2;
+			for (int y = MIN; y <= MAX; y++) {
+				for (int z = MIN; z <= y; z++) {
+					board.makeMove(MAX + 1 - y, y, playerID);
+					if (playerID == PLAYER2) {
+						playerID = PLAYER1;
+					} else {
+						playerID = PLAYER2;
+					}
+				}
+			}
+			assertFalse(board.hasWon(MIN, MAX, MAX));
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exceptions while testing X-Y-Z.");
+		}
 	}
 	
 	/**
@@ -472,7 +699,7 @@ public class BoardTest {
 			}
 			assertTrue(board.isFull());	
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing isFull.");
 		}		
 	}
 	
@@ -531,7 +758,7 @@ public class BoardTest {
 			board.makeMove(MIN, MIN, PLAYER2);
 			assertEquals(board.getCellOwner(MIN, MIN, MIN), PLAYER2);	
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing GetCellOwner.");
 		}
 			
 	}
@@ -546,7 +773,7 @@ public class BoardTest {
 			board.makeMove(MIN, MIN, PLAYER2);
 			assertFalse(board.isEmptyCell(MIN, MIN, MIN));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing IsEmptyCell.");
 		}
 		
 	}
@@ -565,7 +792,7 @@ public class BoardTest {
 			board.makeMove(MIN, MAX, PLAYER2);
 			assertEquals(3, board.getTowerHeight(MIN, MAX));
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing");
+			System.out.println("Exceptions while testing getTowerHeight.");
 		}
 	}
 	
@@ -594,6 +821,9 @@ public class BoardTest {
 		}		
 	}
 	
+	/**
+	 * Test the GetTowerCoordinates method.
+	 */
 	@Test
 	public void testGetTowerCoordinates() {
 		TowerCoordinates one1 = new TowerCoordinates(1, 1);
@@ -647,7 +877,7 @@ public class BoardTest {
 			assertEquals(board.getCellOwner(1, 1, 2), PLAYER2);
 			assertNotEquals(board.getCellOwner(1, 1, 3), PLAYER2);
 		} catch (IllegalCoordinatesException e) {
-			System.out.println("Exceptions while testing 2");
+			System.out.println("Exceptions while testing Make Move.");
 		}
 	}
 	

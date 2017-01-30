@@ -1,6 +1,7 @@
 package exc;
 
 public class InvalidPortException extends Exception {
+	private static final long serialVersionUID = 2L;
 	private int port;
 	
 	/**
