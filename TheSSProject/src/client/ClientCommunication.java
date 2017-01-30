@@ -33,6 +33,11 @@ public class ClientCommunication implements Observer, Runnable {
 	private Board board;
 	private boolean playing;
 	private ComputerPlayer hintGiver;
+	private int x;
+	private int y;
+	private int z;
+	private int win;
+	
 	
 	private ClientTUI view;
 	
@@ -46,6 +51,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public static final int DEFAULTPLAYERSIZE = 2;
 	public static final int UNLIMITEDSIZE = 20;
 	public static final int UNLIMITEDPLAYERS = 4;
+	public static final int UNLIMITED = 0; 
 	public static final int FALSE = 0;
 	public static final int TRUE = 1;
 	
@@ -77,7 +83,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @throws IOException in case the streams can not be initialized.
 	 */
 	public ClientCommunication(Socket socket, ClientTUI view, String name, Strategy strategy,
-			Client client) throws IOException {
+			Client client, int xmax, int ymax, int zmax, int win) throws IOException {
 		this.view = view;
 		this.socket = socket;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -88,6 +94,10 @@ public class ClientCommunication implements Observer, Runnable {
 		playing = false;
 		board = null;
 		players = new ArrayList<Player>();
+		x = xmax;
+		y = ymax;
+		z = zmax;
+		this.win = win;
 	}
 	
 	/**
@@ -114,6 +124,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public void listen() {
 		String message;
 		try { 
+			view.print("Listening");
 			message = in.readLine();
 			react(message);
 		} catch (IOException | NullPointerException e) {
@@ -126,10 +137,11 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public void react(String input)  {
 		String[] message = input.split(" ");
+		view.print("reacting");
 //		 to be deleted.
-//		for (int i = 0; i < message.length; i++){
-//			System.out.println(i + " : " + message[i]);
-//		}
+		for (int i = 0; i < message.length; i++){
+			System.out.println(i + " : " + message[i]);
+		}
 		if (message.length >= 1) {
 			switch (message[0]) {
 				case SERVERCAPABILITIES:
@@ -218,9 +230,9 @@ public class ClientCommunication implements Observer, Runnable {
 					if (playing && message.length == 4) {
 						try {
 							int id = Integer.parseInt(message[1]);
-							int x = Integer.parseInt(message[2]);
-							int y = Integer.parseInt(message[3]);
-							makeMove(x, y, id);
+							int xc = Integer.parseInt(message[2]);
+							int yc = Integer.parseInt(message[3]);
+							makeMove(xc, yc, id);
 							view.valid(MessageType.MOVE_MADE);
 						} catch (NumberFormatException e) {
 							view.errorMessage(MessageType.PROTOCOL_IRREGULARITIES);
@@ -355,14 +367,31 @@ public class ClientCommunication implements Observer, Runnable {
 		result.append(FALSE);
 		result.append(" ");
 		// add the dimensions x, y, z and the winning length.
-		// since our program can handle illimitated dimensions, we return the same as the server.
-		result.append(maxX);
+		// we return the smaller dimension: 
+		// either the dimension received by the server or by the client.
+		if (x > maxX || x == UNLIMITED) {
+			result.append(maxX);
+		} else {
+			result.append(x);
+		}
 		result.append(" ");
-		result.append(maxY);
+		if (y > maxY || y == UNLIMITED) {
+			result.append(maxY);
+		} else {
+			result.append(y);
+		}
 		result.append(" ");
-		result.append(maxZ);
+		if (z > maxZ || z == UNLIMITED) {
+			result.append(maxZ);
+		} else {
+			result.append(z);
+		}
 		result.append(" ");
-		result.append(maxWin);
+		if (win > maxWin || win == UNLIMITED) {
+			result.append(maxWin);
+		} else {
+			result.append(win);
+		}
 		result.append(" ");
 		// add chat Support, which is not enabled on this client
 		result.append(FALSE);
@@ -406,13 +435,14 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public Board makeBoard(String dimensions) throws InvalidSyntaxException, 
 		IllegalBoardConstructorArgumentsException, NumberFormatException {
-		String[] dims = dimensions.split("|");
-		if (dims.length == 7) {
-			int x = Integer.parseInt(dims[0]);
-			int y = Integer.parseInt(dims[2]);
-			int z = Integer.parseInt(dims[4]);
-			int win = Integer.parseInt(dims[6]);
-			board = new Board(x, y, z, win);
+		String[] dims = dimensions.split("\\|");
+		//TODO test this
+		if (dims.length >= 4) {
+			int xs = Integer.parseInt(dims[0]);
+			int ys = Integer.parseInt(dims[1]);
+			int zs = Integer.parseInt(dims[2]);
+			int wins = Integer.parseInt(dims[3]);
+			board = new Board(xs, ys, zs, wins);
 			// This is the observer in case the board makes a move
 			board.addObserver(this);
 			return board.deepCopy();
