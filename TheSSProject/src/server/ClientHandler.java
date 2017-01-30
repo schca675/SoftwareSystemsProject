@@ -16,7 +16,6 @@ public class ClientHandler extends Observable implements Runnable {
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
-	private ServerTUI view;
 	private int bullshit = 0;
 	private static final int BULLSHIT_THRESHOLD = 3;
 	private static final String SHUTDOWN_ERROR = "IOException while trying to shut down "
@@ -29,9 +28,8 @@ public class ClientHandler extends Observable implements Runnable {
 	private Server server;
 	private GameThread game;
 	
-	public ClientHandler(Socket socket, ServerTUI view) throws IOException {
+	public ClientHandler(Socket socket) throws IOException {
 		this.socket = socket;
-		this.view = view;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
@@ -48,9 +46,10 @@ public class ClientHandler extends Observable implements Runnable {
 			out.write(message);
 			out.newLine();
 			out.flush();
-			view.printMessage(message);
+			printSentMessage(message);
 		} catch (IOException e) {
-			view.printMessage("IOException while sending " + message + " to " + 
+			setChanged();
+			notifyObservers("IOException while sending " + message + " to " + 
 					socket.getInetAddress());
 			shutdown();
 		}
@@ -64,6 +63,7 @@ public class ClientHandler extends Observable implements Runnable {
 				String message = in.readLine();
 				if (message != null) {
 					handleMessage(message);
+					printReceivedMessage(message);
 				}
 			} catch (IOException e) {
 				//TODO: Exception forwarding
@@ -171,6 +171,15 @@ public class ClientHandler extends Observable implements Runnable {
 			setChanged();
 			notifyObservers(SHUTDOWN_ERROR + socket.getInetAddress());
 		}
+	}
+	
+	public void printSentMessage(String message) {
+		String toPrint = socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
+		
+	}
+	
+	public String toString() {
+		return socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
 	}
 	
 	private static boolean argToBool(String s) {

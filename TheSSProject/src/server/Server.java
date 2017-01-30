@@ -56,7 +56,6 @@ public class Server implements Observer {
 	private Map<Player, ClientHandler> handlerMap;
 	private Map<Player, ClientCapabilities> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
-	private static final String USAGE = "";
 	private ServerTUI view;
 	
 	/** 
@@ -64,22 +63,10 @@ public class Server implements Observer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		int port;
-		boolean enableExtensions;
-		
-		try {
-			if (args.length == 2 && (args[1].equals("true") || args[1].equals("false")) && 
-					Integer.parseInt(args[0]) >= 0 && Integer.parseInt(args[0]) <= 65535) {
-				port = Integer.parseInt(args[0]);
-				enableExtensions = Boolean.parseBoolean(args[1]);
-				ServerTUI view = new ServerTUI();
-				new Server(port, enableExtensions, view);
-			} else {
-				System.out.println(USAGE);
-			}
-		} catch (NumberFormatException e) {
-			System.out.println(USAGE);
-		}
+		ServerTUI ui = new ServerTUI();
+		int port = ui.requestPortNumber();
+		boolean enableExtensions = ui.requestExtensions();
+		new Server(port, enableExtensions, ui);
 	}
 	
 	/**
@@ -140,7 +127,7 @@ public class Server implements Observer {
 		//TODO: look at exceptions
 		ClientHandler peer = null;
 		try {
-			peer = new ClientHandler(socket, view);
+			peer = new ClientHandler(socket);
 			new Thread(peer).start();
 			if (enableExtensions) {
 				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 

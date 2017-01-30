@@ -14,7 +14,7 @@ public class ServerMessages {
 			int maxYDim, int maxZDim, int winLength, boolean chatSupport) throws IOException {
 		return Protocol.Server.SERVERCAPABILITIES + SPACE + numPlayers + SPACE + 
 				boolToInt(roomSupport) + SPACE + maxXDim + SPACE + maxYDim + SPACE + 
-				maxZDim + SPACE + boolToInt(chatSupport);
+				maxZDim + SPACE + winLength + SPACE + boolToInt(chatSupport);
 	}
 	
 	public static String genAssignIDString(int id) {
