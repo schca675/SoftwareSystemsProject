@@ -2,7 +2,6 @@ package testing;
 
 import java.util.List;
 
-import client.Client;
 import client.ClientCommunication;
 import exc.IllegalBoardConstructorArgumentsException;
 import exc.InvalidSyntaxException;
@@ -22,8 +21,7 @@ public class ClientCommunicationTest {
 	 * @param args does not need any.
 	 */
 	public static void main(String[] args) {
-		Client testClient = new Client();
-		ClientTUI view = new ClientTUI(testClient);
+		ClientTUI view = new ClientTUI();
 		ClientCommunication client = new ClientCommunication(view, "Test");
 		view.addObserver(client);
 		
