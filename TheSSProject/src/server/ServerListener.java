@@ -47,7 +47,8 @@ public class ServerListener  implements Runnable {
 		try {
 			exit = true;
 			listener.close();
-			server.shutdown();
+			view.printMessage("Connection listener shut down, no new connections will be "
+					+ "made");
 		} catch (IOException e) {
 			view.printMessage(SHUTDOWN_ERROR);
 		}

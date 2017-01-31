@@ -1,17 +1,20 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
+import java.time.LocalTime;
+import java.util.Observable;
+import java.util.Scanner;
 
 import model.TowerCoordinates;
 
-public class ClientHandler implements Runnable {
+public class ClientHandlerAlt extends Observable implements Runnable {
 	private Socket socket;
-	private BufferedReader in;
+	private InputStreamReader in;
 	private BufferedWriter out;
 	private int bullshit = 0;
 	private static final int BULLSHIT_THRESHOLD = 3;
@@ -19,15 +22,19 @@ public class ClientHandler implements Runnable {
 			+ "communication thread with ";
 	
 	private boolean exit = false;
+	private static final int TIMEOUTTHRESHOLDSEC = 5;
+	private boolean timeoutRunning = false;
+	private LocalTime timeoutStartedTime;
+	
 	private Server server;
 	private GameThread game;
 	private ServerTUI view;
 	
-	public ClientHandler(Socket socket, Server server, ServerTUI view) throws IOException {
+	public ClientHandlerAlt(Socket socket, Server server, ServerTUI view) throws IOException {
 		this.socket = socket;
 		this.view = view;
 		this.server = server;
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		in = new InputStreamReader(socket.getInputStream());
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
 	
@@ -45,26 +52,40 @@ public class ClientHandler implements Runnable {
 			out.flush();
 			printSentMessage(message);
 		} catch (IOException e) {
-			view.printMessage("IOException while sending " + message + " to " + 
+			setChanged();
+			notifyObservers("IOException while sending " + message + " to " + 
 					socket.getInetAddress());
 			handleDisconnect();
 		}
 	}
 	
 	public void run() {
+		Scanner inputScanner = new Scanner(in);
 		while (!exit) {
-			try {
-				//TODO: timeout when line not terminated?
-				//TODO: timeout when no response when it is desired?
-				String message = in.readLine();
-				if (message != null) {
-					printReceivedMessage(message);
-					handleMessage(message);
+			//TODO: timeout when line not terminated?
+			//TODO: timeout when no response when it is desired?
+			if (!isTimedout()) {
+				if (inputScanner.hasNextLine()) {
+					String message = inputScanner.nextLine();
+					if (message != null) {
+						printReceivedMessage(message);
+						handleMessage(message);
+					}
 				}
-			} catch (IOException e) {
-				//TODO: Exception forwarding
+			} else {
 				handleDisconnect();
 			}
+		}
+	}
+	
+	private boolean isTimedout() {
+		if (timeoutRunning && java.time.LocalTime.now().isAfter(timeoutStartedTime.
+				plusSeconds(TIMEOUTTHRESHOLDSEC))) {
+			view.printMessage("timedout");
+			return true;
+		} else {
+			view.printMessage("nottimedout");
+			return false;
 		}
 	}
 	
@@ -144,15 +165,18 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void startTimeout() {
-		//TODO: find alternative
+		timeoutRunning = true;
+		timeoutStartedTime = java.time.LocalTime.now();
 	}
 	
 	private void stopTimeout() {
-		//TODO: find alternative
+		timeoutRunning = false;
+		timeoutStartedTime = null;
 	}
 	
 	private void handleDisconnect() {
-		view.printMessage(toString() + " has disconnected, will be replaced with computer player");
+		view.printMessage(toString() + " has disconnected or is being dropped after timeout or "
+				+ "repeated illegal messages received");
 		shutdown();
 		if (server != null) {
 			server.removeClient(this);

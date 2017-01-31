@@ -11,7 +11,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
-import client.ClientCapabilities;
 import model.Player;
 
 public class Server implements Observer {
@@ -110,8 +109,6 @@ public class Server implements Observer {
 			System.out.println("Client with IP " + ((Socket) arg).getInetAddress() + 
 					" connected at port " + ((Socket) arg).getPort());
 			initConnection((Socket) arg);
-		} else if (arg instanceof ClientCapabilities && o instanceof ClientHandler) {
-			initPlayer((ClientHandler) o, (ClientCapabilities) arg);
 		} else if (arg instanceof String) {
 			// Message, atm just errors
 			System.err.println(o.toString() + arg);
@@ -188,7 +185,7 @@ public class Server implements Observer {
 				xDim = compareDims(xDim, capabilitiesMap.get(player).maxXDim);
 				yDim = compareDims(yDim, capabilitiesMap.get(player).maxYDim);
 				zDim = compareDims(zDim, capabilitiesMap.get(player).maxZDim);
-				winLength = java.lang.Math.min(winLength, capabilitiesMap.get(player).winLength);
+				winLength = compareDims(winLength, capabilitiesMap.get(player).winLength);
 			}
 			return new GameRules(xDim, yDim, zDim, winLength);
 		} else {
@@ -207,6 +204,17 @@ public class Server implements Observer {
 			return java.lang.Math.max(dim1, dim2);
 		} else {
 			return java.lang.Math.min(dim1, dim2);
+		}
+	}
+	
+	public void removeClient(ClientHandler client) {
+		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
+			if (handlerMapEntry.getValue() == client) {
+				lobbyPlayerList.remove(handlerMapEntry.getKey());
+				handlerMap.remove(handlerMapEntry.getKey());
+				capabilitiesMap.remove(handlerMapEntry.getKey());
+				break;
+			}
 		}
 	}
 	
@@ -231,9 +239,5 @@ public class Server implements Observer {
 			handler.changeParent(game);
 		}
 		new Thread(game).start();
-	}
-	
-	public void shutdown() {
-		
 	}
 }

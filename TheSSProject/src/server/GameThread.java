@@ -26,7 +26,6 @@ public class GameThread extends Observable implements Runnable {
 	private Board board;
 	private Player currentPlayer;
 	private int currentPlayerIndex;
-	private boolean exit = false;
 	private ServerTUI view;
 	
 	// <------ Constructors ------>
@@ -159,13 +158,21 @@ public class GameThread extends Observable implements Runnable {
 	 * same ID. Anti-cheat measure for rage quits.
 	 * @param player Player to replace
 	 */
-	public void replacePlayer(Player player) {
-		ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), player.playerID);
-		players.add(players.indexOf(player), compPlayer);
-		players.remove(player);
-		handlerMap.remove(player);
-		currentPlayer = compPlayer;
-		processMove(null, compPlayer.determineMove(board));
+	public void replaceClient(ClientHandler client) {
+		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
+			if (handlerMapEntry.getValue() == client) {
+				Player toReplace = handlerMapEntry.getKey();
+				ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), 
+						toReplace.playerID);
+				players.add(players.indexOf(toReplace), compPlayer);
+				players.remove(toReplace);
+				handlerMap.remove(toReplace);
+				if (currentPlayer == toReplace) {
+					currentPlayer = compPlayer;
+					processMove(null, compPlayer.determineMove(board));
+				}
+			}
+		}
 	}
 	
 	public boolean expectsHandlerInput(ClientHandler handler) {
@@ -193,10 +200,11 @@ public class GameThread extends Observable implements Runnable {
 	}
 	
 	public void shutdown() {
-		//TODO: notification?
-		exit = true;
+		String toPrint = "Shutting down game with handlers to";
 		for (ClientHandler handler : handlerMap.values()) {
 			handler.shutdown();
+			toPrint = toPrint + " " + handler.toString();
 		}
+		view.printMessage(toPrint);
 	}
 }
