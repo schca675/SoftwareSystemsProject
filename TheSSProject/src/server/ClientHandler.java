@@ -183,7 +183,7 @@ public class ClientHandler extends Observable implements Runnable {
 	 * Keeps track of bullshit received. Increases bullshit counter and evaluates if it exceeds 
 	 * the threshold.
 	 */
-	public void bullshitReceived() {
+	public synchronized void bullshitReceived() {
 		bullshit++;
 		if (bullshit >= BULLSHIT_THRESHOLD) {
 			handleDisconnect();
