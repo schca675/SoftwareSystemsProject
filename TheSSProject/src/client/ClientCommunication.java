@@ -85,6 +85,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public ClientCommunication(Socket socket, ClientTUI view, String name, Strategy strategy,
 			Client client, int xmax, int ymax, int zmax, int win) throws IOException {
 		this.view = view;
+		view.addObserver(this);
 		this.socket = socket;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -137,11 +138,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 */
 	public void react(String input)  {
 		String[] message = input.split(" ");
-		view.print("reacting");
-//		 to be deleted.
-		for (int i = 0; i < message.length; i++){
-			System.out.println(i + " : " + message[i]);
-		}
+		view.print("Reacting to this message: " + input);
 		if (message.length >= 1) {
 			switch (message[0]) {
 				case SERVERCAPABILITIES:
