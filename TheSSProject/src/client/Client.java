@@ -20,8 +20,6 @@ public class Client {
 	private InetAddress addr;
 	private Socket socket;
 	private int port;
-	//private Thread client;
-	//TODO
 	
 	// needed in case the user wants to play as human player.
 	private String playerName;
@@ -140,18 +138,17 @@ public class Client {
 	 */
 	public void terminateMenu() {
 		view.terminateMenu();
-		//TODO
-		//disconnect();
 	}
 	
 	//<<---- Methods needed to do the setup --------------->
 	
 	/**
-	 * Determines the Internet Addres to connect to.
+	 * Determines the Internet Address to connect to.
 	 * @param address Internet Address to connect to.
-	 * @throws UnknownHostException Exception if the given Internet Adress is not valid.
+	 * @throws UnknownHostException Exception if the given Internet Address is not valid.
 	 */
 	//TUI catches Exception!!
+	//@ requires address !=null;
 	public void setInetAddress(String address) throws UnknownHostException {
 		this.addr = InetAddress.getByName(address);
 	}
@@ -175,6 +172,7 @@ public class Client {
 	 * Sets the me-player's name in case me is a Human Player.
 	 * @param name Name of the me-player
 	 */
+	//@ requires name != null;
 	public void setPlayerName(String name) {
 		playerName = name;
 	}
@@ -211,21 +209,10 @@ public class Client {
 				view.valid(MessageType.SOCKET_CREATED);
 				try {
 					ClientCommunication thisClient = new ClientCommunication(socket, view, 
-							playerName, strategy, this, x, y, z, win);
+							playerName, strategy, x, y, z, win);
 					view.addObserver(thisClient);
 					view.print("New communication thread with server started.");
-					thisClient.run();
-//					// We do not need concurrency for our project but if one wants to include that
-//					// a client can connect to multiple servers, this could be used.
-//					client = new Thread(thisClient);
-//					client.run();
-					//TODO
-//					try {
-//						client.join();
-//					} catch (InterruptedException e) {
-//						//do nothing
-//					}
-					
+					thisClient.run();					
 				} catch (IOException e) {
 					view.errorMessage(MessageType.STREAM_FAILURE);
 					reset(); 
@@ -240,18 +227,6 @@ public class Client {
 		
 	}
 	
-	/** 
-	 * Disconnects from the server.
-	 */
-	//TODO see if this is needed.
-//	private void disconnect() {
-//		try {
-//			socket.close();
-//		} catch (IOException e) {
-//			view.errorMessage(MessageType.PROBLEM_DISCONNECTING);
-//		}
-//	}
-	
 // <<--------- Start/End of application ----------->>
 	/**
 	 * Starts the TUI, so starts the communication with the user.
@@ -261,6 +236,9 @@ public class Client {
 		this.startMenu();
 	}
 	
+	/**
+	 * Resets the client.
+	 */
 	public void reset() {
 		view.errorMessage(MessageType.RETURN_START); 
 		playerName = "Initial";
