@@ -13,9 +13,6 @@ import view.ClientTUI;
 
 public class ClientCommunicationTest {
 
-	//TODO Observer hint does not work here --> now works, to check in final version!
-	//TODO Representation of model
-	//TODO Representation does not work like this
 	/**
 	 * Test all the client communication Class method which do not need a Server connection.
 	 * @param args does not need any.
@@ -130,7 +127,6 @@ public class ClientCommunicationTest {
 		TowerCoordinates coords = client.determineMove();
 		System.out.println("Coordinates of this form: " + coords);
 		System.out.println("\n - with Computer player:");
-		//TODO does not work.
 		client.makeMe(null, new RandomStrategy(), 1);
 		coords = client.determineMove();
 		System.out.println("Coordinates of this form: " + coords);

@@ -15,7 +15,6 @@ public class ClientTUITest {
 
 	
 	public static void main(String[] args) {
-		//TODO Exit?
 		Client client = new Client();
 		ClientTUI view = new ClientTUI();
 		ClientCommunication comu = new ClientCommunication(view, "Test");
