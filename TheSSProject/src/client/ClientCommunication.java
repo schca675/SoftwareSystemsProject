@@ -129,7 +129,12 @@ public class ClientCommunication implements Observer {
 		try { 
 			view.print("Listening");
 			message = in.readLine();
-			react(message);
+			if (message != null) {
+				react(message);
+			} else {
+				throw new IOException();
+			}
+			
 		} catch (IOException | NullPointerException e) {
 			disconnect();
 		}
