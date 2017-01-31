@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import model.Player;
 import view.ServerTUI;
 
-public class Server {
+public class Server implements Observer {
 	public class PlayerIDProvider {
 		private Set<Integer> usedIDs;
 		
@@ -114,7 +116,8 @@ public class Server {
 	 */
 	public void initConnection(Socket socket) {
 		ClientHandler peer = null;
-		peer = new ClientHandler(socket, null, view);
+		peer = new ClientHandler(socket, view);
+		peer.addObserver(this);
 		new Thread(peer).start();
 		if (enableExtensions) {
 			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
@@ -125,15 +128,26 @@ public class Server {
 	}
 	
 	/**
+	 * Update method used by the ClientHandler to indicate a client has responded with its 
+	 * capabilities and it is useful to add this information to the server.
+	 */
+	public synchronized void update(Observable o, Object arg) {
+		if (o instanceof ClientHandler && arg instanceof ClientCapabilitiesStruct) {
+			initPlayer((ClientHandler) o, (ClientCapabilitiesStruct) arg);
+		}
+	}
+	
+	/**
 	 * Creates a player and stores relevant data (player, handler and capabilities). Calls 
 	 * matchplayer to see if the new player would allow a game to be started according to its 
 	 * criteria.
 	 * @param handler ClientHandler for this player/client
 	 * @param caps Capabilities of this player/client
 	 */
-	public synchronized void initPlayer(ClientHandler handler, ClientCapabilitiesStruct caps) {
+	private void initPlayer(ClientHandler handler, ClientCapabilitiesStruct caps) {
 		synchronized (this) {
 			handler.setParentServer(this);
+			handler.deleteObserver(this);
 			int id = playerIDProvider.obtainID();
 			Player player = new Player(caps.playerName, id);
 			handler.sendMessage(ServerMessages.genAssignIDString(id));
@@ -151,6 +165,7 @@ public class Server {
 	 */
 	private void matchPlayers(Player player) {
 		//TODO: implement more sophisticated matching, for the moment just first players.
+		//view.printMessage("matchPlayers called");
 		if (lobbyPlayerList.size() >= 2) {
 			List<Player> players = new ArrayList<Player>(2);
 			players.add(lobbyPlayerList.get(0));
@@ -165,6 +180,7 @@ public class Server {
 	 * @return Most extended rule set supported by all players, server
 	 */
 	private GameRulesStruct determineRules(List<Player> players) {
+		//view.printMessage("determineRules called");
 		if (enableExtensions) {
 			int xDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
 			int yDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
@@ -204,6 +220,7 @@ public class Server {
 	 * @param rules Rules for given players, server
 	 */
 	private void startGame(List<Player> players, GameRulesStruct rules) {
+		//view.printMessage("startGame called");
 		Map<Player, ClientHandler> handlers = new HashMap<Player, ClientHandler>(players.size());
 		for (Player player : players) {
 			handlers.put(player, handlerMap.get(player));

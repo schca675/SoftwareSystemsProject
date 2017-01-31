@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Observable;
 
 import model.TowerCoordinates;
 import view.ServerTUI;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler extends Observable implements Runnable {
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
@@ -24,10 +25,14 @@ public class ClientHandler implements Runnable {
 	private Game game;
 	private ServerTUI view;
 	
-	public ClientHandler(Socket socket, Server server, ServerTUI view) {
+	/**
+	 * Creates a ClientHandler for given socket, 
+	 * @param socket Socket of a client
+	 * @param view View to print communication messages on
+	 */
+	public ClientHandler(Socket socket, ServerTUI view) {
 		this.socket = socket;
 		this.view = view;
-		this.server = server;
 		try {
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -38,16 +43,29 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	/**
+	 * Sets the Server field to this server, so handleDisconnect() can notify the server. 
+	 * Supposed to be set to null when a game takes over.
+	 * @param serverToSet A Server
+	 */
+	//@ requires serverToSet == null || serverToSet != null;
 	public void setParentServer(Server serverToSet) {
 		server = serverToSet;
 	}
 	
+	/**
+	 * Sets the Game field to this server, so handleDisconnect() can notify the game. 
+	 * Supposed to be set to null until a game takes over.
+	 * @param gameToSet
+	 */
 	public void setParentGame(Game gameToSet) {
 		game = gameToSet;
 	}
 	
-	// Gets called by both listener thread (run -> handleMessage -> sendMessage) and
-	// from observer.update;
+	/**
+	 * Send a message to the client connected through this handler's socket.
+	 * @param message A message
+	 */
 	public synchronized void sendMessage(String message) {
 		try {
 			out.write(message);
@@ -61,6 +79,9 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	/**
+	 * Run method for listening in a separate thread.
+	 */
 	public void run() {
 		while (!exit) {
 			try {
@@ -82,65 +103,69 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	/**
+	 * Method to handle a received message. Any invalid messages result in a call to 
+	 * bullshitReceived().
+	 * @param message A message
+	 */
 	private void handleMessage(String message) {
 		String[] messageParts = message.split(" ");
 		if (messageParts.length > 0) {
 			String command = messageParts[0];
 			switch (command) {
 				case Protocol.Client.SENDCAPABILITIES:
-					synchronized (server) {
-						if (messageParts.length == 10 && server != null &&
-							(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
-							(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
-							(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
-							try {
-								int numPlayers = Integer.parseInt(messageParts[1]);
-								String playerName = messageParts[2];
-								boolean roomSupport = argToBool(messageParts[3]);
-								int maxXDim = Integer.parseInt(messageParts[4]);
-								int maxYDim = Integer.parseInt(messageParts[5]);
-								int maxZDim = Integer.parseInt(messageParts[6]);
-								int winLength = Integer.parseInt(messageParts[7]);
-								boolean chatSupport = argToBool(messageParts[8]);
-								boolean autoRefresh = argToBool(messageParts[9]);
-								ClientCapabilitiesStruct caps = 
-										new ClientCapabilitiesStruct(numPlayers, 
-										playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
-										winLength, chatSupport, autoRefresh);
-								server.initPlayer(this, caps);
-							} catch (NumberFormatException e) {
-								bullshitReceived();
-								sendMessage(ServerMessages.genErrorIllegalStringString());
-							}
-						} else if (server == null) {
-							bullshitReceived();
-							sendMessage(ServerMessages.genErrorInvalidCommandString());
-						} else {
+					if (messageParts.length == 10 && server == null &&
+						(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
+						(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
+						(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
+						try {
+							int numPlayers = Integer.parseInt(messageParts[1]);
+							String playerName = messageParts[2];
+							boolean roomSupport = argToBool(messageParts[3]);
+							int maxXDim = Integer.parseInt(messageParts[4]);
+							int maxYDim = Integer.parseInt(messageParts[5]);
+							int maxZDim = Integer.parseInt(messageParts[6]);
+							int winLength = Integer.parseInt(messageParts[7]);
+							boolean chatSupport = argToBool(messageParts[8]);
+							boolean autoRefresh = argToBool(messageParts[9]);
+							ClientCapabilitiesStruct caps = 
+									new ClientCapabilitiesStruct(numPlayers, 
+									playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
+									winLength, chatSupport, autoRefresh);
+							setChanged();
+							notifyObservers(caps);
+						} catch (NumberFormatException e) {
 							bullshitReceived();
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
+					} else if (server != null) {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorInvalidCommandString());
+					} else {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorIllegalStringString());
 					}
 					break;
 				case Protocol.Client.MAKEMOVE:
-					synchronized (game) {
-						if (messageParts.length == 3 && game != null && 
-								game.expectsHandlerInput(this)) {
-							try {
+					if (messageParts.length == 3 && game != null && 
+							game.expectsHandlerInput(this)) {
+						try {
 								//Workaround for added protocol coordinate origin definition
-								int x = Integer.parseInt(messageParts[1]) + 1;
-								int y = Integer.parseInt(messageParts[2]) + 1;
-								TowerCoordinates coords = new TowerCoordinates(x, y);
+							int x = Integer.parseInt(messageParts[1]) + 1;
+							int y = Integer.parseInt(messageParts[2]) + 1;
+							TowerCoordinates coords = new TowerCoordinates(x, y);
+							synchronized (game) {
 								game.processMove(this, coords);
-							} catch (NumberFormatException e) {
-								sendMessage(ServerMessages.genErrorIllegalStringString());
 							}
-						} else if (game == null || !game.expectsHandlerInput(this)) {
-							bullshitReceived();
-							sendMessage(ServerMessages.genErrorInvalidCommandString());
-						} else {
-							bullshitReceived();
+						} catch (NumberFormatException e) {
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
+					} else if (game == null || !game.expectsHandlerInput(this)) {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorInvalidCommandString());
+					} else {
+						bullshitReceived();
+						sendMessage(ServerMessages.genErrorIllegalStringString());
 					}
 					break;
 				default:
@@ -154,6 +179,10 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	/**
+	 * Keeps track of bullshit received. Increases bullshit counter and evaluates if it exceeds 
+	 * the threshold.
+	 */
 	public void bullshitReceived() {
 		bullshit++;
 		if (bullshit >= BULLSHIT_THRESHOLD) {
@@ -161,6 +190,10 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	/**
+	 * Responds to a disconnect or communication failure, shuts down this handler and informs 
+	 * parent game or server.
+	 */
 	private void handleDisconnect() {
 		view.printMessage(toString() + " disconnected");
 		shutdown();
