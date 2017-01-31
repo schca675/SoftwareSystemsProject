@@ -116,7 +116,7 @@ public class ClientHandler implements Runnable {
 					}
 					break;
 				case Protocol.Client.MAKEMOVE:
-					synchronized (server) {
+					synchronized (game) {
 						if (messageParts.length == 3 && game != null && 
 								game.expectsHandlerInput(this)) {
 							try {
@@ -165,7 +165,7 @@ public class ClientHandler implements Runnable {
 	
 	private void handleDisconnect() {
 		shutdown();
-		synchronized (server) {
+		synchronized (this) {
 			if (server != null) {
 				view.printMessage(toString() + " has disconnected, removing from lobby");
 				server.removeClient(this);
