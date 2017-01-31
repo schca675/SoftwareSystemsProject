@@ -36,6 +36,7 @@ public class ServerMessages {
 	}
 	
 	public static String genNotifyMoveString(int playerID, int x, int y) {
+		//Workaround for added protocol coordinate origin definition
 		return Protocol.Server.NOTIFYMOVE + SPACE + playerID + SPACE + (x - 1) + SPACE + (y - 1);
 	}
 	

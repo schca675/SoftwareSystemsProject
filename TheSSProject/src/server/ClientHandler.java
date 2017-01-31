@@ -37,11 +37,12 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
-	public void changeParentToGame(GameThread startingGame) {
-		synchronized (server) {
-			server = null;
-			game = startingGame;
-		}
+	public void setParentServer(Server serverToSet) {
+		server = serverToSet;
+	}
+	
+	public void setParentGame(GameThread gameToSet) {
+		game = gameToSet;
 	}
 	
 	// Gets called by both listener thread (run -> handleMessage -> sendMessage) and
@@ -64,14 +65,17 @@ public class ClientHandler implements Runnable {
 			try {
 				//TODO: timeout when line not terminated?
 				//TODO: timeout when no response when it is desired?
+				// Apparently BufferedReader.readline() throws no IOException if the client closes 
+				// the socket, but returns null. Without checking for this, this results in an 
+				// infinite loop.
 				String message = in.readLine();
 				if (message != null) {
 					printReceivedMessage(message);
 					handleMessage(message);
+				} else {
+					handleDisconnect();
 				}
 			} catch (IOException e) {
-				//TODO: Exception forwarding
-				view.printMessage("trying to shutdown clienthandler " + toString());
 				handleDisconnect();
 			}
 		}
@@ -101,7 +105,6 @@ public class ClientHandler implements Runnable {
 								ClientCapabilities caps = new ClientCapabilities(numPlayers, 
 										playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
 										winLength, chatSupport, autoRefresh);
-								stopTimeout();
 								server.initPlayer(this, caps);
 							} catch (NumberFormatException e) {
 								bullshitReceived();
@@ -121,10 +124,10 @@ public class ClientHandler implements Runnable {
 						if (messageParts.length == 3 && game != null && 
 								game.expectsHandlerInput(this)) {
 							try {
+								//Workaround for added protocol coordinate origin definition
 								int x = Integer.parseInt(messageParts[1]) + 1;
 								int y = Integer.parseInt(messageParts[2]) + 1;
 								TowerCoordinates coords = new TowerCoordinates(x, y);
-								stopTimeout();
 								game.processMove(this, coords);
 							} catch (NumberFormatException e) {
 								sendMessage(ServerMessages.genErrorIllegalStringString());
@@ -156,25 +159,15 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
-	public void startTimeout() {
-		//TODO: find alternative
-	}
-	
-	private void stopTimeout() {
-		//TODO: find alternative
-	}
-	
 	private void handleDisconnect() {
+		view.printMessage(toString() + " disconnected");
 		shutdown();
-		synchronized (this) {
-			if (server != null) {
-				view.printMessage(toString() + " has disconnected, removing from lobby");
-				server.removeClient(this);
-			} else if (game != null) {
-				view.printMessage(toString() + " has disconnected, will be replaced with computer "
-						+ "player");
-				game.replaceClient(this);
-			}
+		if (server != null) {
+			view.printMessage(toString() + " remove from lobby");
+			server.removeClient(this);
+		} else if (game != null) {
+			view.printMessage(toString() + " replace with computer player");
+			game.replaceClient(this);
 		}
 	}
 	

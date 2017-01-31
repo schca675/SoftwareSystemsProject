@@ -27,6 +27,7 @@ public class GameThread extends Observable implements Runnable {
 	private Player currentPlayer;
 	private int currentPlayerIndex;
 	private ServerTUI view;
+	boolean exit = false;
 	
 	// <------ Constructors ------>
 	
@@ -104,8 +105,6 @@ public class GameThread extends Observable implements Runnable {
 		broadcastMessage(ServerMessages.genTurnOfPlayerString(player.playerID));
 		if (player instanceof ComputerPlayer) {
 			processMove(null, ((ComputerPlayer) player).determineMove(board));
-		} else {
-			getHandler(player).startTimeout();
 		}
 	}
 	
@@ -116,40 +115,43 @@ public class GameThread extends Observable implements Runnable {
 	 * @param coords Coordinates of the move
 	 */
 	public void processMove(ClientHandler handler, TowerCoordinates coords) {
-		if ((handler == null || getHandler(currentPlayer) == handler) && 
-				board.isValidMove(coords.x, coords.y)) {
-			//Caller is a ComputerPlayer or the correct human player, move is valid
-			try {
-				board.makeMove(coords.x, coords.y, currentPlayer.playerID);
-				broadcastMessage(ServerMessages.genNotifyMoveString(currentPlayer.playerID, 
-						coords.x, coords.y));
-				if (board.isFull()) {
-					broadcastMessage(ServerMessages.genNotifyDrawString());
+		synchronized (this) {
+			if ((handler == null || getHandler(currentPlayer) == handler) && 
+					board.isValidMove(coords.x, coords.y)) {
+				//Caller is a ComputerPlayer or the correct human player, move is valid
+				try {
+					board.makeMove(coords.x, coords.y, currentPlayer.playerID);
+					broadcastMessage(ServerMessages.genNotifyMoveString(currentPlayer.playerID, 
+							coords.x, coords.y));
+					if (board.isFull()) {
+						broadcastMessage(ServerMessages.genNotifyDrawString());
+						shutdown();
+					} else if (board.hasWon(coords.x, coords.y)) {
+						broadcastMessage(ServerMessages.genNotifyWinString(currentPlayer.playerID));
+						shutdown();
+					} else {
+						nextPlayer();
+						if (!exit) {
+							requestMove(currentPlayer);
+						}
+					}
+				} catch (IllegalCoordinatesException e) {
+					//Something goes awfully wrong
 					shutdown();
-				} else if (board.hasWon(coords.x, coords.y)) {
-					broadcastMessage(ServerMessages.genNotifyWinString(currentPlayer.playerID));
-					shutdown();
-				} else {
-					nextPlayer();
-					requestMove(currentPlayer);
 				}
-			} catch (IllegalCoordinatesException e) {
-				//Something goes awfully wrong
+			} else if (currentPlayer instanceof ComputerPlayer) {
+				//Caller is a ComputerPlayer and sends an illegal move
+				broadcastMessage(ServerMessages.genNotifyDisconnectString(currentPlayer.playerID));
 				shutdown();
+			} else if (handler != null && getHandler(currentPlayer) != handler) {
+				//Caller is not a ComputerPlayer and sends data while it shouldn't
+				handler.bullshitReceived();
+				handler.sendMessage(ServerMessages.genErrorInvalidCommandString());
+			} else {
+				//Caller is current player and sends an illegal move
+				handler.bullshitReceived();
+				handler.sendMessage(ServerMessages.genErrorInvalidMoveString());
 			}
-		} else if (currentPlayer instanceof ComputerPlayer) {
-			//Caller is a ComputerPlayer and sends an illegal move
-			broadcastMessage(ServerMessages.genNotifyDisconnectString(currentPlayer.playerID));
-			shutdown();
-		} else if (handler != null && getHandler(currentPlayer) != handler) {
-			//Caller is not a ComputerPlayer and sends data while it shouldn't
-			handler.bullshitReceived();
-			handler.sendMessage(ServerMessages.genErrorInvalidCommandString());
-		} else {
-			//Caller is current player and sends an illegal move
-			handler.bullshitReceived();
-			handler.sendMessage(ServerMessages.genErrorInvalidMoveString());
-			handler.startTimeout();
 		}
 	}
 	
@@ -158,25 +160,27 @@ public class GameThread extends Observable implements Runnable {
 	 * same ID. Anti-cheat measure for rage quits.
 	 * @param player Player to replace
 	 */
-	public void replaceClient(ClientHandler client) {
+	public synchronized void replaceClient(ClientHandler client) {
+		Player toReplace = null;
 		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
 			if (handlerMapEntry.getValue() == client) {
-				Player toReplace = handlerMapEntry.getKey();
-				ComputerPlayer compPlayer = new ComputerPlayer(//new SmartStrategy(), 
-						toReplace.playerID);
-				players.add(players.indexOf(toReplace), compPlayer);
-				players.remove(toReplace);
-				handlerMap.remove(toReplace);
-				if (currentPlayer == toReplace) {
-					currentPlayer = compPlayer;
-					processMove(null, compPlayer.determineMove(board));
-				}
+				toReplace = handlerMapEntry.getKey();
 			}
+		}
+		ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), 
+				toReplace.playerID);
+		players.add(players.indexOf(toReplace), compPlayer);
+		players.remove(toReplace);
+		handlerMap.remove(toReplace);
+		if (handlerMap.size() == 0) {
+			shutdown();
+		} else if (currentPlayer == toReplace) {
+			currentPlayer = compPlayer;
+			processMove(null, compPlayer.determineMove(board));
 		}
 	}
 	
 	public boolean expectsHandlerInput(ClientHandler handler) {
-		//TODO: check safety of this
 		return handlerMap.get(currentPlayer) == handler;
 	}
 	
@@ -200,6 +204,7 @@ public class GameThread extends Observable implements Runnable {
 	}
 	
 	public void shutdown() {
+		exit = true;
 		String toPrint = "Shutting down game with handlers to";
 		for (ClientHandler handler : handlerMap.values()) {
 			handler.shutdown();

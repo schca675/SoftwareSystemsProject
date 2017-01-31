@@ -26,8 +26,8 @@ public class ServerListener  implements Runnable {
 		while (!exit) {
 			try {
 				Socket socket = listener.accept();
-				view.printMessage("Client connected from " + 
-						socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+				view.printMessage(socket.getInetAddress().getHostAddress() + ":" + 
+						socket.getPort() + " connected");
 				server.initConnection(socket);
 			} catch (IOException e) {
 				view.printMessage(LISTEN_ERROR);

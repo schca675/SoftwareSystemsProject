@@ -227,8 +227,9 @@ public class ClientCommunication implements Observer, Runnable {
 					if (playing && message.length == 4) {
 						try {
 							int id = Integer.parseInt(message[1]);
-							int xc = Integer.parseInt(message[2]);
-							int yc = Integer.parseInt(message[3]);
+							//Workaround for added protocol coordinate origin definition
+							int xc = Integer.parseInt(message[2]) + 1;
+							int yc = Integer.parseInt(message[3]) + 1;
 							makeMove(xc, yc, id);
 							view.valid(MessageType.MOVE_MADE);
 						} catch (NumberFormatException e) {
@@ -405,7 +406,8 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @return Command together with the string representation of the move.
 	 */
 	public String sendCoordinates(TowerCoordinates move) {
-		return MAKEMOVE + " " + move.getX() + " " + move.getY();
+		//Workaround for added protocol coordinate origin definition
+		return MAKEMOVE + " " + (move.getX() - 1) + " " + (move.getY() - 1);
 	}
 	
 	/**

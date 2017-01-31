@@ -19,11 +19,11 @@ public class ServerTUI {
 	
 	//@ ensures \result >= 0 && \result <= 65535;
 	public int requestPortNumber() {
-		printMessage("Please enter a port number to bind to, from 0 up to 65535.");
+		printMessage("Please enter a port number to bind to, from 1025 up to 65535.");
 		while (true) {
 			try {
 				String input = inputReader.readLine();
-				if (Integer.parseInt(input) >= 0 && Integer.parseInt(input) 
+				if (Integer.parseInt(input) >= 1025 && Integer.parseInt(input) 
 						<= 65535) {
 					return Integer.parseInt(input);
 				}

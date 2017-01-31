@@ -41,8 +41,9 @@ public class Server {
 	}
 	
 	public static final int EXT_PLAYERS = 2;
-	public static final int EXT_XYDIM = 10;
-	public static final int EXT_ZDIM = 100;
+	public static final int EXT_XYDIM = 0;
+	public static final int EXT_ZDIM = 0;
+	public static final int EXT_DIM_BOUND = 100;
 	public static final int EXT_WINLENGTH = 10;
 	public static final boolean EXT_ROOMS = false;
 	public static final boolean EXT_CHAT = false;
@@ -64,7 +65,7 @@ public class Server {
 		int port = ui.requestPortNumber();
 		boolean enableExtensions = ui.requestExtensions();
 		ui.printMessage("Starting server bound at port " + port + 
-				(enableExtensions ? " with " : " without ") + "extensions");
+				(enableExtensions ? " with " : " without ") + "extensions...");
 		try {
 			new Server(port, enableExtensions, ui);
 		} catch (IOException e) {
@@ -94,6 +95,7 @@ public class Server {
 		handlerMap = new HashMap<Player, ClientHandler>(10);
 		capabilitiesMap = new HashMap<Player, ClientCapabilities>(10);
 		listenForConnections();
+		view.printMessage("Server started");
 	}
 	
 	/**
@@ -110,9 +112,8 @@ public class Server {
 	 * @param socket A socket
 	 */
 	public void initConnection(Socket socket) {
-		//TODO: look at exceptions
 		ClientHandler peer = null;
-		peer = new ClientHandler(socket, this, view);
+		peer = new ClientHandler(socket, null, view);
 		new Thread(peer).start();
 		if (enableExtensions) {
 			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
@@ -120,7 +121,6 @@ public class Server {
 		} else {
 			peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
 		}
-		peer.startTimeout();
 	}
 	
 	/**
@@ -132,6 +132,7 @@ public class Server {
 	 */
 	public synchronized void initPlayer(ClientHandler handler, ClientCapabilities caps) {
 		synchronized (this) {
+			handler.setParentServer(this);
 			int id = playerIDProvider.obtainID();
 			Player player = new Player(caps.playerName, id);
 			handler.sendMessage(ServerMessages.genAssignIDString(id));
@@ -164,9 +165,9 @@ public class Server {
 	 */
 	private GameRules determineRules(List<Player> players) {
 		if (enableExtensions) {
-			int xDim = Server.EXT_XYDIM;
-			int yDim = Server.EXT_XYDIM;
-			int zDim = Server.EXT_ZDIM;
+			int xDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
+			int yDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
+			int zDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
 			int winLength = Server.EXT_WINLENGTH;
 			for (Player player : players) {
 				xDim = compareDims(xDim, capabilitiesMap.get(player).maxXDim);
@@ -212,7 +213,8 @@ public class Server {
 		}
 		GameThread game = new GameThread(players, handlers, rules, view);
 		for (ClientHandler handler : handlers.values()) {
-			handler.changeParentToGame(game);
+			handler.setParentServer(null);
+			handler.setParentGame(game);
 		}
 		new Thread(game).start();
 	}
