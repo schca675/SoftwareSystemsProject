@@ -36,7 +36,7 @@ public class ServerMessages {
 	}
 	
 	public static String genNotifyMoveString(int playerID, int x, int y) {
-		return Protocol.Server.NOTIFYMOVE + SPACE + playerID + SPACE + x + SPACE + y;
+		return Protocol.Server.NOTIFYMOVE + SPACE + playerID + SPACE + (x - 1) + SPACE + (y - 1);
 	}
 	
 	public static String genNotifyWinString(int playerID) {

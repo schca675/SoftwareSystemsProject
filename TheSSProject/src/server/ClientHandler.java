@@ -71,6 +71,7 @@ public class ClientHandler implements Runnable {
 				}
 			} catch (IOException e) {
 				//TODO: Exception forwarding
+				view.printMessage("trying to shutdown clienthandler " + toString());
 				handleDisconnect();
 			}
 		}
@@ -120,8 +121,8 @@ public class ClientHandler implements Runnable {
 						if (messageParts.length == 3 && game != null && 
 								game.expectsHandlerInput(this)) {
 							try {
-								int x = Integer.parseInt(messageParts[1]);
-								int y = Integer.parseInt(messageParts[2]);
+								int x = Integer.parseInt(messageParts[1]) + 1;
+								int y = Integer.parseInt(messageParts[2]) + 1;
 								TowerCoordinates coords = new TowerCoordinates(x, y);
 								stopTimeout();
 								game.processMove(this, coords);

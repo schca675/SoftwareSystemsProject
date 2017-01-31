@@ -11,25 +11,18 @@ public class ServerListener  implements Runnable {
 			+ "shutting down...";
 	public static final String SHUTDOWN_ERROR = "Error while shutting down connection listener";
 	
-	private int port;
 	private ServerSocket listener;
 	private Server server;
 	private ServerTUI view;
 	boolean exit = false;
 	
-	public ServerListener(int port, ServerTUI view, Server server) {
-		this.port = port;
+	public ServerListener(int port, ServerTUI view, Server server) throws IOException {
 		this.server = server;
 		this.view = view;
+		listener = new ServerSocket(port);
 	}
 	
 	public void run() {
-		try {
-			listener = new ServerSocket(port);
-		} catch (IOException e) {
-			view.printMessage(INIT_ERROR);
-			shutdown();
-		}
 		while (!exit) {
 			try {
 				Socket socket = listener.accept();

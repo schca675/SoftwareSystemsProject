@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class Server {
 	
 	public static final int EXT_PLAYERS = 2;
 	public static final int EXT_XYDIM = 10;
-	public static final int EXT_ZDIM = 0;
+	public static final int EXT_ZDIM = 100;
 	public static final int EXT_WINLENGTH = 10;
 	public static final boolean EXT_ROOMS = false;
 	public static final boolean EXT_CHAT = false;
@@ -64,7 +65,17 @@ public class Server {
 		boolean enableExtensions = ui.requestExtensions();
 		ui.printMessage("Starting server bound at port " + port + 
 				(enableExtensions ? " with " : " without ") + "extensions");
-		new Server(port, enableExtensions, ui);
+		try {
+			new Server(port, enableExtensions, ui);
+		} catch (IOException e) {
+			ui.printMessage("Port in use, please enter another one");
+			port = ui.requestPortNumber();
+			try {
+				new Server(port, enableExtensions, ui);
+			} catch (IOException exc) {
+				ui.printMessage("Port also in use, please think before entering something");
+			}
+		}
 	}
 	
 	/**
@@ -74,7 +85,7 @@ public class Server {
 	 * winning length supported)
 	 * @param view View to use
 	 */
-	private Server(int port, boolean enableExtensions, ServerTUI view) {
+	private Server(int port, boolean enableExtensions, ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		this.playerIDProvider = new PlayerIDProvider();
@@ -88,7 +99,7 @@ public class Server {
 	/**
 	 * Method that initiates listening for incoming connections.
 	 */
-	private void listenForConnections() {
+	private void listenForConnections() throws IOException {
 		ServerListener listener = new ServerListener(port, view, this);
 		new Thread(listener).start();
 	}
@@ -157,7 +168,6 @@ public class Server {
 			int yDim = Server.EXT_XYDIM;
 			int zDim = Server.EXT_ZDIM;
 			int winLength = Server.EXT_WINLENGTH;
-			view.printMessage("winLength =" + winLength);
 			for (Player player : players) {
 				xDim = compareDims(xDim, capabilitiesMap.get(player).maxXDim);
 				yDim = compareDims(yDim, capabilitiesMap.get(player).maxYDim);
