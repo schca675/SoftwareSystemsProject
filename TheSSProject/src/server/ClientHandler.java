@@ -23,17 +23,25 @@ public class ClientHandler implements Runnable {
 	private GameThread game;
 	private ServerTUI view;
 	
-	public ClientHandler(Socket socket, Server server, ServerTUI view) throws IOException {
+	public ClientHandler(Socket socket, Server server, ServerTUI view) {
 		this.socket = socket;
 		this.view = view;
 		this.server = server;
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		try {
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		} catch (IOException e) {
+			view.printMessage("IOException while creating communication channel to " + toString() 
+				+ ", trying to shut down");
+			shutdown();
+		}
 	}
 	
-	public void changeParent(GameThread startingGame) {
-		server = null;
-		game = startingGame;
+	public void changeParentToGame(GameThread startingGame) {
+		synchronized (server) {
+			server = null;
+			game = startingGame;
+		}
 	}
 	
 	// Gets called by both listener thread (run -> handleMessage -> sendMessage) and
@@ -45,8 +53,8 @@ public class ClientHandler implements Runnable {
 			out.flush();
 			printSentMessage(message);
 		} catch (IOException e) {
-			view.printMessage("IOException while sending " + message + " to " + 
-					socket.getInetAddress());
+			view.printMessage("IOException while sending '" + message + "' to " + 
+					toString());
 			handleDisconnect();
 		}
 	}
@@ -74,55 +82,59 @@ public class ClientHandler implements Runnable {
 			String command = messageParts[0];
 			switch (command) {
 				case Protocol.Client.SENDCAPABILITIES:
-					if (messageParts.length == 10 && server != null &&
-						(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
-						(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
-						(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
-						try {
-							int numPlayers = Integer.parseInt(messageParts[1]);
-							String playerName = messageParts[2];
-							boolean roomSupport = argToBool(messageParts[3]);
-							int maxXDim = Integer.parseInt(messageParts[4]);
-							int maxYDim = Integer.parseInt(messageParts[5]);
-							int maxZDim = Integer.parseInt(messageParts[6]);
-							int winLength = Integer.parseInt(messageParts[7]);
-							boolean chatSupport = argToBool(messageParts[8]);
-							boolean autoRefresh = argToBool(messageParts[9]);
-							ClientCapabilities caps = new ClientCapabilities(numPlayers, 
-									playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
-									winLength, chatSupport, autoRefresh);
-							stopTimeout();
-							server.initPlayer(this, caps);
-						} catch (NumberFormatException e) {
+					synchronized (server) {
+						if (messageParts.length == 10 && server != null &&
+							(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
+							(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
+							(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
+							try {
+								int numPlayers = Integer.parseInt(messageParts[1]);
+								String playerName = messageParts[2];
+								boolean roomSupport = argToBool(messageParts[3]);
+								int maxXDim = Integer.parseInt(messageParts[4]);
+								int maxYDim = Integer.parseInt(messageParts[5]);
+								int maxZDim = Integer.parseInt(messageParts[6]);
+								int winLength = Integer.parseInt(messageParts[7]);
+								boolean chatSupport = argToBool(messageParts[8]);
+								boolean autoRefresh = argToBool(messageParts[9]);
+								ClientCapabilities caps = new ClientCapabilities(numPlayers, 
+										playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
+										winLength, chatSupport, autoRefresh);
+								stopTimeout();
+								server.initPlayer(this, caps);
+							} catch (NumberFormatException e) {
+								bullshitReceived();
+								sendMessage(ServerMessages.genErrorIllegalStringString());
+							}
+						} else if (server == null) {
+							bullshitReceived();
+							sendMessage(ServerMessages.genErrorInvalidCommandString());
+						} else {
 							bullshitReceived();
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
-					} else if (server == null) {
-						bullshitReceived();
-						sendMessage(ServerMessages.genErrorInvalidCommandString());
-					} else {
-						bullshitReceived();
-						sendMessage(ServerMessages.genErrorIllegalStringString());
 					}
 					break;
 				case Protocol.Client.MAKEMOVE:
-					if (messageParts.length == 3 && game != null && 
-						game.expectsHandlerInput(this)) {
-						try {
-							int x = Integer.parseInt(messageParts[1]);
-							int y = Integer.parseInt(messageParts[2]);
-							TowerCoordinates coords = new TowerCoordinates(x, y);
-							stopTimeout();
-							game.processMove(this, coords);
-						} catch (NumberFormatException e) {
+					synchronized (server) {
+						if (messageParts.length == 3 && game != null && 
+								game.expectsHandlerInput(this)) {
+							try {
+								int x = Integer.parseInt(messageParts[1]);
+								int y = Integer.parseInt(messageParts[2]);
+								TowerCoordinates coords = new TowerCoordinates(x, y);
+								stopTimeout();
+								game.processMove(this, coords);
+							} catch (NumberFormatException e) {
+								sendMessage(ServerMessages.genErrorIllegalStringString());
+							}
+						} else if (game == null || !game.expectsHandlerInput(this)) {
+							bullshitReceived();
+							sendMessage(ServerMessages.genErrorInvalidCommandString());
+						} else {
+							bullshitReceived();
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
-					} else if (game == null || !game.expectsHandlerInput(this)) {
-						bullshitReceived();
-						sendMessage(ServerMessages.genErrorInvalidCommandString());
-					} else {
-						bullshitReceived();
-						sendMessage(ServerMessages.genErrorIllegalStringString());
 					}
 					break;
 				default:
@@ -152,12 +164,16 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private void handleDisconnect() {
-		view.printMessage(toString() + " has disconnected, will be replaced with computer player");
 		shutdown();
-		if (server != null) {
-			server.removeClient(this);
-		} else if (game != null) {
-			game.replaceClient(this);
+		synchronized (server) {
+			if (server != null) {
+				view.printMessage(toString() + " has disconnected, removing from lobby");
+				server.removeClient(this);
+			} else if (game != null) {
+				view.printMessage(toString() + " has disconnected, will be replaced with computer "
+						+ "player");
+				game.replaceClient(this);
+			}
 		}
 	}
 	
@@ -172,15 +188,16 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
-	public void printReceivedMessage(String message) {
+	private void printReceivedMessage(String message) {
 		view.printMessage(java.time.LocalTime.now() + " " + toString() + " R " + message);
 		
 	}
 	
-	public void printSentMessage(String message) {
+	private void printSentMessage(String message) {
 		view.printMessage(java.time.LocalTime.now() + " " + toString() + " S " + message);
 	}
 	
+	@Override
 	public String toString() {
 		return socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
 	}

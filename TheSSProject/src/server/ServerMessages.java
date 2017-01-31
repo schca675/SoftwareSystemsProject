@@ -1,6 +1,5 @@
 package server;
 
-import java.io.IOException;
 import java.util.List;
 
 import model.Player;
@@ -11,7 +10,7 @@ public class ServerMessages {
 	private static final String COLOUR = "ff0000"; 
 	
 	public static String genCapabilitiesString(int numPlayers, boolean roomSupport, int maxXDim, 
-			int maxYDim, int maxZDim, int winLength, boolean chatSupport) throws IOException {
+			int maxYDim, int maxZDim, int winLength, boolean chatSupport) {
 		return Protocol.Server.SERVERCAPABILITIES + SPACE + numPlayers + SPACE + 
 				boolToInt(roomSupport) + SPACE + maxXDim + SPACE + maxYDim + SPACE + 
 				maxZDim + SPACE + winLength + SPACE + boolToInt(chatSupport);

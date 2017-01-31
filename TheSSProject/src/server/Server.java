@@ -1,19 +1,16 @@
 package server;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
 import model.Player;
 
-public class Server implements Observer {
+public class Server {
 	public class PlayerIDProvider {
 		private Set<Integer> usedIDs;
 		
@@ -75,9 +72,9 @@ public class Server implements Observer {
 	 * @param port Port to bind the connection listener to
 	 * @param enableExtensions Whether to enable extensions (currently larger board, 
 	 * winning length supported)
-	 * @param view View to use;
+	 * @param view View to use
 	 */
-	public Server(int port, boolean enableExtensions, ServerTUI view) {
+	private Server(int port, boolean enableExtensions, ServerTUI view) {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		this.playerIDProvider = new PlayerIDProvider();
@@ -91,30 +88,9 @@ public class Server implements Observer {
 	/**
 	 * Method that initiates listening for incoming connections.
 	 */
-	public void listenForConnections() {
+	private void listenForConnections() {
 		ServerListener listener = new ServerListener(port, view, this);
 		new Thread(listener).start();
-	}
-
-	/**
-	 * Update method, used for handling commands to be executed after a ClientHandler receives a 
-	 * valid communication message while in the initial connection stage.
-	 * @param o Caller
-	 * @param arg Object that was created after receiving a valid message
-	 */
-	@Override
-	public synchronized void update(Observable o, Object arg) {
-		// Client connects
-		if (arg instanceof Socket) {
-			System.out.println("Client with IP " + ((Socket) arg).getInetAddress() + 
-					" connected at port " + ((Socket) arg).getPort());
-			initConnection((Socket) arg);
-		} else if (arg instanceof String) {
-			// Message, atm just errors
-			System.err.println(o.toString() + arg);
-		} else {
-			System.out.println("Invalid call to main server update");
-		}
 	}
 	
 	/**
@@ -125,17 +101,15 @@ public class Server implements Observer {
 	public void initConnection(Socket socket) {
 		//TODO: look at exceptions
 		ClientHandler peer = null;
-		try {
-			peer = new ClientHandler(socket, this, view);
-			new Thread(peer).start();
-			if (enableExtensions) {
-				peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
-						EXT_XYDIM, EXT_XYDIM, EXT_ZDIM, EXT_WINLENGTH, EXT_CHAT));
-			} else {
-				peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
-			}
-			peer.startTimeout();
-		} catch (IOException e) { }
+		peer = new ClientHandler(socket, this, view);
+		new Thread(peer).start();
+		if (enableExtensions) {
+			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
+					EXT_XYDIM, EXT_XYDIM, EXT_ZDIM, EXT_WINLENGTH, EXT_CHAT));
+		} else {
+			peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
+		}
+		peer.startTimeout();
 	}
 	
 	/**
@@ -145,14 +119,16 @@ public class Server implements Observer {
 	 * @param handler ClientHandler for this player/client
 	 * @param caps Capabilities of this player/client
 	 */
-	public void initPlayer(ClientHandler handler, ClientCapabilities caps) {
-		int id = playerIDProvider.obtainID();
-		Player player = new Player(caps.playerName, id);
-		handler.sendMessage(ServerMessages.genAssignIDString(id));
-		lobbyPlayerList.add(player);
-		handlerMap.put(player, handler);
-		capabilitiesMap.put(player, caps);
-		matchPlayers(player);
+	public synchronized void initPlayer(ClientHandler handler, ClientCapabilities caps) {
+		synchronized (this) {
+			int id = playerIDProvider.obtainID();
+			Player player = new Player(caps.playerName, id);
+			handler.sendMessage(ServerMessages.genAssignIDString(id));
+			lobbyPlayerList.add(player);
+			handlerMap.put(player, handler);
+			capabilitiesMap.put(player, caps);
+			matchPlayers(player);
+		}
 	}
 	
 	/**
@@ -160,7 +136,7 @@ public class Server implements Observer {
 	 * basic, just starts a game between the first to players connected.
 	 * @param player Player to match
 	 */
-	public void matchPlayers(Player player) {
+	private void matchPlayers(Player player) {
 		//TODO: implement more sophisticated matching, for the moment just first players.
 		if (lobbyPlayerList.size() >= 2) {
 			List<Player> players = new ArrayList<Player>(2);
@@ -175,7 +151,7 @@ public class Server implements Observer {
 	 * @param players List of players
 	 * @return Most extended rule set supported by all players, server
 	 */
-	public GameRules determineRules(List<Player> players) {
+	private GameRules determineRules(List<Player> players) {
 		if (enableExtensions) {
 			int xDim = Server.EXT_XYDIM;
 			int yDim = Server.EXT_XYDIM;
@@ -207,25 +183,14 @@ public class Server implements Observer {
 		}
 	}
 	
-	public void removeClient(ClientHandler client) {
-		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
-			if (handlerMapEntry.getValue() == client) {
-				lobbyPlayerList.remove(handlerMapEntry.getKey());
-				handlerMap.remove(handlerMapEntry.getKey());
-				capabilitiesMap.remove(handlerMapEntry.getKey());
-				break;
-			}
-		}
-	}
-	
 	/**
 	 * Starts a new game thread with given rules for the given players. Removes all relevant 
-	 * player data from the server and hands it to the GameThread. Updates observers for the 
+	 * player data from the server and hands it to the GameThread. Updates parent variables for the 
 	 * ClientHandlers.
 	 * @param players List of players
 	 * @param rules Rules for given players, server
 	 */
-	public void startGame(List<Player> players, GameRules rules) {
+	private void startGame(List<Player> players, GameRules rules) {
 		Map<Player, ClientHandler> handlers = new HashMap<Player, ClientHandler>(players.size());
 		for (Player player : players) {
 			handlers.put(player, handlerMap.get(player));
@@ -236,8 +201,28 @@ public class Server implements Observer {
 		}
 		GameThread game = new GameThread(players, handlers, rules, view);
 		for (ClientHandler handler : handlers.values()) {
-			handler.changeParent(game);
+			handler.changeParentToGame(game);
 		}
 		new Thread(game).start();
+	}
+	
+	/** 
+	 * Removes all data associated with this ClientHandler's player from this server's variables.
+	 * @param client A ClientHandler
+	 */
+	public synchronized void removeClient(ClientHandler client) {
+		synchronized (this) {
+			// Game may have been started with this client
+			if (handlerMap.containsValue(client)) {
+				for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
+					if (handlerMapEntry.getValue() == client) {
+						lobbyPlayerList.remove(handlerMapEntry.getKey());
+						handlerMap.remove(handlerMapEntry.getKey());
+						capabilitiesMap.remove(handlerMapEntry.getKey());
+						break;
+					}
+				}
+			}
+		}
 	}
 }
