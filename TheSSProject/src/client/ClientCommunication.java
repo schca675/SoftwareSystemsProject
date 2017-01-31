@@ -367,25 +367,25 @@ public class ClientCommunication implements Observer, Runnable {
 		// add the dimensions x, y, z and the winning length.
 		// we return the smaller dimension: 
 		// either the dimension received by the server or by the client.
-		if (x > maxX || x == UNLIMITED) {
+		if ((x > maxX && maxX != UNLIMITED) || x == UNLIMITED) {
 			result.append(maxX);
 		} else {
 			result.append(x);
 		}
 		result.append(" ");
-		if (y > maxY || y == UNLIMITED) {
+		if ((y > maxY && maxY != UNLIMITED) || y == UNLIMITED) {
 			result.append(maxY);
 		} else {
 			result.append(y);
 		}
 		result.append(" ");
-		if (z > maxZ || z == UNLIMITED) {
+		if ((z > maxZ && maxZ != UNLIMITED) || z == UNLIMITED) {
 			result.append(maxZ);
 		} else {
 			result.append(z);
 		}
 		result.append(" ");
-		if (win > maxWin || win == UNLIMITED) {
+		if ((win > maxWin && maxWin != UNLIMITED) || win == UNLIMITED) {
 			result.append(maxWin);
 		} else {
 			result.append(win);
