@@ -129,11 +129,16 @@ public class Server implements Observer {
 	
 	/**
 	 * Update method used by the ClientHandler to indicate a client has responded with its 
-	 * capabilities and it is useful to add this information to the server.
+	 * capabilities and it is useful to add this information to the server. Only does this 
+	 * when the client concerned is not already associated with a created player.
 	 */
 	public synchronized void update(Observable o, Object arg) {
 		if (o instanceof ClientHandler && arg instanceof ClientCapabilitiesStruct) {
-			initPlayer((ClientHandler) o, (ClientCapabilitiesStruct) arg);
+			if (!handlerMap.containsValue((ClientHandler) o)) {
+				initPlayer((ClientHandler) o, (ClientCapabilitiesStruct) arg);
+			} else {
+				((ClientHandler) o).bullshitReceived();
+			}
 		}
 	}
 	

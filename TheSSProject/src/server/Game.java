@@ -124,15 +124,15 @@ public class Game extends Observable implements Runnable {
 					board.makeMove(coords.x, coords.y, currentPlayer.playerID);
 					broadcastMessage(ServerMessages.genNotifyMoveString(currentPlayer.playerID, 
 							coords.x, coords.y));
-					if (board.isFull()) {
-						broadcastMessage(ServerMessages.genNotifyDrawString());
-						shutdown();
-					} else if (board.hasWon(coords.x, coords.y)) {
+					if (board.hasWon(coords.x, coords.y)) {
 						broadcastMessage(ServerMessages.genNotifyWinString(currentPlayer.playerID));
 						shutdown();
+					} else if (board.isFull()) {
+						broadcastMessage(ServerMessages.genNotifyDrawString());
+						shutdown();
 					} else {
-						nextPlayer();
 						if (!exit) {
+							nextPlayer();
 							requestMove(currentPlayer);
 						}
 					}
