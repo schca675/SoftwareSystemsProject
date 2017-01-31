@@ -162,7 +162,7 @@ public class GameThread extends Observable implements Runnable {
 		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
 			if (handlerMapEntry.getValue() == client) {
 				Player toReplace = handlerMapEntry.getKey();
-				ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), 
+				ComputerPlayer compPlayer = new ComputerPlayer(//new SmartStrategy(), 
 						toReplace.playerID);
 				players.add(players.indexOf(toReplace), compPlayer);
 				players.remove(toReplace);

@@ -157,6 +157,7 @@ public class Server {
 			int yDim = Server.EXT_XYDIM;
 			int zDim = Server.EXT_ZDIM;
 			int winLength = Server.EXT_WINLENGTH;
+			view.printMessage("winLength =" + winLength);
 			for (Player player : players) {
 				xDim = compareDims(xDim, capabilitiesMap.get(player).maxXDim);
 				yDim = compareDims(yDim, capabilitiesMap.get(player).maxYDim);

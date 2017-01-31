@@ -224,7 +224,7 @@ public class Board extends Observable {
 			int x = getTowerCoordinates(i).getX();
 			int y = getTowerCoordinates(i).getY();
 			try {
-				if (getTowerHeight(x, y) < zDim) {
+				if (getTowerHeight(x, y) < zDim || zDim == Board.UNLIMITED_Z) {
 					availableTowers.add(new TowerCoordinates(x, y));
 				}
 			} catch (CoordinatesOutOfBoundsException e) { 
