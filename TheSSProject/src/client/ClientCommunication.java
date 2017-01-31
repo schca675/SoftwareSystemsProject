@@ -24,7 +24,7 @@ import server.Protocol;
 import view.ClientTUI;
 import view.MessageType;
 
-public class ClientCommunication implements Observer, Runnable {
+public class ClientCommunication implements Observer {
 	//<<------- Variables needed for a play -------->>
 	private Player me;
 	private String name;
@@ -82,8 +82,10 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param view TUI of the client.
 	 * @throws IOException in case the streams can not be initialized.
 	 */
+	/*@requires socket != null && view != null && (name !=null || strategy != null) && xmax >= 0
+	  @ && ymax >=0 && zmax >= 0 && win >=0;*/
 	public ClientCommunication(Socket socket, ClientTUI view, String name, Strategy strategy,
-			Client client, int xmax, int ymax, int zmax, int win) throws IOException {
+			int xmax, int ymax, int zmax, int win) throws IOException {
 		this.view = view;
 		view.addObserver(this);
 		this.socket = socket;
@@ -105,7 +107,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * Constructor needed for testing purposes.
 	 * @param name name of player.
 	 */
-	
+	//@ requires view != null && name != null;
 	public ClientCommunication(ClientTUI view, String name) {
 		this.view = view;
 		this.name = name;
@@ -136,6 +138,7 @@ public class ClientCommunication implements Observer, Runnable {
 	/**
 	 * Reacts to the incoming messages by the protocol and calls the corresponding methods.
 	 */
+	//@ requires input != null;
 	public void react(String input)  {
 		String[] message = input.split(" ");
 		view.print("Reacting to this message: " + input);
@@ -286,6 +289,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * The method sends messages to the server, writes to the output Stream.
 	 * @param message message to communicate to the server.
 	 */
+	//@ requires message !=null;
 	public void write(String message) {
 		try {
 			out.write(message);
@@ -320,7 +324,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @return answer of the client.
 	 * @throws InvalidSyntaxException thrown when the syntax of the protocol does not hold.
 	 */
-	//@ requires message.length == 8;
+	//@ requires message.length == 8 && (\forall int i; i <= 8; message[i] != null);
 	public String serverCapabilities(String[] message) throws InvalidSyntaxException {
 		int amount = Integer.parseInt(message[1]);
 		boolean room = giveBoolean(message[2]);
@@ -343,6 +347,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param chat whether the server is able to use chat or not.
 	 * @return reaction message with the client's capabilities.
 	 */
+	//@ requires amountPlayers >= 2 && maxX >= 0 && maxY >=0 && maxZ >= 0 && maxWin >=0;
 	public String sendClientCapabilities(int amountPlayers, boolean roomSupport, 
 			int maxX, int maxY, int maxZ, int maxWin, boolean chat) {
 		StringBuilder result = new StringBuilder();
@@ -413,6 +418,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param meName name of the user's player.
 	 * @param meID id of the user's player.
 	 */
+	//@ requires meName !=null || meStrategy != null;
 	public void makeMe(String meName, Strategy meStrategy, int meID) {
 		if (meStrategy != null) {
 			me = new ComputerPlayer(meStrategy, meID);
@@ -431,6 +437,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * sends invalid dimensions to create a board.
 	 * @throws NumberFormatException in case the dimensions are not represented as integer.
 	 */
+	//@ requires dimensions !=null;
 	public Board makeBoard(String dimensions) throws InvalidSyntaxException, 
 		IllegalBoardConstructorArgumentsException, NumberFormatException {
 		String[] dims = dimensions.split("\\|");
@@ -457,6 +464,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @throws InvalidSyntaxException in case not all the information for a player are present.
 	 * @throws NumberFormatException in case the player id is not an integer.
 	 */
+	//@ requires input !=null;
 	public List<Player> makePlayers(String[] input) throws InvalidSyntaxException, 
 		NumberFormatException {
 		List<Player> result = new ArrayList<Player>();
@@ -482,6 +490,8 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @return boolean the String represents.
 	 * @throws InvalidSyntaxException in case the parameter string does not equal TRUE nor FALSE.
 	 */
+	/*@ requires value != null && (value.equals(String.valueOf(TRUE)) 
+	  @ || value.equals(String.valueOf(false))); */
 	public boolean giveBoolean(String value) throws InvalidSyntaxException {
 		if (value.equals(String.valueOf(TRUE))) {
 			return true;
@@ -499,8 +509,10 @@ public class ClientCommunication implements Observer, Runnable {
 	 * Determines the next move to play, asks TUI in case of Human Player or the method of Computer
 	 * Player, handles exceptions before server communication (local check).
 	 * @return the TowerCoordinates the me-Player wants to play.
+	 * If the me player or the board is not initialized it returns null.
 	 */
-	public TowerCoordinates determineMove() {
+	//@ ensures \result.getX() > 0 && \result.getY() > 0;
+	/*nullable*/ /*pure*/ public TowerCoordinates determineMove() {
 		if (me != null && board != null) {
 			if (me instanceof ComputerPlayer) {
 				return ((ComputerPlayer) me).determineMove(board);
@@ -530,6 +542,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param y Y Coordinate of the Tower, the player is playing.
 	 * @param id ID of the player whose move it is.
 	 */
+	//@ requires newX >= 0 && newY >=0;
 	public void makeMove(int newX, int newY, int newID) {
 		try {
 			board.makeMove(newX, newY, newID);
@@ -545,7 +558,8 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param id player ID of the winner, in case of a win. 
 	 * @return String stating the end.
 	 */
-	public String determineEnd(int reason, int id) {
+	//@ ensures \result != null;
+	/*pure*/ public String determineEnd(int reason, int id) {
 		switch (reason) {
 			case Protocol.EndID.WIN:
 				return "Player " + id + " won the game";
@@ -559,7 +573,8 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param reason reason why the game ended.
 	 * @return String stating the end.
 	 */
-	public String determineEnd(int reason) {
+	//@ ensures \result != null;
+	/*pure*/ public String determineEnd(int reason) {
 		switch (reason) {
 			case Protocol.EndID.WIN:
 				return "There is a winner.";
@@ -576,12 +591,13 @@ public class ClientCommunication implements Observer, Runnable {
 	}
 	
 	// << --------- Observer pattern ------------>>
-		/**
-		 * After a change is made on the board, the client will alert the TUI 
-		 * to print the changed situation.
-		 * @param observable Board to observe.
-		 * @param type Type of change the board has made.
-		 */
+	/**
+	 * After a change is made on the board, the client will alert the TUI 
+	 * to print the changed situation.
+	 * @param observable Board to observe.
+	 * @param type Type of change the board has made.
+	 */
+	//@ requires observable != null && type != null;
 	@Override
 	public void update(Observable observable, Object type) {
 		if (observable instanceof Board && type instanceof TowerCoordinates) {
@@ -607,6 +623,7 @@ public class ClientCommunication implements Observer, Runnable {
 	 * @param number String with error code defined in Protocol
 	 * @return Error explanation or null if invalid error code.
 	 */
+	//@ requires number != null;
 	public static String getError(String number) {
 		return Protocol.getError(number);
 	}
