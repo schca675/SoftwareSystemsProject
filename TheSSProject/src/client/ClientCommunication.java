@@ -289,6 +289,7 @@ public class ClientCommunication implements Observer, Runnable {
 	public void write(String message) {
 		try {
 			out.write(message);
+			view.print(message);
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {

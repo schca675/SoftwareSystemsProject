@@ -707,10 +707,47 @@ public class BoardTest {
 	 * Test the getAvailableTowers method.
 	 */
 	@Test
-	public void testgetAvailableTowers() {
+	public void testgetAvailableTowers1() {
 		List<TowerCoordinates> data = board.getAvailableTowers();
 		for (int i = 0; i < data.size(); i++) {
 			assertTrue(board.isValidMove(data.get(i).getX(), data.get(i).getY()));
+		}
+		for (int x = MIN; x <= MAX; x++) {
+			for (int y = MIN; y <= MAX; y++) {
+				TowerCoordinates test = new TowerCoordinates(x, y);
+				if (!data.contains(test)) {
+					assertFalse(board.isValidMove(test.getX(), test.getY()));
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Test the getAvailableTowers method with first filling some towers.
+	 */
+	@Test
+	public void testgetAvailableTowers2() {
+		try {
+			for (int i = 1; i <= MAX; i++) {
+				for (int j = 1; j <= MAX; j++) {
+					board.makeMove(i, i, PLAYER1);
+	
+				}
+			}
+		} catch (IllegalCoordinatesException e) {
+			System.out.println("Exception while testing testGetAvailableTowers2");
+		}
+		List<TowerCoordinates> data = board.getAvailableTowers();
+		for (int i = 0; i < data.size(); i++) {
+			assertTrue(board.isValidMove(data.get(i).getX(), data.get(i).getY()));
+		}
+		for (int x = MIN; x <= MAX; x++) {
+			for (int y = MIN; y <= MAX; y++) {
+				TowerCoordinates test = new TowerCoordinates(x, y);
+				if (!data.contains(test)) {
+					assertFalse(board.isValidMove(test.getX(), test.getY()));
+				}
+			}
 		}
 	}
 	
