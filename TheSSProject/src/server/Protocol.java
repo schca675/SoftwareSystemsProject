@@ -4,13 +4,6 @@ package server;
  * the protocol. This protocol is for Group 7, Mod02 BIT/INF 2016/2017, UTWENTE
  */
 public class Protocol {
-	
-	public static final boolean isDefinedClientCommand(String s) {
-		return s.equals(Client.SENDCAPABILITIES) || s.equals(Client.JOINROOM) || 
-				s.equals(Client.GETROOMLIST) || s.equals(Client.LEAVEROOM) || 
-				s.equals(Client.MAKEMOVE) || s.equals(Client.SENDMESSAGE) || 
-				s.equals(Client.REQUESTLEADERBOARD);
-	}
 
 	/**
 	 * Server to client messages.
@@ -61,30 +54,6 @@ public class Protocol {
 		public static final String REQUESTLEADERBOARD = "requestLeaderboard";
 
 	}
-	
-	/**
-	 * Game end IDs.
-	 *
-	 */
-	public class EndID {
-		public static final int WIN = 1;
-		public static final int DRAW = 2;
-		public static final int DISCONNECT = 3;
-		public static final int DISCONNECT_THIS = 4;
-	}
-	
-	/**
-	 * Error IDs.
-	 *
-	 */
-	public class ErrorID {
-		public static final int NOCAPABILITIES = 1;
-		//Lobby messages left out
-		public static final int INVALIDCOMMAND = 4;
-		public static final int INVALIDMOVE = 5;
-		//Lobby message left out
-		public static final int ILLEGALSTRING = 7;
-	}
 
 	/**
 	 * Function to get Error message by error code defined in protocol.
@@ -131,6 +100,30 @@ public class Protocol {
 
 		return result;
 
+	}
+	
+	/**
+	 * Game end IDs.
+	 *
+	 */
+	public class EndID {
+		public static final int WIN = 1;
+		public static final int DRAW = 2;
+		public static final int DISCONNECT = 3;
+		public static final int DISCONNECT_THIS = 4;
+	}
+	
+	/**
+	 * Error IDs.
+	 *
+	 */
+	public class ErrorID {
+		public static final int NOCAPABILITIES = 1;
+		//Lobby messages left out
+		public static final int INVALIDCOMMAND = 4;
+		public static final int INVALIDMOVE = 5;
+		//Lobby message left out
+		public static final int ILLEGALSTRING = 7;
 	}
 
 }
