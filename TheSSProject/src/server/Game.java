@@ -12,8 +12,9 @@ import model.ComputerPlayer;
 import model.Player;
 import model.SmartStrategy;
 import model.TowerCoordinates;
+import view.ServerTUI;
 
-public class GameThread extends Observable implements Runnable {
+public class Game extends Observable implements Runnable {
 	
 	// <------ Instance variables ------>
 	
@@ -44,7 +45,7 @@ public class GameThread extends Observable implements Runnable {
 	  @ (rules.winLength <= rules.xDim || rules.winLength <= rules.yDim || rules.winLength <= 
 	  @ rules.zDim || rules.zDim == 0);
 	*/
-	public GameThread(List<Player> players, Map<Player, ClientHandler> handlerMap, GameRules 
+	public Game(List<Player> players, Map<Player, ClientHandler> handlerMap, GameRulesStruct 
 			rules, ServerTUI view) {
 		try {
 			this.view = view;

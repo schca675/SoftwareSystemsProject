@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ServerListener  implements Runnable {
+import view.ServerTUI;
+
+public class ConnectionListener  implements Runnable {
 	public static final String INIT_ERROR = "Connection listener cannot be created, "
 			+ "shutting down...";
 	public static final String LISTEN_ERROR = "Error while waiting for connection, "
@@ -16,7 +18,7 @@ public class ServerListener  implements Runnable {
 	private ServerTUI view;
 	boolean exit = false;
 	
-	public ServerListener(int port, ServerTUI view, Server server) throws IOException {
+	public ConnectionListener(int port, ServerTUI view, Server server) throws IOException {
 		this.server = server;
 		this.view = view;
 		listener = new ServerSocket(port);

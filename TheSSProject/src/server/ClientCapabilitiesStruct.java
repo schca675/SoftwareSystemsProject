@@ -1,6 +1,6 @@
 package server;
 
-public class ClientCapabilities {
+public class ClientCapabilitiesStruct {
 	public final int amountOfPlayers;
 	public final String playerName;
 	public final boolean roomSupport;
@@ -11,7 +11,7 @@ public class ClientCapabilities {
 	public final boolean chatSupport;
 	public final boolean autoRefresh;
 	
-	public ClientCapabilities(int amountOfPlayers, String playerName, boolean roomSupport, 
+	public ClientCapabilitiesStruct(int amountOfPlayers, String playerName, boolean roomSupport, 
 			int maxXDim, int maxYDim, int maxZDim, int winLength, boolean chatSupport, 
 			boolean autoRefresh) {
 		this.amountOfPlayers = amountOfPlayers;

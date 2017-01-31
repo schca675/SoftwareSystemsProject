@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import model.Player;
+import view.ServerTUI;
 
 public class Server {
 	public class PlayerIDProvider {
@@ -52,7 +53,7 @@ public class Server {
 	private boolean enableExtensions;
 	private List<Player> lobbyPlayerList;
 	private Map<Player, ClientHandler> handlerMap;
-	private Map<Player, ClientCapabilities> capabilitiesMap;
+	private Map<Player, ClientCapabilitiesStruct> capabilitiesMap;
 	private PlayerIDProvider playerIDProvider;
 	private ServerTUI view;
 	
@@ -93,7 +94,7 @@ public class Server {
 		this.view = view;
 		lobbyPlayerList = new ArrayList<Player>(10);
 		handlerMap = new HashMap<Player, ClientHandler>(10);
-		capabilitiesMap = new HashMap<Player, ClientCapabilities>(10);
+		capabilitiesMap = new HashMap<Player, ClientCapabilitiesStruct>(10);
 		listenForConnections();
 		view.printMessage("Server started");
 	}
@@ -102,7 +103,7 @@ public class Server {
 	 * Method that initiates listening for incoming connections.
 	 */
 	private void listenForConnections() throws IOException {
-		ServerListener listener = new ServerListener(port, view, this);
+		ConnectionListener listener = new ConnectionListener(port, view, this);
 		new Thread(listener).start();
 	}
 	
@@ -130,7 +131,7 @@ public class Server {
 	 * @param handler ClientHandler for this player/client
 	 * @param caps Capabilities of this player/client
 	 */
-	public synchronized void initPlayer(ClientHandler handler, ClientCapabilities caps) {
+	public synchronized void initPlayer(ClientHandler handler, ClientCapabilitiesStruct caps) {
 		synchronized (this) {
 			handler.setParentServer(this);
 			int id = playerIDProvider.obtainID();
@@ -163,7 +164,7 @@ public class Server {
 	 * @param players List of players
 	 * @return Most extended rule set supported by all players, server
 	 */
-	private GameRules determineRules(List<Player> players) {
+	private GameRulesStruct determineRules(List<Player> players) {
 		if (enableExtensions) {
 			int xDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
 			int yDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
@@ -175,9 +176,9 @@ public class Server {
 				zDim = compareDims(zDim, capabilitiesMap.get(player).maxZDim);
 				winLength = compareDims(winLength, capabilitiesMap.get(player).winLength);
 			}
-			return new GameRules(xDim, yDim, zDim, winLength);
+			return new GameRulesStruct(xDim, yDim, zDim, winLength);
 		} else {
-			return new GameRules(4, 4, 4, 4);
+			return new GameRulesStruct(4, 4, 4, 4);
 		}
 	}
 	
@@ -202,7 +203,7 @@ public class Server {
 	 * @param players List of players
 	 * @param rules Rules for given players, server
 	 */
-	private void startGame(List<Player> players, GameRules rules) {
+	private void startGame(List<Player> players, GameRulesStruct rules) {
 		Map<Player, ClientHandler> handlers = new HashMap<Player, ClientHandler>(players.size());
 		for (Player player : players) {
 			handlers.put(player, handlerMap.get(player));
@@ -211,7 +212,7 @@ public class Server {
 			capabilitiesMap.remove(player);
 			playerIDProvider.releaseID(player.playerID);
 		}
-		GameThread game = new GameThread(players, handlers, rules, view);
+		Game game = new Game(players, handlers, rules, view);
 		for (ClientHandler handler : handlers.values()) {
 			handler.setParentServer(null);
 			handler.setParentGame(game);

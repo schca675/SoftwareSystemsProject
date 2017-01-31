@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import model.TowerCoordinates;
+import view.ServerTUI;
 
 public class ClientHandler implements Runnable {
 	private Socket socket;
@@ -20,7 +21,7 @@ public class ClientHandler implements Runnable {
 	
 	private boolean exit = false;
 	private Server server;
-	private GameThread game;
+	private Game game;
 	private ServerTUI view;
 	
 	public ClientHandler(Socket socket, Server server, ServerTUI view) {
@@ -41,7 +42,7 @@ public class ClientHandler implements Runnable {
 		server = serverToSet;
 	}
 	
-	public void setParentGame(GameThread gameToSet) {
+	public void setParentGame(Game gameToSet) {
 		game = gameToSet;
 	}
 	
@@ -102,7 +103,7 @@ public class ClientHandler implements Runnable {
 								int winLength = Integer.parseInt(messageParts[7]);
 								boolean chatSupport = argToBool(messageParts[8]);
 								boolean autoRefresh = argToBool(messageParts[9]);
-								ClientCapabilities caps = new ClientCapabilities(numPlayers, 
+								ClientCapabilitiesStruct caps = new ClientCapabilitiesStruct(numPlayers, 
 										playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
 										winLength, chatSupport, autoRefresh);
 								server.initPlayer(this, caps);
