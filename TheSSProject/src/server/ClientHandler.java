@@ -26,7 +26,7 @@ public class ClientHandler extends Observable implements Runnable {
 	private ServerTUI view;
 	
 	/**
-	 * Creates a ClientHandler for given socket, 
+	 * Creates a ClientHandler for given socket.
 	 * @param socket Socket of a client
 	 * @param view View to print communication messages on
 	 */
@@ -104,8 +104,12 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	/**
-	 * Method to handle a received message. Any invalid messages result in a call to 
-	 * bullshitReceived().
+	 * Method to handle a received message. 
+	 * SENDCAPABILITES is only processed when the server and game fields are not set, i.e. when 
+	 * this client has no player associated with it on the Server and is not part of a game.
+	 * MAKEMOVE is only processed if a game has been started with this client and the game expects
+	 * input from this client.
+	 * Any invalid messages result in a call to bullshitReceived(). 
 	 * @param message A message
 	 */
 	private void handleMessage(String message) {
@@ -114,7 +118,7 @@ public class ClientHandler extends Observable implements Runnable {
 			String command = messageParts[0];
 			switch (command) {
 				case Protocol.Client.SENDCAPABILITIES:
-					if (messageParts.length == 10 && server == null &&
+					if (messageParts.length == 10 && server == null && game == null &&
 						(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
 						(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
 						(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
@@ -138,7 +142,7 @@ public class ClientHandler extends Observable implements Runnable {
 							bullshitReceived();
 							sendMessage(ServerMessages.genErrorIllegalStringString());
 						}
-					} else if (server != null) {
+					} else if (server != null || game != null) {
 						bullshitReceived();
 						sendMessage(ServerMessages.genErrorInvalidCommandString());
 					} else {
@@ -181,7 +185,7 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	/**
 	 * Keeps track of bullshit received. Increases bullshit counter and evaluates if it exceeds 
-	 * the threshold.
+	 * the threshold, if so, this client is dropped.
 	 */
 	public synchronized void bullshitReceived() {
 		bullshit++;
@@ -192,7 +196,7 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	/**
 	 * Responds to a disconnect or communication failure, shuts down this handler and informs 
-	 * parent game or server.
+	 * parent game or server, if set.
 	 */
 	private void handleDisconnect() {
 		view.printMessage(toString() + " disconnected");
@@ -206,6 +210,9 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 	}
 	
+	/** 
+	 * Shuts down this handler. This is supposed to happen when everything goes according to plan.
+	 */
 	public void shutdown() {
 		exit = true;
 		try {
@@ -217,20 +224,39 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 	}
 	
+	/**
+	 * Prints a message on the view, with the annotation that it was received and timestamp.
+	 * @param message
+	 */
 	private void printReceivedMessage(String message) {
 		view.printMessage(java.time.LocalTime.now() + " " + toString() + " R " + message);
 		
 	}
 	
+	/**
+	 * Prints a message on the view, with the annotation that it was send and timestamp.
+	 * @param message
+	 */
 	private void printSentMessage(String message) {
-		view.printMessage(java.time.LocalTime.now() + " " + toString() + " S " + message);
+		view.printMessage(java.time.LocalTime.now() + " " + toString() + " T " + message);
 	}
 	
+	/**
+	 * Provides a textual description of the connection to the client.
+	 */
 	@Override
 	public String toString() {
 		return socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
 	}
 	
+	/**
+	 * Checks if a String matched "1", if so return true, else false. Supposed to be called only 
+	 * when the String equals "1" or "0".
+	 * @param s A String equaling "1" or "0".
+	 * @return s.equals("1);
+	 */
+	//@ requires s.equals("1") || s.equals("0");
+	//@ ensures \result == s.equals("1");
 	private static boolean argToBool(String s) {
 		if (s.equals("1")) {
 			return true;

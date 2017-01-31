@@ -55,7 +55,6 @@ public class Game extends Observable implements Runnable {
 		} catch (IllegalBoardConstructorArgumentsException e) {
 			//Something went awfully wrong
 			view.printMessage(e.getMessage());
-			//TODO: notification
 			shutdown();
 		}
 	}
@@ -97,8 +96,8 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	/**
-	 * Requests a move from given player. Notifies all players of a new turn. Normally, starts the 
-	 * client handler timeout. If a player has been replaced by a ComputerPlayer, its 
+	 * Requests a move from given player. Notifies all players of a new turn. 
+	 * If a player has been replaced by a ComputerPlayer, its 
 	 * determineMove method is called and processMove with the result.
 	 * @param player Player whose turn it is
 	 */
@@ -138,6 +137,7 @@ public class Game extends Observable implements Runnable {
 					}
 				} catch (IllegalCoordinatesException e) {
 					//Something goes awfully wrong
+					view.printMessage(e.getMessage());
 					shutdown();
 				}
 			} else if (currentPlayer instanceof ComputerPlayer) {

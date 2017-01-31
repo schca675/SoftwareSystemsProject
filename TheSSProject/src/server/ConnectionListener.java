@@ -18,12 +18,24 @@ public class ConnectionListener  implements Runnable {
 	private ServerTUI view;
 	boolean exit = false;
 	
+	/**
+	 * Creates a new connection listener, i.e. a ServerSocket.
+	 * @param port Port to bind ServerSocket to
+	 * @param view View to print messages to
+	 * @param server Parent server
+	 * @throws IOException If the ServerSocket can not be 
+	 * created at the given port (if it is in use)
+	 */
 	public ConnectionListener(int port, ServerTUI view, Server server) throws IOException {
 		this.server = server;
 		this.view = view;
 		listener = new ServerSocket(port);
 	}
 	
+	/**
+	 * Run method for listening in a separate thread. If a connection is made to the ServerSocket, 
+	 * the resulting socket is passed to the server to create a ClientHandler for it.
+	 */
 	public void run() {
 		while (!exit) {
 			try {
@@ -38,7 +50,10 @@ public class ConnectionListener  implements Runnable {
 		}
 	}
 	
-	public void shutdown() {
+	/**
+	 * Method to safely shutdown when an IOException occurs while listening.
+	 */
+	private void shutdown() {
 		try {
 			exit = true;
 			listener.close();
