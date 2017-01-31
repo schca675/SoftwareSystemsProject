@@ -103,7 +103,8 @@ public class ClientHandler implements Runnable {
 								int winLength = Integer.parseInt(messageParts[7]);
 								boolean chatSupport = argToBool(messageParts[8]);
 								boolean autoRefresh = argToBool(messageParts[9]);
-								ClientCapabilitiesStruct caps = new ClientCapabilitiesStruct(numPlayers, 
+								ClientCapabilitiesStruct caps = 
+										new ClientCapabilitiesStruct(numPlayers, 
 										playerName, roomSupport, maxXDim, maxYDim, maxZDim, 
 										winLength, chatSupport, autoRefresh);
 								server.initPlayer(this, caps);
