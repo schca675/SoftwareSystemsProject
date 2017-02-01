@@ -121,7 +121,8 @@ public class ClientHandler extends Observable implements Runnable {
 					if (messageParts.length == 10 && server == null && game == null &&
 						(messageParts[3].equals("0") || messageParts[3].equals("1")) && 
 						(messageParts[8].equals("0") || messageParts[8].equals("1")) && 
-						(messageParts[9].equals("0") || messageParts[9].equals("1"))) {
+						(messageParts[9].equals("0") || messageParts[9].equals("1")) &&
+						!messageParts[2].contains("|")) {
 						try {
 							int numPlayers = Integer.parseInt(messageParts[1]);
 							String playerName = messageParts[2];
