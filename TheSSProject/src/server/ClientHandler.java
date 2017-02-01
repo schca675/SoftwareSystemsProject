@@ -201,6 +201,7 @@ public class ClientHandler extends Observable implements Runnable {
 	 */
 	private void handleDisconnect() {
 		view.printMessage(toString() + " disconnected");
+		deleteObservers();
 		shutdown();
 		if (server != null) {
 			view.printMessage(toString() + " remove from lobby");

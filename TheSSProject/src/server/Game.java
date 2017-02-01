@@ -168,17 +168,21 @@ public class Game extends Observable implements Runnable {
 				toReplace = handlerMapEntry.getKey();
 			}
 		}
-		if (toReplace != null) {
-			ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), 
-				toReplace.playerID);
-			players.add(players.indexOf(toReplace), compPlayer);
-			players.remove(toReplace);
-			handlerMap.remove(toReplace);
-			if (handlerMap.size() == 0) {
-				shutdown();
-			} else if (currentPlayer == toReplace) {
-				currentPlayer = compPlayer;
-				processMove(null, compPlayer.determineMove(board));
+		// Synchronized to ensure handlerMap is locked shutdown or broadcastMessage try to iterate 
+		// over it
+		synchronized (handlerMap) {
+			if (toReplace != null) {
+				ComputerPlayer compPlayer = new ComputerPlayer(new SmartStrategy(), 
+					toReplace.playerID);
+				players.add(players.indexOf(toReplace), compPlayer);
+				players.remove(toReplace);
+				handlerMap.remove(toReplace);
+				if (handlerMap.size() == 0) {
+					shutdown();
+				} else if (currentPlayer == toReplace) {
+					currentPlayer = compPlayer;
+					processMove(null, compPlayer.determineMove(board));
+				}
 			}
 		}
 	}
@@ -201,17 +205,25 @@ public class Game extends Observable implements Runnable {
 	 * @param message A message
 	 */
 	private void broadcastMessage(String message) {
-		for (ClientHandler handler : handlerMap.values()) {
-			handler.sendMessage(message);
+		// Synchronized to ensure handlerMap is locked should replaceClient be called while this 
+		// method is being executed
+		synchronized (handlerMap) {
+			for (ClientHandler handler : handlerMap.values()) {
+				handler.sendMessage(message);
+			}
 		}
 	}
 	
 	public void shutdown() {
 		exit = true;
 		String toPrint = "Shutting down game with handlers to";
-		for (ClientHandler handler : handlerMap.values()) {
-			handler.shutdown();
-			toPrint = toPrint + " " + handler.toString();
+		// Synchronized to ensure handlerMap is locked should replaceClient be called while this 
+		// method is being executed
+		synchronized (handlerMap) {
+			for (ClientHandler handler : handlerMap.values()) {
+				handler.shutdown();
+				toPrint = toPrint + " " + handler.toString();
+			}
 		}
 		view.printMessage(toPrint);
 	}
