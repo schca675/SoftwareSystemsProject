@@ -70,7 +70,8 @@ public class Server implements Observer {
 		ui.printMessage("Starting server bound at port " + port + 
 				(enableExtensions ? " with " : " without ") + "extensions...");
 		try {
-			new Server(port, enableExtensions, ui);
+			Server server = new Server(port, enableExtensions, ui);
+			server.listenForConnections();
 		} catch (IOException e) {
 			ui.printMessage("Port in use, please enter another one");
 			port = ui.requestPortNumber();
@@ -89,7 +90,7 @@ public class Server implements Observer {
 	 * winning length supported)
 	 * @param view View to use
 	 */
-	private Server(int port, boolean enableExtensions, ServerTUI view) throws IOException {
+	public Server(int port, boolean enableExtensions, ServerTUI view) throws IOException {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		this.playerIDProvider = new PlayerIDProvider();
@@ -97,14 +98,15 @@ public class Server implements Observer {
 		lobbyPlayerList = new ArrayList<Player>(10);
 		handlerMap = new HashMap<Player, ClientHandler>(10);
 		capabilitiesMap = new HashMap<Player, ClientCapabilitiesStruct>(10);
-		listenForConnections();
-		view.printMessage("Server started");
+//		listenForConnections();
+//		view.printMessage("Server started");
 	}
 	
 	/**
 	 * Method that initiates listening for incoming connections.
 	 */
-	private void listenForConnections() throws IOException {
+	public void listenForConnections() throws IOException {
+		view.printMessage("Server started");
 		ConnectionListener listener = new ConnectionListener(port, view, this);
 		new Thread(listener).start();
 	}
