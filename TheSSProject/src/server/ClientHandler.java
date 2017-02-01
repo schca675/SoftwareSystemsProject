@@ -30,6 +30,7 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param socket Socket of a client
 	 * @param view View to print communication messages on
 	 */
+	//@ requires socket !=null && view != null;
 	public ClientHandler(Socket socket, ServerTUI view) {
 		this.socket = socket;
 		this.view = view;
@@ -46,7 +47,7 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Sets the Server field to this server, so handleDisconnect() can notify the server. 
 	 * Supposed to be set to null when a game takes over.
-	 * @param serverToSet A Server
+	 * @param serverToSet the Server the instance should notify.
 	 */
 	//@ requires serverToSet == null || serverToSet != null;
 	public void setParentServer(Server serverToSet) {
@@ -56,16 +57,18 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Sets the Game field to this server, so handleDisconnect() can notify the game. 
 	 * Supposed to be set to null until a game takes over.
-	 * @param gameToSet
+	 * @param gameToSet A Game the instance should notify.
 	 */
+	//@requires gameToSet !=null;
 	public void setParentGame(Game gameToSet) {
 		game = gameToSet;
 	}
 	
 	/**
 	 * Send a message to the client connected through this handler's socket.
-	 * @param message A message
+	 * @param message The message to send.
 	 */
+	//@ requires message != null;
 	public synchronized void sendMessage(String message) {
 		try {
 			out.write(message);
@@ -110,8 +113,9 @@ public class ClientHandler extends Observable implements Runnable {
 	 * MAKEMOVE is only processed if a game has been started with this client and the game expects
 	 * input from this client.
 	 * Any invalid messages result in a call to bullshitReceived(). 
-	 * @param message A message
+	 * @param message The message to handle.
 	 */
+	//@ requires message != null;
 	private void handleMessage(String message) {
 		String[] messageParts = message.split(" ");
 		if (messageParts.length > 0) {
@@ -228,8 +232,9 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	/**
 	 * Prints a message on the view, with the annotation that it was received and timestamp.
-	 * @param message
+	 * @param message Message the server received and should print to the terminal.
 	 */
+	//@ requires message != null;
 	private void printReceivedMessage(String message) {
 		view.printMessage(java.time.LocalTime.now() + " " + toString() + " R " + message);
 		
@@ -237,8 +242,9 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	/**
 	 * Prints a message on the view, with the annotation that it was send and timestamp.
-	 * @param message
+	 * @param message to print on the terminal.
 	 */
+	//@ requires message !=null;
 	private void printSentMessage(String message) {
 		view.printMessage(java.time.LocalTime.now() + " " + toString() + " T " + message);
 	}
@@ -246,6 +252,7 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Provides a textual description of the connection to the client.
 	 */
+	//@ ensures \result != null;
 	@Override
 	public String toString() {
 		return socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
@@ -254,7 +261,7 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Checks if a String matched "1", if so return true, else false. Supposed to be called only 
 	 * when the String equals "1" or "0".
-	 * @param s A String equaling "1" or "0".
+	 * @param s A String equal to "1" or "0".
 	 * @return s.equals("1);
 	 */
 	//@ requires s.equals("1") || s.equals("0");

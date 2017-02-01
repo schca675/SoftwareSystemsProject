@@ -12,8 +12,8 @@ public interface Strategy {
 	/**
 	 * Determining the next move by this strategy.
 	 * @param board Board the game is played on.
-	 * @param id player ID of the player using this strategy
-	 * @return the index of the next move following this strategy
+	 * @param id player ID of the player using this strategy.
+	 * @return the coordinates of the next move following this strategy.
 	 */
 	//@ requires board != null;
 	//@ requires id >=0;

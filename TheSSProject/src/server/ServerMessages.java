@@ -20,6 +20,7 @@ public class ServerMessages {
 	 * @param chatSupport Chat support available
 	 * @return serverCapabilities message
 	 */
+	//@ requires numPlayers >= 2 && maxXDim >= 0 && maxYDim >=0 && maxZDim >= 0 && winLength >= 0;
 	public static String genCapabilitiesString(int numPlayers, boolean roomSupport, int maxXDim, 
 			int maxYDim, int maxZDim, int winLength, boolean chatSupport) {
 		return Protocol.Server.SERVERCAPABILITIES + SPACE + numPlayers + SPACE + 
@@ -45,13 +46,15 @@ public class ServerMessages {
 	 * @param players Players in this game
 	 * @return startGame message
 	 */
+	//@ requires xDim >= 0 && yDim >= 0 && zDim >= 0 && winLength >= 0;
+	//@ requires players != null & (\forall Player player; players.contains(player); player !=null);
 	public static String genStartGameString(int xDim, int yDim, int zDim, int winLength, 
 			List<Player> players) {
 		String s = Protocol.Server.STARTGAME + SPACE + xDim + PIPE + yDim + PIPE + zDim + PIPE 
 				+ winLength;
 		for (Player player : players) {
 			s = s + SPACE + player.playerID + PIPE + player.name + PIPE + COLOUR;
-			//This will give everyone the same colour #EVIL
+			//This will give everyone the same colour
 		}
 		return s;
 	}
@@ -113,26 +116,41 @@ public class ServerMessages {
 				playerID;
 	}
 	
-	// Generates various error strings
+	/**
+	 * Generates the error String message when no capabilities are received.
+	 * @return error String message
+	 */
 	public static String genErrorNoCapabilitiesString() {
 		return Protocol.Server.ERROR + SPACE + Protocol.ErrorID.NOCAPABILITIES;
 	}
 	
+	/**
+	 * Generates the error String message when an invalid Command is received.
+	 * @return error String message
+	 */
 	public static String genErrorInvalidCommandString() {
 		return Protocol.Server.ERROR + SPACE + Protocol.ErrorID.INVALIDCOMMAND;
 	}
 	
+	/**
+	 * Generates the error String message when an invalid move is received.
+	 * @return error String message
+	 */
 	public static String genErrorInvalidMoveString() {
 		return Protocol.Server.ERROR + SPACE + Protocol.ErrorID.INVALIDMOVE;
 	}
 	
+	/**
+	 * Generates the error String message when an illegal string is received.
+	 * @return error String message
+	 */
 	public static String genErrorIllegalStringString() {
 		return Protocol.Server.ERROR + SPACE + Protocol.ErrorID.ILLEGALSTRING;
 	}
 	
 	/**
-	 * Returns the integer corresponding to the boolean.
-	 * @param bool A boolean
+	 * Returns the integer corresponding to the boolean according to the protocol.
+	 * @param bool The boolean to check.
 	 * @return 1 if bool == true, 0 if bool == false
 	 */
 	public static int boolToInt(boolean bool) {

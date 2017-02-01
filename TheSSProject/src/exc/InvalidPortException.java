@@ -14,7 +14,8 @@ public class InvalidPortException extends Exception {
 	}
 	
 	/**
-	 * Returns a description of the exception.
+	 * Returns the message of the exception.
+	 * @return String containing the message of the exception.
 	 */
 	@Override
 	public String getMessage() {

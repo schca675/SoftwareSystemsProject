@@ -50,6 +50,9 @@ public class Client {
 	
 	//<<--------- Methods to communicate with TUI -------->>
 	
+	/**
+	 * The method starts the start menu of the TUI and handles the input given.
+	 */
 	public void startMenu() {
 		boolean play = false;
 		do {

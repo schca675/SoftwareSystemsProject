@@ -15,9 +15,16 @@ import model.Player;
 import view.ServerTUI;
 
 public class Server implements Observer {
+	
+	/**
+	 * The class PlayerIDProvider is needed to distribute different IDs for each player in a game.
+	 */
 	public class PlayerIDProvider {
 		private Set<Integer> usedIDs;
 		
+		/**
+		 * Creates a new PlayerIDProvider.
+		 */
 		public PlayerIDProvider() {
 			usedIDs = new HashSet<Integer>();
 		}
@@ -38,6 +45,11 @@ public class Server implements Observer {
 			}
 		}
 		
+		/**
+		 * Releases an ID when it is not used anymore, so it removes
+		 * them from the list of usedIDs.
+		 * @param id ID to release.
+		 */
 		public void releaseID(int id) {
 			usedIDs.remove(id);
 		}
@@ -61,7 +73,7 @@ public class Server implements Observer {
 	
 	/** 
 	 * Main method to launch the server.
-	 * @param args
+	 * @param args Arguments for launching the server, unused
 	 */
 	public static void main(String[] args) {
 		ServerTUI ui = new ServerTUI();
@@ -91,7 +103,9 @@ public class Server implements Observer {
 	 * winning length supported)
 	 * @param view View to use
 	 */
-	public Server(int port, boolean enableExtensions, ServerTUI view) throws IOException {
+	//@ requires port >= 1025 && port <= 65535;
+	//@ requires view != null;
+	public Server(int port, boolean enableExtensions, ServerTUI view) {
 		this.port = port;
 		this.enableExtensions = enableExtensions;
 		this.playerIDProvider = new PlayerIDProvider();
@@ -99,12 +113,11 @@ public class Server implements Observer {
 		lobbyPlayerList = new ArrayList<Player>(10);
 		handlerMap = new HashMap<Player, ClientHandler>(10);
 		capabilitiesMap = new HashMap<Player, ClientCapabilitiesStruct>(10);
-//		listenForConnections();
-//		view.printMessage("Server started");
 	}
 	
 	/**
 	 * Method that initiates listening for incoming connections.
+	 * @throws IOException if the ConnectionListener cannot be initiated.
 	 */
 	public void listenForConnections() throws IOException {
 		view.printMessage("Server started");
@@ -114,9 +127,10 @@ public class Server implements Observer {
 	
 	/**
 	 * Initiates a connection to the given socket, e.g. starts a handler for this socket and sends 
-	 * the initial server message. Starts timeout in handler for handshake from client.
-	 * @param socket A socket
+	 * the initial server message.
+	 * @param socket The socket to make the connection to.
 	 */
+	//@ requires socket != null;
 	public void initConnection(Socket socket) {
 		ClientHandler peer = null;
 		peer = new ClientHandler(socket, view);
@@ -134,6 +148,9 @@ public class Server implements Observer {
 	 * Update method used by the ClientHandler to indicate a client has responded with its 
 	 * capabilities and it is useful to add this information to the server. Only does this 
 	 * when the client concerned is not already associated with a created player.
+	 * @param o Observable that this observer observes.
+	 * @param arg Information the Observable sends in addition, 
+	 * here the Client Capabilities Structure.
 	 */
 	public synchronized void update(Observable o, Object arg) {
 		if (o instanceof ClientHandler && arg instanceof ClientCapabilitiesStruct) {
@@ -152,6 +169,7 @@ public class Server implements Observer {
 	 * @param handler ClientHandler for this player/client
 	 * @param caps Capabilities of this player/client
 	 */
+	//@ requires handler != null && caps != null;
 	private void initPlayer(ClientHandler handler, ClientCapabilitiesStruct caps) {
 		synchronized (this) {
 			handler.setParentServer(this);
@@ -171,9 +189,10 @@ public class Server implements Observer {
 	 * basic, just starts a game between the first to players connected.
 	 * @param player Player to match
 	 */
+	//@ requires player != null;
 	private void matchPlayers(Player player) {
-		//TODO: implement more sophisticated matching, for the moment just first players.
-		//view.printMessage("matchPlayers called");
+		//If one wants to implement more sophisticated matching,
+		// it could be done here, but for the moment just first players.
 		if (lobbyPlayerList.size() >= 2) {
 			List<Player> players = new ArrayList<Player>(2);
 			players.add(lobbyPlayerList.get(0));
@@ -187,8 +206,9 @@ public class Server implements Observer {
 	 * @param players List of players
 	 * @return Most extended rule set supported by all players, server
 	 */
+	/*@ requires players != null && 
+	  @ (\forall Player player; players.contains(player); player != null); */
 	private GameRulesStruct determineRules(List<Player> players) {
-		//view.printMessage("determineRules called");
 		if (enableExtensions) {
 			int xDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
 			int yDim = compareDims(Server.EXT_XYDIM, Server.EXT_DIM_BOUND);
@@ -212,6 +232,9 @@ public class Server implements Observer {
 	 * @param dim2 Second dimension
 	 * @return 'Greatest' dimension
 	 */
+	//@ requires dim1 >= 0 && dim2 >= 0;
+	//@ ensures (dim1 == 0 || dim2 == 0) ==> \result == java.lang.Math.min(dim1, dim2);
+	//@ ensures (dim2 != 0 && dim1 != 0) ==> \result == java.lang.Math.max(dim1, dim2);
 	private int compareDims(int dim1, int dim2) {
 		if (dim1 == 0 || dim2 == 0) {
 			return java.lang.Math.max(dim1, dim2);
@@ -227,6 +250,9 @@ public class Server implements Observer {
 	 * @param players List of players
 	 * @param rules Rules for given players, server
 	 */
+	/*@ requires players != null && 
+	  @ (\forall Player player; players.contains(player); player != null); */
+	//@ requires rules != null;
 	private void startGame(List<Player> players, GameRulesStruct rules) {
 		//view.printMessage("startGame called");
 		Map<Player, ClientHandler> handlers = new HashMap<Player, ClientHandler>(players.size());
@@ -249,6 +275,7 @@ public class Server implements Observer {
 	 * Removes all data associated with this ClientHandler's player from this server's variables.
 	 * @param client A ClientHandler
 	 */
+	//@ requires client != null;
 	public synchronized void removeClient(ClientHandler client) {
 		synchronized (this) {
 			// Game may have been started with this client

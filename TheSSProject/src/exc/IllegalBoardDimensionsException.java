@@ -8,12 +8,22 @@ public class IllegalBoardDimensionsException extends IllegalBoardConstructorArgu
 	private int yDim;
 	private int zDim;
 	
+	/**
+	 * Creates a new IllegalBoard Dimensions Exception.
+	 * @param xDim X dimension
+	 * @param yDim Y dimension
+	 * @param zDim Z dimension
+	 */
 	public IllegalBoardDimensionsException(int xDim, int yDim, int zDim) {
 		this.xDim = xDim;
 		this.yDim = yDim;
 		this.zDim = zDim;
 	}
 	
+	/**
+	 * Returns the message of the exception.
+	 * @return String containing the message of the exception.
+	 */
 	@Override
 	public String getMessage() {
 		return "Got invalid dimensions for constructing a board. They must be positive, except " + 

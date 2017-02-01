@@ -37,10 +37,11 @@ public class Game extends Observable implements Runnable {
 	 * @param players List of players
 	 * @param handlerMap Map of players and their handlers
 	 * @param rules Rules of the game
+	 * @param view ServerTUI to communicate with the terminal.
 	 */
 	/*@ requires players.size() >= 2;
 	  @ requires handlerMap.size() == players.size();
-	  @ requires \forall Player player; players.contains(player); handlerMap.containsKey(player);
+	  @ requires (\forall Player player; players.contains(player); handlerMap.containsKey(player));
 	  @ requires rules.xDim >= 0 && rules.yDim >= 0 && rules.zDim >= 0 && rules.winLength > 0 && 
 	  @ (rules.winLength <= rules.xDim || rules.winLength <= rules.yDim || rules.winLength <= 
 	  @ rules.zDim || rules.zDim == 0);
@@ -101,6 +102,7 @@ public class Game extends Observable implements Runnable {
 	 * determineMove method is called and processMove with the result.
 	 * @param player Player whose turn it is
 	 */
+	//@ requires player != null; 
 	private void requestMove(Player player) {
 		broadcastMessage(ServerMessages.genTurnOfPlayerString(player.playerID));
 		if (player instanceof ComputerPlayer) {
@@ -114,6 +116,7 @@ public class Game extends Observable implements Runnable {
 	 * @param handler ClientHandler caller, null for a move by a ComputerPlayer
 	 * @param coords Coordinates of the move
 	 */
+	//@ requires handler != null && coords != null;
 	public void processMove(ClientHandler handler, TowerCoordinates coords) {
 		synchronized (this) {
 			if ((handler == null || getHandler(currentPlayer) == handler) && 
@@ -161,6 +164,7 @@ public class Game extends Observable implements Runnable {
 	 * same ID. Anti-cheat measure for rage quits.
 	 * @param player Player to replace
 	 */
+	//@ requires client != null;
 	public synchronized void replaceClient(ClientHandler client) {
 		Player toReplace = null;
 		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
@@ -187,7 +191,13 @@ public class Game extends Observable implements Runnable {
 		}
 	}
 	
-	public boolean expectsHandlerInput(ClientHandler handler) {
+	/**
+	 * The method returns if the game expects input from a given Clienthandler.
+	 * @param handler Clienthandler that should be tested.
+	 * @return if the handler is the current player or not.
+	 */
+	//@ requires handler != null;
+	/*pure*/ public boolean expectsHandlerInput(ClientHandler handler) {
 		return handlerMap.get(currentPlayer) == handler;
 	}
 	
@@ -196,14 +206,16 @@ public class Game extends Observable implements Runnable {
 	 * @param player A player
 	 * @return Its handler, null if ComputerPlayer
 	 */
-	private ClientHandler getHandler(Player player) {
+	//@ requires player != null;
+	/*nullable*/ /*pure*/ private ClientHandler getHandler(Player player) {
 		return handlerMap.get(player);
 	}
 	
 	/**
 	 * Sends a message through all ClientHandlers.
-	 * @param message A message
+	 * @param message The message to broadcast.
 	 */
+	//@ requires message != null;
 	private void broadcastMessage(String message) {
 		// Synchronized to ensure handlerMap is locked should replaceClient be called while this 
 		// method is being executed
@@ -214,6 +226,9 @@ public class Game extends Observable implements Runnable {
 		}
 	}
 	
+	/**
+	 * The method shuts down the game with the handlers.
+	 */
 	public void shutdown() {
 		exit = true;
 		String toPrint = "Shutting down game with handlers to";

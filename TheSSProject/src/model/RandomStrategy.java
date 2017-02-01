@@ -7,6 +7,10 @@ public class RandomStrategy implements Strategy {
 
 	// <------ Queries ------>
 	
+	/**
+	 * Get the name of the strategy.
+	 * @return name of the strategy.
+	 */
 	@Override
 	public String getName() {
 		return "Randi";
@@ -16,7 +20,7 @@ public class RandomStrategy implements Strategy {
 	 * Determining the next move by choosing a random valid field.
 	 * @param board Board the game is played on.
 	 * @param id player ID of the player using this strategy
-	 * @return the index of the next move following this strategy
+	 * @return the coordinates of the next move following this strategy
 	 */
 	//@ requires board != null;
 	//@ requires id >= 0;

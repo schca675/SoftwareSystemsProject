@@ -7,12 +7,25 @@ import exc.IllegalCoordinatesException;
 public class SmartStrategy implements Strategy {
 
 	// <------ Queries ------>
+	/**
+	 * Get the name of the strategy.
+	 * @return name of the strategy.
+	 */
 	@Override
 	public String getName() {
 		return "Trams";
 	}
 
+	/**
+	 * Determine the next move by a smart strategy which returns 
+	 * the winning move in case the player can win in the next turn 
+	 * else the strategy is random.
+	 * @param board Board the game is played on.
+	 * @param id player ID of the player using this strategy
+	 * @return the coordinates of the next move following this strategy
+	 */
 	//@ requires board != null && id > 0;
+	//@ ensures board.isValidMove(\result.getX(),\result.getY());
 	@Override
 	public TowerCoordinates determineMove(Board board, int id) {
 		List<TowerCoordinates> availableTowers = board.getAvailableTowers();

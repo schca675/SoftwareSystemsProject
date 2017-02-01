@@ -50,7 +50,9 @@ public class ClientCommunication implements Observer {
 	
 	public static final int DEFAULTPLAYERSIZE = 2;
 	public static final int UNLIMITEDSIZE = 20;
-	public static final int UNLIMITEDPLAYERS = 4;
+	// Unlimited player is not handled correctly everywhere therefore we also put it to 2
+	// Could be extended in a later version.
+	public static final int UNLIMITEDPLAYERS = 2;
 	public static final int UNLIMITED = 0; 
 	public static final int FALSE = 0;
 	public static final int TRUE = 1;
@@ -76,10 +78,17 @@ public class ClientCommunication implements Observer {
 	public static final String SENDMESSAGE = Protocol.Client.SENDMESSAGE;
 	public static final String REQUESTLEADERBOARD = Protocol.Client.REQUESTLEADERBOARD;
 	
+	// < --------- Constructor --------------->
 	/**
 	 * Creates a new Client Communication thread.
-	 * @param socket Socket the thread should listen to.
-	 * @param view TUI of the client.
+	 * @param socket Socket the client Communication class should listen to.
+	 * @param view ClientTUI to communicate with the user.
+	 * @param name Name of the user's player in case he plays himself. 
+	 * @param strategy Strategy of the user's player in case he lets a computer player play.
+	 * @param xmax Maximal X dimension the user wants to play with.
+	 * @param ymax Maximal Y dimension the user wants to play with.
+	 * @param zmax Maximal Z dimension the user wants to play with.
+	 * @param win Maximal winning length the user wants to play with.
 	 * @throws IOException in case the streams can not be initialized.
 	 */
 	/*@requires socket != null && view != null && (name !=null || strategy != null) && xmax >= 0
@@ -105,6 +114,7 @@ public class ClientCommunication implements Observer {
 	
 	/**
 	 * Constructor needed for testing purposes.
+	 * @param view ClientTUI for the ClientCommunication.
 	 * @param name name of player.
 	 */
 	//@ requires view != null && name != null;
@@ -114,6 +124,7 @@ public class ClientCommunication implements Observer {
 		players = new ArrayList<Player>();
 	}
 	
+	// < --------- Commands and Queries --------------->
 	/**
 	 * Starts the ClientCommunication thread.
 	 */
@@ -142,6 +153,7 @@ public class ClientCommunication implements Observer {
 	
 	/**
 	 * Reacts to the incoming messages by the protocol and calls the corresponding methods.
+	 * @param input Input of the Server, the method has to react to.
 	 */
 	//@ requires input != null;
 	public void react(String input)  {
@@ -325,8 +337,8 @@ public class ClientCommunication implements Observer {
 	//<<------- Reactions ------------>>
 	
 	/**
-	 * Interpretes the serverCapabilities message of the server.
-	 * @param message message by the server.
+	 * Interprets the serverCapabilities message of the server.
+	 * @param message decomposed message by the server, sending the capabilities.
 	 * @return answer of the client.
 	 * @throws InvalidSyntaxException thrown when the syntax of the protocol does not hold.
 	 */
@@ -420,13 +432,16 @@ public class ClientCommunication implements Observer {
 	
 	/**
 	 * Create the user's player.
-	 * @param meName name of the user's player.
+	 * @param meName name of the user's player (human).
+	 * @param meStrategy strategy of the user's player (Computer).
 	 * @param meID id of the user's player.
 	 */
 	//@ requires meName !=null || meStrategy != null;
 	public void makeMe(String meName, Strategy meStrategy, int meID) {
+		//Determine if the user wants to play with a Computer
 		if (meStrategy != null) {
 			me = new ComputerPlayer(meStrategy, meID);
+		// else the user wants to play on his own.
 		} else if (meName != null) {
 			me = new Player(meName, meID);
 		}
@@ -492,7 +507,7 @@ public class ClientCommunication implements Observer {
 	/**
 	 * Determine boolean value out of a String.
 	 * @param value String value representing the boolean.
-	 * @return boolean the String represents.
+	 * @return the boolean the String represents.
 	 * @throws InvalidSyntaxException in case the parameter string does not equal TRUE nor FALSE.
 	 */
 	/*@ requires value != null && (value.equals(String.valueOf(TRUE)) 
@@ -514,7 +529,7 @@ public class ClientCommunication implements Observer {
 	 * Determines the next move to play, asks TUI in case of Human Player or the method of Computer
 	 * Player, handles exceptions before server communication (local check).
 	 * @return the TowerCoordinates the me-Player wants to play.
-	 * If the me player or the board is not initialized it returns null.
+	 * If the me player or the board is not initialised it returns null.
 	 */
 	//@ ensures \result.getX() > 0 && \result.getY() > 0;
 	/*nullable*/ /*pure*/ public TowerCoordinates determineMove() {
@@ -543,9 +558,9 @@ public class ClientCommunication implements Observer {
 	/** 
 	 * Makes the moves on the board, handles boards exception after getting the coordinates from 
 	 * the server.
-	 * @param x X Coordinate of the Tower, the player is playing.
-	 * @param y Y Coordinate of the Tower, the player is playing.
-	 * @param id ID of the player whose move it is.
+	 * @param newX X Coordinate of the Tower, the player is playing.
+	 * @param newY Y Coordinate of the Tower, the player is playing.
+	 * @param newID ID of the player whose move it is.
 	 */
 	//@ requires newX >= 0 && newY >=0;
 	public void makeMove(int newX, int newY, int newID) {

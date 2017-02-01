@@ -37,6 +37,8 @@ public class Board extends Observable {
 	 * @param yDim Y dimension of the board
 	 * @param zDim Z dimension of the board, -1 specifies unlimited
 	 * @param winningLength Connected pieces required to win the game
+	 * @throws IllegalBoardConstructorArgumentsException if the arguments
+	 * are not valid to create a board.
 	 */
 	/*@ requires winningLength <= xDim || winningLength <= yDim 
 	   				|| (zDim > 0 && winningLength <= zDim) || (zDim == UNLIMITED_Z);
@@ -140,9 +142,22 @@ public class Board extends Observable {
 	 * @param z Z position
 	 * @return Piece at (<code>x</code>, <code>y</code>, <code>getTowerHeight(z)</code>) belongs to
 	 * winning set
+	 * @throws CoordinatesOutOfBoundException if the coordinates given as argument are out of bound.
 	 */
 	//@ requires isValidCell(x,y,getTowerHeight(x,y)) && !isEmptyCell(x,y,getTowerHeight(x,y));
-	//TODO: ensures part?
+	/*@ ensures \result == directionHasWon(x, y, z, 1, 0, 0, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 0, 1, 0, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 0, 0, 1, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 1, 1, 0, getCellOwner(x,y,z)) ||
+	  @ directionHasWon(x, y, z, 1, -1, 0, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 1, 0, 1, getCellOwner(x,y,z)) ||
+	  @ directionHasWon(x, y, z, 1, 0, -1, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 0, 1, 1, getCellOwner(x,y,z)) ||
+	  @ directionHasWon(x, y, z, 0, 1, -1, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 1, 1, 1, getCellOwner(x,y,z)) ||
+	  @ directionHasWon(x, y, z, 1, 1, -1, getCellOwner(x,y,z)) || 
+	  @ directionHasWon(x, y, z, 1, -1, 1, getCellOwner(x,y,z)) ||
+	  @ directionHasWon(x, y, z, 1, -1, -1, getCellOwner(x,y,z)); */
 	/*@ pure @*/ public boolean hasWon(int x, int y, int z) throws CoordinatesOutOfBoundsException {
 		Integer owner = getCellOwner(x, y, z);
 		// Linearly independent direction vectors:
@@ -184,7 +199,7 @@ public class Board extends Observable {
 	 * winning set
 	 */
 	//@ requires isValidCell(x,y,getTowerHeight(x,y)) && !isEmptyCell(x,y,getTowerHeight(x,y));
-	//TODO: ensures part?
+	//@ ensures \result == hasWon(x, y, getTowerHeight(x, y));
 	/*@ pure @*/ public boolean hasWon(int x, int y) throws CoordinatesOutOfBoundsException {
 		return hasWon(x, y, getTowerHeight(x, y));
 	}
@@ -277,6 +292,7 @@ public class Board extends Observable {
 	 * @param y Y position
 	 * @param z Z position
 	 * @return Owner, null if no owner
+	 * @throws CoordinatesOutOfBoundsException if the entered X and Y coordinates are invalid.
 	 */
 	//@ requires isValidCell(x,y,z);
 	//@ ensures \result == null || \result instanceof Integer;
@@ -296,6 +312,7 @@ public class Board extends Observable {
 	 * @param y Y position to check
 	 * @param z Z position to check
 	 * @return (<code>x</code>, <code>y</code>, <code>z</code>) is empty
+	 * @throws CoordinatesOutOfBoundsException if the entered X and Y coordinates are invalid.
 	 */
 	//@ requires isValidCell(x,y,z);
 	//@ ensures \result == (getCellOwner(x,y,z) == null);
@@ -304,12 +321,12 @@ public class Board extends Observable {
 		return getCellOwner(x, y, z) == null;
 	}
 	
-	// Still needed for current implementation of the controller.
 	/** 
 	 * Returns the height of the tower at (<code>x</code>, <code>y</code>).
 	 * @param x X position
 	 * @param y Y position
 	 * @return The height of the tower at (<code>x</code>, <code>y</code>)
+	 * @throws CoordinatesOutOfBoundsException if the entered X and Y coordinates are invalid.
 	 */
 	//@ requires isValidTower(x,y);
 	//@ ensures \result >= 0 && (\result <= zDim || zDim == UNLIMITED_Z);
@@ -323,6 +340,7 @@ public class Board extends Observable {
 	 * @param x X position
 	 * @param y Y position
 	 * @return Tower at (<code>x</code>, <code>y</code>)
+	 * @throws CoordinatesOutOfBoundsException if the entered X and Y coordinates are invalid.
 	 */
 	//@ requires isValidTower(x,y);
 	/*@ pure @*/ public List<Integer> getTower(int x, int y) 
@@ -347,8 +365,7 @@ public class Board extends Observable {
 	 * @return Direction has won
 	 */
 	//@ requires isValidCell(x,y,z) && !isEmptyCell(x,y,z);
-	//TODO: ensures part?
-	/*@ pure @*/ private boolean directionHasWon(int x, int y, int z, 
+	/*@ pure @*/ public boolean directionHasWon(int x, int y, int z, 
 													int xDir, int yDir, int zDir, Integer owner) {
 		int connectedPieces = 1;
 		int distance = 1;
@@ -397,13 +414,12 @@ public class Board extends Observable {
 	
 	// <------ COMMANDS ------>
 	
-	// <------ What it's all about ------>
-	
 	/** 
 	 * Add a piece to the tower at (<code>x</code>, <code>y</code>).
 	 * @param x X position to place piece at
 	 * @param y Y position to place piece at
 	 * @param playerID ID of player that makes a move
+	 * @throws IllegalCoordinatesException if the entered x and y dimensions are not valid.
 	 */
 	//@ requires isValidMove(x,y);
 	/*@ ensures getCellOwner(x,y,getTowerHeight(x,y)) == playerID && 
@@ -426,7 +442,7 @@ public class Board extends Observable {
 	/** 
 	 * Resets the board to an empty board.
 	 */
-	//@ ensures \forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z);
+	//@ ensures (\forall int x,y,z; isValidCell(x,y,z); isEmptyCell(x,y,z));
 	private void reset() {
 		boardData = new ArrayList<List<Integer>>(xDim * yDim);
 		if (zDim == UNLIMITED_Z) {

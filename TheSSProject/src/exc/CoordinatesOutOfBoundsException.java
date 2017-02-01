@@ -11,6 +11,12 @@ public class CoordinatesOutOfBoundsException extends IllegalCoordinatesException
 	private int yDim;
 	private int zDim;
 	
+	/**
+	 * Creates a new Coordinates out of bound Exception.
+	 * @param x X coordinate
+	 * @param y Y coordinate
+	 * @param board Board on which the exception occurs.
+	 */
 	public CoordinatesOutOfBoundsException(int x, int y, Board board) {
 		this.x = x;
 		this.y = y;
@@ -18,6 +24,13 @@ public class CoordinatesOutOfBoundsException extends IllegalCoordinatesException
 		this.yDim = board.yDim;
 	}
 	
+	/**
+	 * Creates a new Coordinates out of bound Exception.
+	 * @param x X coordinate
+	 * @param y Y coordinate
+	 * @param z Z coordinate
+	 * @param board Board on which the exception occurs.
+	 */
 	public CoordinatesOutOfBoundsException(int x, int y, int z, Board board) {
 		this.x = x;
 		this.y = y;
@@ -27,6 +40,10 @@ public class CoordinatesOutOfBoundsException extends IllegalCoordinatesException
 		this.zDim = board.zDim;
 	}
 	
+	/**
+	 * Returns the message of the exception.
+	 * @return String containing the message of the exception.
+	 */
 	@Override
 	public String getMessage() {
 		if (z == -1) {

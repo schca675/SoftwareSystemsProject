@@ -40,7 +40,7 @@ public class ServerThird {
 			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
-			testerD.write("makeMove 2 2");
+			testerD.write("makeMove -1 2");
 			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
