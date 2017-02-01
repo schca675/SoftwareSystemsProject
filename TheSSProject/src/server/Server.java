@@ -76,7 +76,8 @@ public class Server implements Observer {
 			ui.printMessage("Port in use, please enter another one");
 			port = ui.requestPortNumber();
 			try {
-				new Server(port, enableExtensions, ui);
+				Server servertry = new Server(port, enableExtensions, ui);
+				servertry.listenForConnections();
 			} catch (IOException exc) {
 				ui.printMessage("Port also in use, please think before entering something");
 			}
