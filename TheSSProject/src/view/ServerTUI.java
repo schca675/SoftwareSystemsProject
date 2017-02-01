@@ -39,6 +39,7 @@ public class ServerTUI {
 					return Integer.parseInt(input);
 				}
 			} catch (NumberFormatException e) {	
+				printMessage("Please write an integer.");
 			} catch (IOException e) {
 				printMessage("IOException while reading port number, terminating...");
 				//This is the very beginning of startup, if it is impossible to read this exiting 

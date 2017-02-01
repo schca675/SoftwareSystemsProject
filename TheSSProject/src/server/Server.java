@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import model.Player;
 import view.ServerTUI;
@@ -111,8 +112,8 @@ public class Server implements Observer {
 		this.playerIDProvider = new PlayerIDProvider();
 		this.view = view;
 		lobbyPlayerList = new ArrayList<Player>(10);
-		handlerMap = new HashMap<Player, ClientHandler>(10);
-		capabilitiesMap = new HashMap<Player, ClientCapabilitiesStruct>(10);
+		handlerMap = new ConcurrentHashMap<Player, ClientHandler>(10);
+		capabilitiesMap = new ConcurrentHashMap<Player, ClientCapabilitiesStruct>(10);
 	}
 	
 	/**
