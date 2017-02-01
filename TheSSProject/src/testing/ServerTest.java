@@ -3,7 +3,7 @@ package testing;
 import java.io.IOException;
 import java.net.InetAddress;
 
-public class ServerGameTest {
+public class ServerTest {
 	
 	/**
 	 * Executing the server Test, following the schema of.
@@ -68,17 +68,21 @@ public class ServerGameTest {
 			testerE.connect(InetAddress.getByName("localhost"), 2000);
 			//Server should send its capabilities.
 			testerE.read();
-			//Client sends wrong capabilities and should be disconnected
+			//Client sends wrong capabilities and wrong messages and 
+			// should be disconnected after the third stupid message.
 			testerE.write("sendCapabilities 2 Mike 0 4 4 4 4 0 0 0");
-			//Server should send an ID back.
 			testerE.read();
 			testerE.write("I am writing stupid stuff");
+			testerE.read();
+			testerE.write("I am still writing stupid stuff and should now be disconnected.");
 			
 			//Second player.
 			testerD.connect(InetAddress.getByName("localhost"), 2000);
 			//Server should send its capabilities.
 			testerD.read();
-			//Client has to send its capabilities.
+			//Client has to send its capabilities but sends wrong stuff.
+			testerD.write("Not right for the first time");
+			// Client has 3 chances to send sth right so it should now still work.
 			testerD.write("sendCapabilities 2 Ben 0 4 4 4 4 0 0");
 			//Server should send an ID back.
 			testerD.read();
