@@ -24,7 +24,7 @@ public class Game extends Observable implements Runnable {
 	// private invariant currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
 	private List<Player> players;
 	private Map<Player, ClientHandler> handlerMap;
-	private Board board;
+	private /*@ spec_public @*/ Board board;
 	private Player currentPlayer;
 	private int currentPlayerIndex;
 	private ServerTUI view;
@@ -116,7 +116,8 @@ public class Game extends Observable implements Runnable {
 	 * @param handler ClientHandler caller, null for a move by a ComputerPlayer
 	 * @param coords Coordinates of the move
 	 */
-	//@ requires handler != null && coords != null;
+	//@ requires handler != null;
+	//@ requires coords != null && board.isValidMove(coords.getX(), coords.getY());
 	public void processMove(ClientHandler handler, TowerCoordinates coords) {
 		synchronized (this) {
 			if ((handler == null || getHandler(currentPlayer) == handler) && 

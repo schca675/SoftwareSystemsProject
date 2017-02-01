@@ -4,6 +4,7 @@ Module 2
 FourWins Project
 Jansen Erik - s1196014
 Schmit Cathy - s1830929
+
 ------------------------------------------
 Installation and execution:
 
@@ -12,12 +13,14 @@ Import the Project into Eclipse.
 To use the program and play a FourWins game, first the server needs to be setup and only afterwards the Client can connect.
 
 Setup of the Server:
+
 Run the server class. Then the program asks for a port number on the console.
 Enter a valid port number (Integer between 1025 and 65535). The program will only continue once a valid port number is entered.
 Afterwards the server asks whether it should enable the extensions or not. Our implemented extension is a board with variable dimensions.
 After this information is entered, the server starts listening and the clients can connect.
 
 Setup of the client:
+
 Run the client Class. The start menu of the client class gives you different options, to play, help, and exit the game. 
 Exit terminates the application. Help prints the rule and some explanation of the game to the console. Play initiates to play a game.
 To play a game the client needs some more information. First of all it asks whether the user wants to play by itself, give own moves 
