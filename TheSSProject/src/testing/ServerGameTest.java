@@ -2,7 +2,6 @@ package testing;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class ServerGameTest {
 	
@@ -10,7 +9,7 @@ public class ServerGameTest {
 	 * Executing the server Test, following the schema of.
 	 * @param args not given.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		// A Server must be started on this laptop with port number 2000.
 		ServerTesterClient testerA = new ServerTesterClient();
 		ServerTesterClient testerB = new ServerTesterClient();
@@ -94,32 +93,66 @@ public class ServerGameTest {
 			testerC.read();
 			
 			//Server should start a game.
+			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
 			testerC.write("makeMove 2 8");
+			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
 			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
-			testerC.write("makeMove 2 4");
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
 			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
 			testerC.read();
 			testerD.read();
-			testerC.write("makeMove 2 4");
-			testerD.read();
-			testerC.read();
-			testerD.write("makeMove 2 2");
-			testerC.read();
-			testerD.read();
-			testerC.write("makeMove 2 4");
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
 			testerD.read();
 			testerC.read();
 			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
+			testerC.read();
+			testerD.read();
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
+			testerD.read();
+			testerC.read();
+			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
+			testerC.read();
+			testerD.read();
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
+			testerD.read();
+			testerC.read();
+			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
+			testerC.read();
+			testerD.read();
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
+			testerD.read();
+			testerC.read();
+			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
+			testerC.read();
+			testerD.read();
+			testerC.write("makeMove 2 3");
+			Thread.sleep(100);
+			testerD.read();
+			testerC.read();
+			testerD.write("makeMove 2 2");
+			Thread.sleep(100);
 			// At some point tester C wants to write an illegal move and 
 			// then wants to write more moves. It should get disconnected
+			System.out.println("The clients are now shutting down");
 			testerE.shutDown();
 			testerC.shutDown();
 			testerD.shutDown();
