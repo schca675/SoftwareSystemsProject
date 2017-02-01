@@ -41,6 +41,12 @@ public class ClientTUITest {
 		System.out.println("\n\nFourth test:\n");
 		List<List<Integer>> display4 = createFullBoardData(1, 1, 1, 4);
 		view.printBoard(display4, 1, 1, 1, 4);
+		System.out.println("\n\nFifth test:\n");
+		List<List<Integer>> display5 = createNotFullBoardData(3, 4, 4, 24);
+		view.printBoard(display5, 3, 4, 4, 24);
+		System.out.println("\n\nSixth test:\n");
+		List<List<Integer>> display6 = createNotFullBoardData(3, 4, 4, 244);
+		view.printBoard(display6, 3, 4, 4, 244);
 		
 		//Representation of the board model
 		System.out.println("\nRepresentation of the model:\n");

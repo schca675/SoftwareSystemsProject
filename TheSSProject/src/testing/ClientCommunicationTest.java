@@ -22,6 +22,19 @@ public class ClientCommunicationTest {
 		ClientCommunication client = new ClientCommunication(view, "Test");
 		view.addObserver(client);
 		
+		// Test eliminate spaces.
+		System.out.println("- Test the eliminate space function.\n");
+		String line = "Cathy";
+		System.out.println("This is the initial input: " + line);
+		line = client.deleteSpaces(line);
+		System.out.println("This is the transformed input: " + line);
+		line = "Max Mustermann";
+		System.out.println("This is the initial input: " + line);
+		line = client.deleteSpaces(line);
+		System.out.println("This is the transformed input: " + line);
+		
+		
+		
 		// Test the send Client capabilities 
 		System.out.println("- Test the send Client's capabilities\n");
 		String output = client.sendClientCapabilities(2, true, 5, 32, 4, 4, false);
@@ -75,7 +88,7 @@ public class ClientCommunicationTest {
 					+ "- amount = " + players.size());
 			for (int i = 0; i < players.size(); i++) {
 				System.out.println("Player " + i + ": " + players.get(i).name + " with ID = " 
-						+ players.get(i).playerID);
+						+ players.get(i).playerID); 
 			}
 					
 		} catch (InvalidSyntaxException | NumberFormatException e) {

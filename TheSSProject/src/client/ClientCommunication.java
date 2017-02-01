@@ -367,9 +367,7 @@ public class ClientCommunication implements Observer {
 		}
 		result.append(" ");
 		// add player name, cannot contain spaces.
-		if (name.contains(" ")) {
-			name.replaceAll(" ", "_");
-		}
+		name = deleteSpaces(name);
 		result.append(name);
 		result.append(" ");
 		// add if client can support rooms, which this client cannot.
@@ -597,6 +595,20 @@ public class ClientCommunication implements Observer {
 		}
 	}
 	
+	/**
+	 * The names are not allowed to contain spaces, so the spaces are replaced by "_".
+	 * @param line String maybe with spaces.
+	 * @return line without spaces.
+	 */
+	//@ requires line !=null;
+	public String deleteSpaces(String line) {
+		String resultLine = line;
+		if (line.contains(" ")) {
+			resultLine = line.replaceAll(" ", "_");
+		}
+		return resultLine;
+	}
+	
 	// << --------- Observer pattern ------------>>
 	/**
 	 * After a change is made on the board, the client will alert the TUI 
@@ -610,7 +622,7 @@ public class ClientCommunication implements Observer {
 		if (observable instanceof Board && type instanceof TowerCoordinates) {
 			Board playboard = (Board) observable;
 			int id = 1;
-			id = players.size();
+			id = maxID();
 			view.print("This move was made: " + ((TowerCoordinates) type).toString());
 			view.printBoard(playboard.deepDataCopy(), playboard.xDim, 
 					playboard.yDim, playboard.zDim, id);
@@ -622,6 +634,23 @@ public class ClientCommunication implements Observer {
 		}
 	}
  
+	/**
+	 * Determines the highest ID of the players.
+	 * @return the highest ID of the players.
+	 */
+	public int maxID() {
+		if (players != null) {
+			int max = (players.get(0)).playerID;
+			for (Player test: players) {
+				if (test.playerID > max) {
+					max = test.playerID;
+				}
+			}
+			return max;
+		} else {
+			return 0;
+		}
+	}
 
 	// <<------ Function provided by the protocol interface ----->>
 	

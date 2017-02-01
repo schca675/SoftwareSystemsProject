@@ -73,7 +73,7 @@ public class ClientTUI extends Observable {
 	public void printModel(int xmax, int ymax) {
 		System.out.println("Model of the board:\nThe indices are as follows (x y):");
 		int middleLength = digitLength(xmax) + 1 /*space*/ + digitLength(ymax);
-		String format = "%" + middleLength + "s";
+		String format = "%" + middleLength + "s"; 
 		for (int x = 1; x <= xmax; x++) {
 			System.out.println(drawLine(middleLength, ymax));
 			System.out.println(dashedLine(middleLength, ymax));
