@@ -9,7 +9,6 @@ Schmit Cathy - s1830929
 Installation and execution:
 
 Import the Project into Eclipse.
-
 To use the program and play a FourWins game, first the server needs to be setup and only afterwards the Client can connect.
 
 Setup of the Server:
