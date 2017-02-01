@@ -167,9 +167,11 @@ public class Game extends Observable implements Runnable {
 	//@ requires client != null;
 	public synchronized void replaceClient(ClientHandler client) {
 		Player toReplace = null;
-		for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
-			if (handlerMapEntry.getValue() == client) {
-				toReplace = handlerMapEntry.getKey();
+		synchronized (handlerMap) {
+			for (Map.Entry<Player, ClientHandler> handlerMapEntry : handlerMap.entrySet()) {
+				if (handlerMapEntry.getValue() == client) {
+					toReplace = handlerMapEntry.getKey();
+				}
 			}
 		}
 		// Synchronized to ensure handlerMap is locked shutdown or broadcastMessage try to iterate 

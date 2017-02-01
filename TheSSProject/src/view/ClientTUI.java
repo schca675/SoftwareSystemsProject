@@ -331,7 +331,7 @@ public class ClientTUI extends Observable {
 	 */
 	//@ ensures \result >= 1;
 	public int getXDimension() {
-		return getInt("Please enter the x dimension (integer): ");
+		return getInt("Please enter the x dimension (integer, 0 for infinite dimension): ");
 	}
 	
 	/**
@@ -340,7 +340,7 @@ public class ClientTUI extends Observable {
 	 */
 	//@ ensures \result >= 1;
 	public int getYDimension() {
-		return getInt("Please enter the y dimension (integer): ");
+		return getInt("Please enter the y dimension (integer, 0 for infinite dimension): ");
 	}
 	
 	/**
@@ -349,7 +349,7 @@ public class ClientTUI extends Observable {
 	 */
 	//@ ensures \result >= 1;
 	public int getZDimension() {
-		return getInt("Please enter the z dimension (integer): ");
+		return getInt("Please enter the z dimension (integer, 0 for infinite dimension): ");
 	}
 	
 	/**
@@ -358,7 +358,7 @@ public class ClientTUI extends Observable {
 	 */
 	//@ ensures \result >= 1;
 	public int getWinDimension() {
-		return getInt("Please enter the winning length (integer): ");
+		return getInt("Please enter the winning length (integer, 0 for infinite dimension): ");
 	}
 	
 	/**
