@@ -20,6 +20,9 @@ public class StrategiesTest {
 	private Strategy trams;
 	private Board board;
 	
+	/**
+	 * Setup for the Strategy test.
+	 */
 	@Before
 	public void setup() {
 		randi = new RandomStrategy();

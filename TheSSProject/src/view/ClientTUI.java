@@ -29,6 +29,7 @@ public class ClientTUI extends Observable {
 	/**
 	 * Start Menu which is called at the beginning and at after a game finished.
 	 */
+	//@ ensures \result != null;
 	public String startMenu() {
 		System.out.println("\nPlease enter you input: \n"
 				+ " - Play for Play a 4-wins game. \n"
@@ -46,6 +47,7 @@ public class ClientTUI extends Observable {
 	 * @param prompt Message to print on the screen.
 	 * @return tower Coordinates for the next move.
 	 */
+	//@ ensures \result.getX() >= 1 && \result.getY() >= 1;
 	public TowerCoordinates determineMove() {
 		boolean validMove = false;
 		while (!validMove) {
@@ -67,9 +69,10 @@ public class ClientTUI extends Observable {
 	
 	/**
 	 * Print the model of the board, whit the indices to be used.
-	 * @param xmax
-	 * @param ymax
+	 * @param xmax X dimension of the board.
+	 * @param ymax Y dimension of the board.
 	 */
+	//@ requires xmax > 0 && ymax > 0;
 	public void printModel(int xmax, int ymax) {
 		System.out.println("Model of the board:\nThe indices are as follows (x y):");
 		int middleLength = digitLength(xmax) + 1 /*space*/ + digitLength(ymax);
@@ -91,9 +94,13 @@ public class ClientTUI extends Observable {
 	
 	/**
 	 * Prints the situation of the current board, after a move has been made.
-	 * @param observable Observable object that notified the TUI.
-	 * @param boardData Data of the board (observable object)
+	 * @param boardData boardData of the board.
+	 * @param xmax X dimension of the board.
+	 * @param ymax Y dimension of the board.
+	 * @param zmax Z dimension of the board.
+	 * @param id Maximal ID that has to be represented.
 	 */
+	//@ requires boardData != null && xmax > 0 && ymax > 0 && zmax > 0 ;
 	public void printBoard(List<List<Integer>> boardData, int xmax, int ymax, int zmax, int id) {
 		for (int z = 0; z < zmax; z++) {
 			System.out.println("\nLevel " + (z + 1) + "\n");
@@ -119,7 +126,8 @@ public class ClientTUI extends Observable {
 	
 	/**
 	 * Returns a line (___) as String.
-	 * @param amount Amount of players playing, determines how big each interval should be.
+	 * @param idLength length of the ID to be represented to determine the length
+	 * of the middle part of each cell.
 	 * @param times Amount of x cells of the board.
 	 * @return the finished line.
 	 */
@@ -140,7 +148,8 @@ public class ClientTUI extends Observable {
 	
 	/**
 	 * Returns the dashed middle part of the board representation.
-	 * @param amount Amount of players playing, determines how big each interval should be.
+	 * @param idLength length of the ID to be represented to determine the length
+	 * of the middle part of each cell.
 	 * @param times Amount of x cells of the board.
 	 * @return the finished drawing element.
 	 */
@@ -160,17 +169,17 @@ public class ClientTUI extends Observable {
 		
 	/**
 	 * Return the highest amount of digits of the player IDs.
-	 * @param playerAmount amount of players playing.
-	 * @return amount of digits.
+	 * @param id ID to be represented.
+	 * @return amount of digits needed to represent the ID.
 	 */
-	public int digitLength(int playerAmount) {
-		return (int) (Math.log10(playerAmount) + 1);
+	public int digitLength(int id) {
+		return (int) (Math.log10(id) + 1);
 	}
 	
 	/**
 	 * Print the middle in case there is no entry yet.
-	 * @param amount
-	 * @return
+	 * @param idLength length of the ID to be replaced.
+	 * @return middle representation of empty cell.
 	 */
 	public String printMiddle(int idLength) {
 		String result = "";
@@ -179,6 +188,7 @@ public class ClientTUI extends Observable {
 		}
 		return result;
 	}
+	
 	// <<------- Menus called by the StartMenu ---------->>
 	/**
 	 * Prints additional information for the game.
@@ -229,6 +239,8 @@ public class ClientTUI extends Observable {
 	
 	/**
 	 * Determines if the player wants to play with default or own dimensions.
+	 * @return true if player wants to play with default dimensions, 
+	 * false if he wants to play with own dimensions.
 	 */
 	public boolean determineDimensions() {
 		System.out.println("With which dimensions do you want to play?\n"
@@ -268,7 +280,7 @@ public class ClientTUI extends Observable {
 	// <<------- Method needed by determinePlayer ----------->>
 	/**
 	 * The method asks for the user's player's name.
-	 * @return
+	 * @return the name of the player.
 	 */
 	public String determinePlayerName() {
 		String name;
@@ -286,6 +298,7 @@ public class ClientTUI extends Observable {
 	/**
 	 * The method asks with which strategy the user's Computerplayer should play.
 	 * It does not check if the given strategy exists.
+	 * @return the name of the Strategy of the Computer Player.
 	 */
 	public String determineStrategy() {
 		String strategy;
@@ -511,11 +524,9 @@ public class ClientTUI extends Observable {
 	/**
 	 * Reads the coordinates provided by the user.
 	 * It only ensures the coordinates are indeed integers, not if they are valid towers.
-	 * 
 	 * @param message Message that should be printed.
 	 * @return Coordinates that the player entered.
 	 */
-	// checked
 	public TowerCoordinates readCoordinates(String format) {
 		int x = -1;
 		int y = -1;

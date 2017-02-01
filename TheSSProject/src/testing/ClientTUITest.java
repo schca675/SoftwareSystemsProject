@@ -13,7 +13,10 @@ import view.MessageType;
 
 public class ClientTUITest {
 
-	
+	/**
+	 * Main to test the ClientTUI.
+	 * @param args Arguments for the main, unused.
+	 */
 	public static void main(String[] args) {
 		Client client = new Client();
 		ClientTUI view = new ClientTUI();

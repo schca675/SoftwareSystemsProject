@@ -7,16 +7,27 @@ import java.io.InputStreamReader;
 public class ServerTUI {
 	BufferedReader inputReader;
 
+	/**
+	 * Create a new ServerTUI.
+	 */
 	public ServerTUI() {
 		inputReader = new BufferedReader(new InputStreamReader(System.in));
 	}
 	
+	/**
+	 * Print a message to the terminal.
+	 * @param message message to print to the terminal.
+	 */
 	public synchronized void printMessage(String message) {
 		synchronized (System.out) {
 			System.out.println(message);
 		}
 	}
 	
+	/**
+	 * Request the portnumber on which the server should open a connection.
+	 * @return the portnumber for the server connection.
+	 */
 	//@ ensures \result >= 0 && \result <= 65535;
 	public int requestPortNumber() {
 		printMessage("Please enter a port number to bind to, from 1025 up to 65535.");
@@ -37,6 +48,10 @@ public class ServerTUI {
 		}
 	}
 	
+	/**
+	 * Request if the server should enable the extensions or not.
+	 * @return true if the extensions should be enabled, false if not.
+	 */
 	public boolean requestExtensions() {
 		printMessage("Enable extensions: 'yes' for extensions, 'no' otherwise (case-sensitive).");
 		printMessage("Extensions currently implemented: larger board, infinite height, "

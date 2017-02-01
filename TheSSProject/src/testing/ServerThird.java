@@ -5,6 +5,12 @@ import java.net.InetAddress;
 
 public class ServerThird {
 
+	/**
+	 * Tests the server: a player first sends a wrong message and gets another chance to 
+	 * write the capabilities. Second try is right, a second player connects and a game is started.
+	 * @param args
+	 * @throws InterruptedException
+	 */
 	public static void main(String[] args) throws InterruptedException {
 		System.out.println("\n\nThird Test \n");
 		ServerTesterClient testerC = new ServerTesterClient("C");

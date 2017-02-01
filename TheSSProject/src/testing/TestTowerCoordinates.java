@@ -19,6 +19,9 @@ public class TestTowerCoordinates {
 	private Object coordE;
 	private Object other;
 	
+	/**
+	 * Do the setup for the Tower Coordinates Test.
+	 */
 	@Before
 	public void setup() {
 		coordA = new TowerCoordinates(1, 2);

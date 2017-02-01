@@ -15,7 +15,7 @@ public class ClientCommunicationTest {
 
 	/**
 	 * Test all the client communication Class method which do not need a Server connection.
-	 * @param args does not need any.
+	 * @param args Arguments for the main, unused.
 	 */
 	public static void main(String[] args) {
 		ClientTUI view = new ClientTUI();

@@ -6,8 +6,8 @@ import java.net.InetAddress;
 public class ServerTestFirst {
 	
 	/**
-	 * Executing the server Test, following the schema of.
-	 * @param args not given.
+	 * Executing the server Test, by following the protocol until sending illegal moves.
+	 * @param args arguments for the main, unused.
 	 */
 	public static void main(String[] args) {
 		// A Server must be started on this laptop with port number 2000.

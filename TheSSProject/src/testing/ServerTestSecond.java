@@ -5,6 +5,10 @@ import java.net.InetAddress;
 
 public class ServerTestSecond {
 
+	/**
+	 * Test the server by writing invalid messages to it.
+	 * @param args arguments for the main, unused.
+	 */
 	public static void main(String[] args) {
 		System.out.println("\n\nSecond Test \n");
 		// Tester E is only giving invalid input.

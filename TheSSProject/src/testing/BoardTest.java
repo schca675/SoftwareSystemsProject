@@ -43,6 +43,9 @@ public class BoardTest {
 	private Board specialBoard;
 	private Board unlimitedBoard;
 	
+	/**
+	 * Setup to test the Board.
+	 */
 	@Before
 	public void setUp() {
 		board = new Board();

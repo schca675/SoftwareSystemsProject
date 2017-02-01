@@ -202,7 +202,7 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Responds to a disconnect or communication failure, shuts down this handler and informs 
 	 * parent game or server, if set.
-	 */
+	 */ 
 	private void handleDisconnect() {
 		view.printMessage(toString() + " disconnected");
 		deleteObservers();
