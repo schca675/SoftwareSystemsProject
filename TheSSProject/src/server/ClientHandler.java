@@ -88,9 +88,7 @@ public class ClientHandler extends Observable implements Runnable {
 	public void run() {
 		while (!exit) {
 			try {
-				//TODO: timeout when line not terminated?
-				//TODO: timeout when no response when it is desired?
-				// Apparently BufferedReader.readline() throws no IOException if the client closes 
+				// BufferedReader.readline() throws no IOException if the client closes 
 				// the socket, but returns null. Without checking for this, this results in an 
 				// infinite loop.
 				String message = in.readLine();

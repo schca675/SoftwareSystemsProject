@@ -12,6 +12,7 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import model.Board;
 import model.Player;
 import view.ServerTUI;
 
@@ -21,7 +22,7 @@ public class Server implements Observer {
 	 * The class PlayerIDProvider is needed to distribute different IDs for each player in a game.
 	 */
 	public class PlayerIDProvider {
-		private Set<Integer> usedIDs;
+		private /*@ spec_public @*/ Set<Integer> usedIDs;
 		
 		/**
 		 * Creates a new PlayerIDProvider.
@@ -34,6 +35,7 @@ public class Server implements Observer {
 		 * Returns the lowest unused integer ID.
 		 * @return Unused player ID
 		 */
+		//@ ensures usedIDs.contains(\result);
 		public int obtainID() {
 			int id = 0;
 			while (true) {
@@ -51,6 +53,8 @@ public class Server implements Observer {
 		 * them from the list of usedIDs.
 		 * @param id ID to release.
 		 */
+		//@ requires usedIDs.contains(id);
+		//@ ensures !usedIDs.contains(id);
 		public void releaseID(int id) {
 			usedIDs.remove(id);
 		}
@@ -63,6 +67,8 @@ public class Server implements Observer {
 	public static final int EXT_WINLENGTH = 10;
 	public static final boolean EXT_ROOMS = false;
 	public static final boolean EXT_CHAT = false;
+	public static final int DEFAULT_DIM = Board.DEFAULT_DIM;
+	public static final int DEFAULT_PLAYERS = 2;
 	
 	private int port;
 	private boolean enableExtensions;
@@ -141,7 +147,8 @@ public class Server implements Observer {
 			peer.sendMessage(ServerMessages.genCapabilitiesString(EXT_PLAYERS, EXT_ROOMS, 
 					EXT_XYDIM, EXT_XYDIM, EXT_ZDIM, EXT_WINLENGTH, EXT_CHAT));
 		} else {
-			peer.sendMessage(ServerMessages.genCapabilitiesString(2, false, 4, 4, 4, 4, false));
+			peer.sendMessage(ServerMessages.genCapabilitiesString(DEFAULT_PLAYERS, false, 
+					DEFAULT_DIM, DEFAULT_DIM, DEFAULT_DIM, DEFAULT_DIM, false));
 		}
 	}
 	
@@ -194,8 +201,8 @@ public class Server implements Observer {
 	private void matchPlayers(Player player) {
 		//If one wants to implement more sophisticated matching,
 		// it could be done here, but for the moment just first players.
-		if (lobbyPlayerList.size() >= 2) {
-			List<Player> players = new ArrayList<Player>(2);
+		if (lobbyPlayerList.size() >= DEFAULT_PLAYERS) {
+			List<Player> players = new ArrayList<Player>(DEFAULT_PLAYERS);
 			players.add(lobbyPlayerList.get(0));
 			players.add(lobbyPlayerList.get(1));
 			startGame(players, determineRules(players));
@@ -223,7 +230,7 @@ public class Server implements Observer {
 			}
 			return new GameRulesStruct(xDim, yDim, zDim, winLength);
 		} else {
-			return new GameRulesStruct(4, 4, 4, 4);
+			return new GameRulesStruct(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_DIM, DEFAULT_DIM);
 		}
 	}
 	
@@ -242,7 +249,7 @@ public class Server implements Observer {
 		} else {
 			return java.lang.Math.min(dim1, dim2);
 		}
-	}
+	} 
 	
 	/**
 	 * Starts a new game thread with given rules for the given players. Removes all relevant 
