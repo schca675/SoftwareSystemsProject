@@ -13,11 +13,13 @@ public class ServerTesterClient {
 	private Socket socket;
 	private BufferedReader in;
 	private BufferedWriter out;
+	private String name;
 	
 	/**
 	 * Creates a new Server Tester Client.
 	 */
-	public ServerTesterClient() {
+	public ServerTesterClient(String name) {
+		this.name = name;
 	}
 	
 	/**
@@ -50,6 +52,7 @@ public class ServerTesterClient {
 			out.write(input);
 			out.newLine();
 			out.flush();			
+			System.out.println(name + " wrote this to the server: " + input);
 			if (input.equals("exit")) {
 				this.shutDown();
 			}
@@ -57,23 +60,7 @@ public class ServerTesterClient {
 			System.out.println("Connection terminated.");
 		}
     }
-    
-//    /**  
-//     * Read a line from the default input.
-//     */
-//    static public String readString(String message) {
-//        System.out.print(message);
-//        String antw = null;
-//        try {
-//            BufferedReader in = new BufferedReader(new InputStreamReader(
-//                    System.in));
-//            antw = in.readLine();
-//        } catch (IOException e) {
-//        }
-//
-//        return (antw == null) ? "exit" : antw;
-//    }
-    
+
 	/**
 	 * Reads from the socket and prints it to the Terminal.
 	 */
@@ -86,7 +73,11 @@ public class ServerTesterClient {
     			if (message != null) {
     				System.out.println("Server sent this message: " + message);
     				read = true;
-    			}    			
+    			} else {
+    				System.out.println(name + 
+    						" did not get a message from the server and disconnected.");
+    				shutDown();
+    			}
     		}
     	} catch (IOException e) {
     		this.shutDown();
